@@ -1,0 +1,21 @@
+:root{
+  --color-fondo: #3d3d3d;
+  --color-ppal: #b445ff;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100hv;
+  background-color: var(--color-fondo);
+  color: var(--color-ppal);
+  font-family: sans-serif;
+}
+nav {
+  border: 50px;
+  border-color: blueviolet;
+  padding: 15px;
+}
+main{
+  flex: 1;
+}
