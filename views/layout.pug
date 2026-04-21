@@ -1,13 +1,20 @@
 doctype
 html(lang='en')
     head
-    title 
-    link(rel="stylesheet", href="/css/style.css")
+        meta(charset="UTF-8")
+        title Proyecto Web 2 | Lucas Serrano
+        block metadata
+        link(rel="stylesheet", href="/css/style.css")
+        script(src='https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4')
+        script(src='https://kit.fontawesome.com/65094b592d.js' crossorigin='anonymous')
     body
-        nav 
-            p Menu (Inicio | Ventas | Stock) 
-        hr 
+        nav(class='bg-indigo-500')
+            ul
+                li 
+                    a(href="/") Inicio
+                li 
+                    a(href="/index") Iniciar Sesion
         block contenido 
-        hr 
+        main 
         footer 
-            p Lucas Serrano
+            p © Lucas Serrano
