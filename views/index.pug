@@ -1,11 +1,18 @@
-extend layout 
+extends layout  
 
 block metadata 
-        title control
+        title user
         link(rel="stylesheet", href="/css/style.css")
 
-block contenido 
-    p(class="font-semibold text-indigo-400 text-8xl m-auto mt-30") 404
-        h1(class='sm:text-7xl mt-4 text-5xl font-semibold tracking-tight text-balance text-white m-auto') Pagina no encontrada.
-        i.fa-duotone.fa-solid.fa-face-sad-cry.text-indigo-500.text-6xl.mt-5.m-auto
+block contenido
+        div(style='background-color:#0000ff; margin :30px; padding: 20px;display : inline-flex;')
+                p(style=' color: white; margin-right: 20px;') hola
+                img(src="/img/camalardo.jpg", alt="", style='')
+                div(style=' color: white; margin-left : 20px;display : flex; flex-direction: column; flex-basis: 0; flex-grow: 1; max-width: 500px; ') 
+                        p(style='margin-top: 5px ') Titulo 
+                        p(style='margin-top: 5px ') Descripcion
+                        p(style='margin-top: 5px ') Comentarios 
 
+
+
+                

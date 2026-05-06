@@ -1,20 +1,23 @@
-doctype
+doctype html
 html(lang='en')
     head
         meta(charset="UTF-8")
         title Proyecto Web 2 | Lucas Serrano
-        block metadata
         link(rel="stylesheet", href="/css/style.css")
-        script(src='https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4')
-        script(src='https://kit.fontawesome.com/65094b592d.js' crossorigin='anonymous')
+        block metadata
+
     body
-        nav(class='bg-indigo-500')
+        nav
+            div Fotaza 2
             ul
                 li 
-                    a(href="/") Inicio
+                    a(href="/index") inicio 
                 li 
-                    a(href="/index") Iniciar Sesion
-        block contenido 
+                    a(href="/notis") Notificaciones
+                li 
+                    a(href="/iniciosSesion") Iniciar sesion
+                
         main 
+        block contenido 
         footer 
             p © Lucas Serrano

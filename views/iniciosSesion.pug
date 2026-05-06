@@ -1,0 +1,25 @@
+extend layout 
+
+block metadata 
+        title control
+        link(rel="stylesheet", href="/css/style.css")
+
+block contenido  
+    form(action='' style='display: flex; flex-direction: column')
+        label(for='Email') Email 
+        input(type='mail')
+        label(for='contrasena') contrase&ntilde;a
+        input(type='password')
+        label(for='contrasena') Repetir contrase&ntilde;a
+        input(type='password')
+        div(style='display: flex; flex-direction: row; justify-content: space-around')
+          div(style='display: flex; flex-direction: column')
+            label(for='tyc')
+              | Acepta los 
+              a(href='') t&eacute;rminos y condiciones
+            input#tyc(type='checkbox' name='terminos')
+          div(style='display: flex; flex-direction: column')
+            label(for='ofertas') Recibir ofertas
+            input#ofertas(type='checkbox' name='ofertas')
+        div(style='display; flex ; flex-direction: column')
+        input(type='button' value='Registrarse')
