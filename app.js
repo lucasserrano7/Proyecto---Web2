@@ -36,7 +36,7 @@ res.render('user')
 })
 
 // CONEXION A BASE DE DATOS
- sequelize.sync({alter: true, FORCE: true})
+ sequelize.sync({alter: true/*, FORCE: true*/})
 .then(() => {
   // SERVIDOR
   app.listen(PORT, (err) => {

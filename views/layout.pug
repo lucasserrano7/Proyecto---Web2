@@ -3,11 +3,12 @@ html(lang='en')
     head
         meta(charset="UTF-8")
         title Proyecto Web 2 | Lucas Serrano
+        script(src="https://unpkg.com/@tailwindcss/browser@4")
         link(rel="stylesheet", href="/css/style.css")
         block metadata
 
     body
-        nav
+        nav(class='bg-blue-500')
             div Fotaza 2
             ul
                 li 
@@ -19,5 +20,5 @@ html(lang='en')
                 
         main 
         block contenido 
-        footer 
+        footer(class='bg-blue-500')
             p © Lucas Serrano
