@@ -1,10 +1,10 @@
-import sequelize from "./db/config.js";
-import User from "./models/usuario.js";
-import './models/usuario.js';
-import 'dotenv/config';
+import sequelize from "./models/config.js";
+import "./models/usuario.js";
+import "dotenv/config";
 import express from "express";
 import pug from "pug";
-import './models/sync.js';
+import "./models/sync.js";
+import { connectDatabase } from "./models/sync.js";
 
 // CONSTANTES
 const app = express();
@@ -31,21 +31,19 @@ app.get("/iniciosSesion", (req, res) => {
 app.get("/notis", (req, res) => {
   res.render("notis");
 });
-app.get("/user", (req, res)=>{
-res.render('user')
-})
+app.get("/user", (req, res) => {
+  res.render("user");
+});
 
 // CONEXION A BASE DE DATOS
- sequelize.sync({alter: true/*, FORCE: true*/})
-.then(() => {
-  // SERVIDOR
-  app.listen(PORT, (err) => {
-    if (err) {
-      console.error("Error al iniciar el servidor: ", err);
-    }
-    console.log(`Servidor corriendo en el puerto:${PORT}`);
+connectDatabase().then(() => {
+    app.listen(PORT, (err) => {
+      if (err) {
+        console.error(" [X] Error al iniciar el servidor: ", err);
+      }
+      console.log(` [✓] Servidor corriendo en el puerto:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error(" [X] Error al conectar a la base de datos: ", err);
   });
-  }).catch((err) => {
-    console.error("Error al conectar a la base de datos: ", err);
-  });
-

@@ -1,56 +1,51 @@
-import { Model, DataTypes } from "sequelize";
-import sequelize from "../db/config.js";
+import { DataTypes, Model } from 'sequelize';
+import sequelize from "./config.js";
 
-class User extends Model {}
+export class Usuario extends Model {}
 
-User.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
+Usuario.init(
+    {
+        id: {
+            type: DataTypes.INTEGER,
+            unique: true,
+            primaryKey: true,
+            autoIncrement: true,
+            allowNull: false,
+        },
+        username: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            unique: true,
+        },
+        password: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        email: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            unique: true,
+        },
+        foto_de_perfil: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        Nro_publicaciones_bajadas: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 0,
+        },
+        estado: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false,
+        },
     },
-    firstName: {
-      type: DataTypes.STRING(50),
-      allowNull: false,
-    },
-    lastName: {
-      type: DataTypes.STRING(50),
-    },
-    email: {
-      type: DataTypes.STRING, // 255
-      allowNull: false,
-      unique: true,
-  },
-  phone: {
-    type: DataTypes.STRING,
-  },
-  birthDate: {
-    type: DataTypes.DATEONLY,
-  },
-  avatar: {
-    type: DataTypes.BLOB,
-  },
-    },
-  {
-    // Other model options go here
-    sequelize, // We need to pass the connection instance
-    modelName: 'Usuario',
-    tableName: 'usuarios',
-    createdAt: true,
-    deletedAt: true,
-    // We need to choose the model name
-  },
+    {
+        sequelize,
+        modelName: 'Usuario',
+        tableName: 'usuarios',
+        createdAt: true,
+        deletedAt: true,
+    }
 );
-
-export default User;
-
-// user
-// id not null auntoincremental
-// firstname notnull varchar 50
-// lastname
-// email not null varchar 255
-// birthDate date
-// -- auditoria
-//createdAt
-// deletedAt => null || date
