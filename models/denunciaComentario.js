@@ -9,18 +9,6 @@ denunciaComentario.init({
     primaryKey: true,
     allowNull: false,
   },
-  post_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  user_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },    
-  comment_id: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  },
   contenido: {
     type: DataTypes.STRING(255),
     allowNull: false,

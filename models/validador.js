@@ -10,10 +10,6 @@ Validador.init(
             primaryKey: true,
             autoIncrement: true,
         },
-        user_id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-        },
         estado: {
             type: DataTypes.STRING,
             allowNull: false,

@@ -11,17 +11,12 @@ publicacion.init(
       primaryKey: true,
       allowNull: false,
     },
-    // Model attributes are defined here
-    user_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-
-    },
     estado: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
+      defaultValue: true,
     },
-    tittle: {
+    title: {
       type: DataTypes.STRING(50),
       allowNull: false,
     },
@@ -58,3 +53,5 @@ publicacion.init(
     updatedAt: true,
   },
 );
+
+export default publicacion;

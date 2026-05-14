@@ -11,14 +11,6 @@ Coleccion.init(
             autoIncrement:true,
             allowNull:false,
         },
-        post_id:{
-            type:DataTypes.INTEGER,
-            allowNull:false,
-        },
-        user_id:{
-            type: DataTypes.INTEGER,
-            allowNull: false,
-        },
         titulo:{
             type:DataTypes.STRING,
             allowNull:false,

@@ -11,14 +11,6 @@ Valoracion.init(
       primaryKey: true,
       allowNull: false,
     },
-    post_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    user_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
     puntaje: {
       type: DataTypes.INTEGER,
       allowNull: false,

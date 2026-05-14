@@ -4,16 +4,7 @@ import sequelize from "./config.js";
 export class Favoritos extends Model {}
 
 Favoritos.init(
-  {
-    post_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    user_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-  },
+  {},
   {
     sequelize,
     modelName: "favoritos",

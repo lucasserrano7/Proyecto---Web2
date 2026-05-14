@@ -10,34 +10,27 @@ notificacion.init({
     primaryKey: true,
     allowNull: false,
   },
-  post_id: {
-    type: DataTypes.INTEGER,
+  titulo:{
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  mensaje:{
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  fecha: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    },
+  leida: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },  
+  link_:{
+    type: DataTypes.STRING,
     allowNull: true,
-  },
-  user_id: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  },    
-  comment_id: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  },
-  valoracion_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-},
-  denuncia_publicacion_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  denuncia_user_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  denuncia_comentario_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
+  }
 }, {
   sequelize,
   modelName: "notificacion",

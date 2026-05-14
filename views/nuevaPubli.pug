@@ -1,0 +1,11 @@
+extends layout
+
+block metadata 
+        title Notificaciones 
+        link(rel="stylesheet", href="") 
+
+block contenido 
+        form(action="/p" method="POST")
+           input(type="text" name="titulo" placeholder="Título de la foto")
+           textarea(name="descripcion" placeholder="¿Qué estás pensando?")
+           button(type="submit") Publicar

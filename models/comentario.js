@@ -11,14 +11,6 @@ Comentario.init(
       primaryKey: true,
       allowNull: false,
     },
-    post_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    user_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
     fecha: {
       type: DataTypes.DATE,
       allowNull: false,

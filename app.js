@@ -5,6 +5,9 @@ import express from "express";
 import pug from "pug";
 import "./models/sync.js";
 import { connectDatabase } from "./models/sync.js";
+import { publicacion } from "./models/publicacion.js";
+import { Usuario } from "./models/usuario.js";
+import { notificacion } from "./models/notificacion.js";
 
 // CONSTANTES
 const app = express();
@@ -34,7 +37,39 @@ app.get("/notis", (req, res) => {
 app.get("/user", (req, res) => {
   res.render("user");
 });
+app.get("/p", (req, res) => {
+  res.render("nuevaPubli");
+});
+app.get("/registro", (req, res) => {
+  res.render("registro");
+});
 
+// controladores
+app.post("/p", async (req, res) => {
+  try {
+    const { titulo, descripcion } = req.body;
+    const receptor_id = 1;
+
+    const nuevaPublicacion = await publicacion.create({
+      title: titulo,
+      description: descripcion,
+      comments_allowed: true,
+      UsuarioId: receptor_id,
+    });
+    await notificacion.create({
+      titulo: "Nueva publicación",
+      mensaje: `Sesubio la publicaion "${titulo}" correctamente`,
+      fecha: new Date(),
+      leida: false,
+      link_: `/p/${nuevaPublicacion.id}`,
+      UsuarioId: receptor_id,
+    });
+    console.log("publicacion y notificacion creada");
+    res.redirect(`/p/${nuevaPublicacion.id}`);
+  }catch(err){
+    console.error(err);
+    res.status(500).send("fallo");
+  }});
 // CONEXION A BASE DE DATOS
 connectDatabase().then(() => {
     app.listen(PORT, (err) => {
