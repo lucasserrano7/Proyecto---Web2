@@ -1,7 +1,32 @@
 import { DataTypes, Model } from 'sequelize';
 import sequelize from "./config.js";
 
-export class Usuario extends Model {}
+export class Usuario extends Model {
+    
+    //static por que permite usar sin especificar una instancia
+    static async revisarEmail(pemail) {
+    const res = await Usuario.findOne({ where: { email: pemail } });
+    if(res){return true;}else{return false;}
+    }    
+    static async revisarUsuario(usuario) {
+    const res = await Usuario.findOne({ where: { username: usuario} });
+    if(res){return true;}else{return false;}
+    }  
+
+    static async crearUsuario(usuario, contrasenia, email, ofertas){
+        try {
+            const user = Usuario.build({
+            username: usuario,
+            password: contrasenia,
+            email: email,
+            ofertas: ofertas,
+        })
+        await user.save();
+        return user;
+        }
+        catch(err){console.log(err)}  
+    }
+}
 
 Usuario.init(
     {
@@ -40,12 +65,14 @@ Usuario.init(
             allowNull: false,
             defaultValue: false,
         },
+        ofertas: {
+            type: DataTypes.BOOLEAN,
+            allowNull: true,
+            defaultValue: false,
+        },
     },
     {
         sequelize,
         modelName: 'Usuario',
-        tableName: 'usuarios',
-        createdAt: true,
-        deletedAt: true,
     }
 );

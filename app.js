@@ -8,6 +8,7 @@ import { connectDatabase } from "./models/sync.js";
 import { publicacion } from "./models/publicacion.js";
 import { Usuario } from "./models/usuario.js";
 import { notificacion } from "./models/notificacion.js";
+import RegyLogin from "./controller/RegYLogin.js"
 
 // CONSTANTES
 const app = express();
@@ -20,6 +21,7 @@ app.use(express.static("public"));
 //MOTOR DE PLANTILLAS
 app.set("view engine", "pug");
 app.set("views", "./views");
+app.use(RegyLogin);
 
 //RUTAS
 app.get("/index", (req, res) => {
@@ -40,9 +42,7 @@ app.get("/user", (req, res) => {
 app.get("/p", (req, res) => {
   res.render("nuevaPubli");
 });
-app.get("/registro", (req, res) => {
-  res.render("registro");
-});
+
 
 // controladores
 app.post("/p", async (req, res) => {
