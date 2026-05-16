@@ -24,7 +24,7 @@ export class Usuario extends Model {
         await user.save();
         return user;
         }
-        catch(err){console.log(err)}  
+        catch(err){console.log(err.mesage)}  
     }
 }
 

@@ -24,7 +24,7 @@ RegYLogin.post("/registro", async (req, res) => {
         const ofertas = req.body.ofertas === 'on';
         const creado = await Usuario.crearUsuario(usuario, contrasenia, email, ofertas);
         if (creado) {
-            res.render('extra/welcome', { nombre: usuario });
+            res.render('welcome', { nombre: usuario });
         } else {
             res.end()
         }
