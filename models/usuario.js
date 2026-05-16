@@ -74,5 +74,8 @@ Usuario.init(
     {
         sequelize,
         modelName: 'Usuario',
+        tableName: 'usuarios',
+        createdAt: true,
+        updatedAt: true,
     }
 );

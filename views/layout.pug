@@ -4,16 +4,18 @@ html(lang='en')
         meta(charset="UTF-8")
         title Proyecto Web 2 | Lucas Serrano
         link(rel="stylesheet", href="/css/style.css")
+        link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=visibility")
         block metadata
-
-body(class="min-h-screen bg-linear-to-br from-[#1e4eb8] via-[#4a90e2] to-[#b3d9ff] bg-fixed")
-        nav(class='bg-linear-to-b from-[#245edb] via-[#2e7bdf] to-[#1b439c] shadow-md text-white flex justify-between items-center p-4')
-            div Fotaza
-            ul(class= 'flex gap-4 m-0 list-none' )
-                each link in [{url: '/index', name: 'Inicio' },{url: '/notis', name: 'Notificaciones' },{url: '/iniciosSesion', name: 'Iniciar Sesion' }]
-                    li 
-                        a(href=link.url class='hover:bg-[#272757] p-2 transition-colors border border-white rounded-sm')= link.name
-                
+        style. 
+            body {
+                background-image: url('/img/WinHS (1).jpg');
+                background-size: cover;
+                background-position: center;          
+                background-attachment: fixed;
+                background-repeat: no-repeat;
+            }
+body(class="min-h-screen flex flex-col bg-linear-to-br from-[#1e4eb8] via-[#4a90e2] to-[#b3d9ff] bg-fixed")
+    block navbar       
         nav(class='sticky top-0 z-50 bg-white/15 backdrop-blur-md border-b border-white/20 shadow-lg flex justify-between items-center p-4')
             div(class="text-2xl font-black italic tracking-tighter text-white drop-shadow-md") Fotaza
             ul(class= 'flex gap-4 m-0 list-none items-center' )
@@ -21,9 +23,9 @@ body(class="min-h-screen bg-linear-to-br from-[#1e4eb8] via-[#4a90e2] to-[#b3d9f
                     li 
                         a(href=link.url class='text-white hover:bg-white/20 px-3 py-1 rounded transition-all')= link.name
                 
-        main 
-            a(href="/publicar" class="bg-linear-to-b from-[#60b035] to-[#3a751c] hover:from-[#72cb3f] hover:to-[#468e22] text-white font-bold italic text-lg px-6 h-12 flex items-center shadow-lg transition-all rounded-full fixed bottom-6 right-6 md:static md:rounded-lg")
-                span(class='drop-shadow-[1px_1px_1px_rgba(0,0,0,0.8)]') + Subir foto
-        block contenido 
+        main(class='grow')
+            block contenido 
+
+    block footer     
         footer(class='bg-linear-to-b from-[#0e60cc] via-55% to-indigo-600 text-white text-center items-center p-4')
             p © Lucas Serrano

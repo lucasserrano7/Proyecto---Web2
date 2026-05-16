@@ -42,6 +42,9 @@ app.get("/user", (req, res) => {
 app.get("/p", (req, res) => {
   res.render("nuevaPubli");
 });
+app.get("/welcome", (req, res) => {
+  res.render("welcome", {nombre: "Lucas"});
+});
 
 
 // controladores

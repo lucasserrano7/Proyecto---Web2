@@ -1,34 +1,50 @@
 extends layout 
 
-block contenido 
-    form#form(action='/registro' method='POST' style='display: flex; flex-direction: column; gap: 10px; max-width: 400px; margin: auto')
-        h3 Registro
+block metadata 
+        title Registro
+        script(src="https://unpkg.com/@tailwindcss/browser@4")
+        link(rel="stylesheet", href="/css/style.css")
+        link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200")
+block contenido
+    style. 
+        body {
+            background-image: url('/img/WinHS (1).jpg');
+            background-size: cover;
+            background-position: center;          
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
+    form#form(action='/registro' method='POST' autocomplete='off' class='flex flex-col gap-2.5 max-w-2xl my-22  m-auto p-20 bg-blue-900/10 backdrop-blur-lg  border-2 border-white/20 rounded-xl shadow-xl' )
+        h3(class='text-[30px] text-white text-center font-bold pb-5 ') CREAR UNA CUENTA 
+        div(class='relative mb-8')
+            input#usuario(type='text' name='usuario' required="true" class='border-white/50 border-2 rounded-xs p-1 text-white peer w-full bg-transparent py-2 outline-none focus:border-white transition-colors')
+            label(for='usuario' class=' text-xl absolute left-2 top-2 text-white/80 transition-all peer-focus:-top-4 peer-focus:text-xs peer-focus:bg-transparent peer-focus:text-white peer-valid:-top-4 peer-valid:text-xs peer-valid:text-white pointer-events-none px-1') Usuario
+        div(class='relative mb-8')
+            input#email(type='email' name='email' required="true" class='border-white/50 border-2 rounded-xs p-1 text-white peer w-full bg-transparent py-2 outline-none focus:border-white transition-colors' )
+            label(for='email'  class=' text-xl absolute left-2 top-2 text-white/80 transition-all peer-focus:-top-4 peer-focus:text-xs peer-focus:bg-transparent peer-focus:text-white peer-valid:-top-4 peer-valid:text-xs peer-valid:text-white pointer-events-none px-1') Email
+        div(class='relative mb-8')
+            input#contrasenia(type='password' name='contrasenia' required="true"  class='border-white/50 border-2 rounded-xs p-1 text-white peer w-full bg-transparent py-2 outline-none focus:border-white transition-colors')
+            label(for='contrasenia'  class=' top-1/2 -translate-y-1/2 text-xl absolute left-2  text-white/80 transition-all peer-focus:-top-4 peer-focus:text-xs peer-focus:bg-transparent peer-focus:text-white peer-valid:-top-4 peer-valid:text-xs peer-valid:text-white pointer-events-none px-1') Contraseña
+            button(type='button' onclick="verContrasenia('contrasenia', 'ojo1')" class='text-white bg-transparent border-none absolute right-3 top-2.5 text-xl opacity-70 hover:opacity-100 transition-opacity cursor-pointer')
+                span#ojo1.material-symbols-outlined(class='') visibility_off
+        div(class='relative mb-8')
+            input#repetir(type='password' name='repetir' required="true"  class='border-white/50 border-2 rounded-xs p-1 text-white peer w-full bg-transparent py-2 outline-none focus:border-white transition-colors')
+            label(for='repetir'  class=' top-1/2 -translate-y-1/2 text-xl absolute left-2  text-white/80 transition-all peer-focus:-top-4 peer-focus:text-xs peer-focus:bg-transparent peer-focus:text-white peer-valid:-top-4 peer-valid:text-xs peer-valid:text-white pointer-events-none px-1') Repetir contraseña
+            button(type='button' onclick="verContrasenia('repetir', 'ojo2')" class='text-white bg-transparent border-none absolute right-3 top-2.5 text-xl opacity-70 hover:opacity-100 transition-opacity cursor-pointer')
+                span#ojo2.material-symbols-outlined visibility_off
+        div(class='flex flex-row justify-between items-center text-xs gap-2 mb-4 select-none text-white')
+            div(class='flex items-center gap-2')
+                input#tyc(type='checkbox' name='terminos' required="true" class='w-4 h-4 cursor-pointer accent-vlue-600')
+                label(for='tyc' class='cursor-pointer text-white/90') Acepto los 
+                    a(href='' class='text-indigo-400 font-bold underline hover:text-blue-300') Terminos y Condiciones
+            div(class='flex items-center gap-2')
+                input#ofertas(type='checkbox' name='ofertas' class='w-4 h-4 cursor-pointer accent-blue-600')
+                label(for='ofertas' class='cursor-pointer text-white/90') Recibir ofertas
 
-        label(for='usuario') Usuario
-        input#usuario(type='text' name='usuario' required="true" )
+        input#enviar(type='submit' value='REGISTRARSE' class='w-full cursor-pointer border-2 border-white/30 rounded-md py-3 text-white bg-white/10 backdrop-blur-md hover:bg-white/20 hover:border-white/50 transition-all text-xl font-bold tracking-widest shadow-lg' )
+        div#mensajes(class='mt-2 text-center text-sm text-red-200 border-red-500 bg-red-900 p-3 m-auto rounded-xs font-bold empty:hidden shadow-lg')
 
-        label(for='email') Email
-        input#email(type='email' name='email' required="true")
 
-        label(for='contrasenia') Contraseña
-        input#contrasenia(type='password' name='contrasenia' required="true")
-
-        label(for='repetir') Repetir contraseña
-        input#repetir(type='password' name='repetir' required="true")
-
-        div(style='display: flex; flex-direction: row; justify-content: space-around')
-            div(style='display: flex; flex-direction: column')
-                label(for='tyc')
-                    | Acepta los 
-                    a(href='') términos y condiciones
-                input#tyc(type='checkbox' name='terminos' required="true")
-
-            div(style='display: flex; flex-direction: column')
-                label(for='ofertas') Recibir ofertas
-                input#ofertas(type='checkbox' name='ofertas' )
-
-        input#enviar(type='submit' value='Registrarse')
-        div#mensajes 
 
         script.
             const mensajes = document.querySelector("#mensajes");
@@ -57,17 +73,19 @@ block contenido
                 mensajes.appendChild(emailMsg);
 
                 if(!emailRE.test(valor)){
-                    emailMsg.innerHTML = "formato de email incorrecto (debe ser @gmail.com)";
+                    emailMsg.innerHTML = "Formato de email incorrecto (debe ser @gmail.com)";
                     emailValido = false;
+                    temporizadorErr();
                     return false;
                 }
                 
                 if(data.respuesta) {                  
-                    emailMsg.innerHTML = "email ya en uso";
+                    emailMsg.innerHTML = "El Email ingresado ya esta en uso, intente uno distinto";
                     emailValido = false;
+                    temporizadorErr();
                     return false;
                 } else {
-                    emailMsg.innerHTML = "";
+                    emailMsg.remove();
                     emailValido = true;
                     return true;
                 }
@@ -91,11 +109,12 @@ block contenido
                 mensajes.appendChild(usuarioMsg);
 
                 if(data.respuesta) {                  
-                    usuarioMsg.innerHTML = "usuario ya en uso";
+                    usuarioMsg.innerHTML = "El Usuario ingresado ya esta en uso, intente uno distinto";
                     userValido = false;
+                    temporizadorErr();
                     return false;
                 } else {
-                    usuarioMsg.innerHTML = "";
+                    usuarioMsg.remove();
                     userValido = true;
                     return true;
                 }
@@ -110,12 +129,13 @@ block contenido
                 mensajes.appendChild(tycMsg);
 
                 if(terminosycondiciones.checked){
-                    tycMsg.innerHTML = "";
+                    tycMsg.remove();
                     terYcond = true;
                     return true;
                 } else {
                     tycMsg.innerHTML = "Tienes que Aceptar los Terminos y Condiciones";
                     terYcond = false;
+                    temporizadorErr();
                     return false;
                 }
             }
@@ -131,16 +151,37 @@ block contenido
                 mensajes.appendChild(contrasMsg);
 
                 if(contraseniaInput.value.length <= 7){ 
-                    contrasMsg.innerHTML = "Contraseña demasiado pequeña (mínimo 8)"; 
+                    contrasMsg.innerHTML = "La contraseña es demasiado corta (mínimo 8 caracteres)"; 
+                    temporizadorErr();
                     return false;
                 }
                 if(contraseniaInput.value === repetirInput.value){ 
-                    contrasMsg.innerHTML = ""; 
+                    contrasMsg.remove();
                     return true;       
                 } else {
-                    contrasMsg.innerHTML = "Contraseñas desiguales";
+                    contrasMsg.innerHTML = "Las contraseñas son distintas";
+                    temporizadorErr();
                     return false;
                 }
+                
+            }
+
+            function verContrasenia(inputId, iconoId){
+                const input = document.getElementById(inputId);
+                const icono = document.getElementById(iconoId);
+                if (input.type === 'password'){
+                    input.type = 'text';
+                    icono.innerText = 'visibility';
+                }else{
+                    input.type = 'password';
+                    icono.innerText = 'visibility_off';
+                }
+            }
+
+            function temporizadorErr(){
+                setTimeout(()=>{
+                    mensajes.innerHTML = "";
+                }, 4000);
             }
 
             // --- funciones ---
@@ -167,5 +208,6 @@ block contenido
                 if(emailOk && usuarioOk && tycOk && contraOk){ 
                     HTMLFormElement.prototype.submit.call(form);
                 } else {
+                    temporizadorErr();
                 }
             });
