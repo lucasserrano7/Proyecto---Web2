@@ -30,7 +30,7 @@ app.get("/index", (req, res) => {
 app.get("/", (req, res) => {
   res.render("index");
 });
-app.get("/iniciosSesion", (req, res) => {
+app.get("/inicioSesion", (req, res) => {
   res.render("iniciosSesion");
 });
 app.get("/notis", (req, res) => {

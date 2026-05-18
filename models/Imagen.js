@@ -27,12 +27,8 @@ Imagen.init({
   copyrigth: {
     type: DataTypes.BOOLEAN,
   },
-  licencia: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: true,
-  },
   marcaAgua: {
-    type: DataTypes.STRING,
+    type: DataTypes.BOOLEAN,
   },
   texto_personalizado: {
     type: DataTypes.STRING,

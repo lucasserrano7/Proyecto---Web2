@@ -1,0 +1,25 @@
+block metadata 
+
+        script(src="https://unpkg.com/@tailwindcss/browser@4")
+        link(rel="stylesheet", href="/css/style.css")
+
+block contenido
+    div#bg_subir(class="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center p-4  bg-black/30 ")
+
+        div(class="relative w-full max-w-2xl")
+
+            button#btn_cerrar(class="absolute top-4 right-4 text-white/60 hover:text-red-500 hover:font-bold text-xl cursor-pointer z-10 hover:bg-white/10 rounded-2xl p-2") ✕
+
+            form(action="/p" method="POST" autocomplete='off' enctype="multipart/form-data" class='flex flex-col gap-2.5 m-auto p-10 md:p-20 bg-blue-900/20 backdrop-blur-xl border-2 border-white/10 rounded-xl shadow-2xl')
+
+                input(type="text" name="titulo"  placeholder="Título de la publicacion" class='border-white/50 border-2 rounded-xs p-1 text-white peer w-full bg-transparent py-2 outline-none focus:border-white transition-colors')
+
+                textarea(name="descripcion" placeholder="Descripción" class='border-white/50 border-2 rounded-xs p-1 text-white peer w-full bg-transparent py-2 outline-none focus:border-white transition-colors')
+        
+                p(class='text-xl text-white/80') Comentarios 
+                input(type="checkbox", name="")
+                
+
+                input(type="file" name="file" class='text-white file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20 file:cursor-pointer') 
+
+                input#subir(type='submit' value='Publicar' class='w-full cursor-pointer border-2 border-white/30 rounded-md py-3 text-white bg-white/10 backdrop-blur-md hover:text-green-600/80 hover:bg-green-400/20 hover:border-green-600/50 transition-all text-xl font-bold tracking-widest shadow-lg mt-4')

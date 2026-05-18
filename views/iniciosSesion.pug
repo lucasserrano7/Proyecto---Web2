@@ -1,25 +1,57 @@
 extend layout 
 
 block metadata 
-        title control
         link(rel="stylesheet", href="/css/style.css")
+        script(src="https://unpkg.com/@tailwindcss/browser@4")
+        link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200")
 
 block contenido  
-    form(action='' style='display: flex; flex-direction: column')
-        label(for='Email') Email 
-        input(type='mail')
-        label(for='contrasena') contrase&ntilde;a
-        input(type='password')
-        label(for='contrasena') Repetir contrase&ntilde;a
-        input(type='password')
-        div(style='display: flex; flex-direction: row; justify-content: space-around')
-          div(style='display: flex; flex-direction: column')
-            label(for='tyc')
-              | Acepta los 
-              a(href='') t&eacute;rminos y condiciones
-            input#tyc(type='checkbox' name='terminos')
-          div(style='display: flex; flex-direction: column')
-            label(for='ofertas') Recibir ofertas
-            input#ofertas(type='checkbox' name='ofertas')
-        div(style='display; flex ; flex-direction: column')
-        input(type='button' value='Registrarse')
+    style. 
+        body {
+            background-image: url('/img/WinHS (1).jpg');
+            background-size: cover;
+            background-position: center;          
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
+    form#form(action='/registro' method='POST' autocomplete='off' class='flex flex-col gap-2.5 max-w-2xl my-22  m-auto p-20 bg-blue-900/10 backdrop-blur-lg  border-2 border-white/20 rounded-xl shadow-xl' )
+        h3(class='text-[30px] text-white text-center font-bold pb-5 ') INICIAR SESIÓN
+      
+        div(class='relative mb-8')
+            input#email(type='email' name='email' required="true" class='border-white/50 border-2 rounded-xs p-1 text-white peer w-full bg-transparent py-2 outline-none focus:border-white transition-colors' )
+            label(for='email'  class=' text-xl absolute left-2 top-2 text-white/80 transition-all peer-focus:-top-4 peer-focus:text-xs peer-focus:bg-transparent peer-focus:text-white peer-valid:-top-4 peer-valid:text-xs peer-valid:text-white pointer-events-none px-1') Email
+        div(class='relative mb-8')
+            input#contrasenia(type='password' name='contrasenia' required="true"  class='border-white/50 border-2 rounded-xs p-1 text-white peer w-full bg-transparent py-2 outline-none focus:border-white transition-colors')
+            label(for='contrasenia'  class=' top-1/2 -translate-y-1/2 text-xl absolute left-2  text-white/80 transition-all peer-focus:-top-4 peer-focus:text-xs peer-focus:bg-transparent peer-focus:text-white peer-valid:-top-4 peer-valid:text-xs peer-valid:text-white pointer-events-none px-1') Contraseña
+            button(type='button' onclick="verContrasenia('contrasenia', 'ojo1')" class='text-white bg-transparent border-none absolute right-3 top-2.5 text-xl opacity-70 hover:opacity-100 transition-opacity cursor-pointer')
+                span#ojo1.material-symbols-outlined(class='') visibility_off
+        div(class='relative mb-8 text-xl text-white text-center flex-row')
+            p ¿Aun no tienes cuenta? 
+            a(href="/registro" class='text-indigo-400 font-bold underline hover:text-blue-300') Regístrate aquí
+
+
+        input#enviar(type='submit' value='INICIAR SESIÓN' class='w-full cursor-pointer border-2 border-white/30 rounded-md py-3 text-white bg-white/10 backdrop-blur-md hover:bg-white/20 hover:border-white/50 transition-all text-xl font-bold tracking-widest shadow-lg' )
+        div#mensajes(class='mt-2 text-center text-sm text-red-200 border-red-500 bg-red-900 p-3 m-auto rounded-xs font-bold empty:hidden shadow-lg')
+
+
+    script.
+          const mensajes = document.querySelector("#mensajes");
+          const enviar  = document.querySelector("#enviar");
+          const campoEmail = document.querySelector("#email");
+          const form = document.querySelector("#form");
+          function verContrasenia(inputId, iconoId){
+              const input = document.getElementById(inputId);
+              const icono = document.getElementById(iconoId);
+              if (input.type === 'password'){
+                  input.type = 'text';
+                  icono.innerText = 'visibility';
+              }else{
+                  input.type = 'password';
+                  icono.innerText = 'visibility_off';
+              }
+          }
+          function temporizadorErr(){
+              setTimeout(()=>{
+                  mensajes.innerHTML = "";
+              }, 4000);
+          }
