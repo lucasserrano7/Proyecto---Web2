@@ -1,54 +1,81 @@
-import express from 'express';
-import { Usuario } from '../models/usuario.js';
+import express from "express";
+import { Usuario } from "../models/usuario.js";
 
 const RegYLogin = express.Router();
 
 RegYLogin.get("/login", (req, res) => {
-    res.render("login");
+  res.render("login");
 });
 
-RegYLogin.post("/login", (req, res) => {
-    const { email } = req.body;
-    //res.render("extra/welcome", { email });
+RegYLogin.post("/login", async (req, res) => {
+  const { email, contrasenia } = req.body;
+  try {
+    const usuario = await Usuario.findOne({ where: { email } });
+    if (!usuario) {
+      return res.render("iniciosSesion", { error: "El Email no existe." });
+    }
+
+    const claveDB = String(usuario.password).trim();
+    const claveEscrita = String(contrasenia).trim();
+    if (claveDB !== claveEscrita) {
+      return res.render("iniciosSesion", { error: "Contraseña incorrecta." });
+    }
+    console.log("Usuario logeado:", usuario);
+    req.app.locals.usuarioLogeado = {
+      id: usuario.id,
+      username: usuario.username,
+      email: usuario.email,
+    };
+
+    return res.redirect("/index");
+  } catch (error) {
+    console.error("Error en el proceso de login:", error);
+    return res
+      .status(500)
+      .render("iniciosSesion", { error: "Error interno del servidor." });
+  }
 });
 
 // registrarse
 RegYLogin.get("/registro", (req, res) => {
-    res.render("registrarse");
+  res.render("registrarse");
 });
 
 // recibir registro
 RegYLogin.post("/registro", async (req, res) => {
-    try {
-        const { usuario, contrasenia, email } = req.body;
-        const ofertas = req.body.ofertas === 'on';
-        const creado = await Usuario.crearUsuario(usuario, contrasenia, email, ofertas);
-        if (creado) {
-            res.render('welcome', { nombre: usuario });
-        } else {
-            res.end()
-        }
-    } catch (error) {
-        res.status(500).send("Error interno del servidor");
+  try {
+    const { usuario, contrasenia, email } = req.body;
+    const ofertas = req.body.ofertas === "on";
+    const creado = await Usuario.crearUsuario(
+      usuario,
+      contrasenia,
+      email,
+      ofertas,
+    );
+    if (creado) {
+      res.render("welcome", { nombre: usuario });
+    } else {
+      res.render("registrarse", { error: "Usuario o Email ya estan en uso." });
     }
+  } catch (error) {
+    res.status(500).send("Error interno del servidor");
+  }
 });
 
-RegYLogin.get("/welcome",(req,res)=>{
-    res.render("")
-})
-
+RegYLogin.get("/welcome", (req, res) => {
+  res.render("");
+});
 
 RegYLogin.get("/revisarEmail", async (req, res) => {
-    const { email } = req.query;
-    const respuesta = await Usuario.revisarEmail(email);
-    res.json({ respuesta });
+  const { email } = req.query;
+  const respuesta = await Usuario.revisarEmail(email);
+  res.json({ respuesta });
 });
 
 RegYLogin.get("/revisarUsuario", async (req, res) => {
-    const { usuario } = req.query;
-    const respuesta = await Usuario.revisarUsuario(usuario);
-    res.json({ respuesta });
+  const { usuario } = req.query;
+  const respuesta = await Usuario.revisarUsuario(usuario);
+  res.json({ respuesta });
 });
-
 
 export default RegYLogin;

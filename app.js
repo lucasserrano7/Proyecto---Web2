@@ -9,6 +9,8 @@ import { publicacion } from "./models/publicacion.js";
 import { Usuario } from "./models/usuario.js";
 import { notificacion } from "./models/notificacion.js";
 import RegyLogin from "./controller/RegYLogin.js"
+import { authMiddleware } from "./middlewares/auth.js";
+import { config } from "dotenv";
 
 // CONSTANTES
 const app = express();
@@ -25,14 +27,19 @@ app.use(RegyLogin);
 
 //RUTAS
 app.get("/index", (req, res) => {
-  res.render("index");
+  res.render("index", { usuario: req.app.locals.usuarioLogeado });
 });
 app.get("/", (req, res) => {
-  res.render("index");
+  res.render("index", { usuario: req.app.locals.usuarioLogeado });
 });
-app.get("/inicioSesion", (req, res) => {
+app.get("/iniciosSesion", (req, res) => {
   res.render("iniciosSesion");
 });
+app.get("/welcome", (req, res) => {
+  res.render("welcome");
+});
+
+app.use(authMiddleware);
 app.get("/notis", (req, res) => {
   res.render("notis");
 });
@@ -42,10 +49,13 @@ app.get("/user", (req, res) => {
 app.get("/p", (req, res) => {
   res.render("nuevaPubli");
 });
-app.get("/welcome", (req, res) => {
-  res.render("welcome", {nombre: "Lucas"});
-});
 
+app.post(/nuevaPubli/, (req, res) => {
+  const imagenSubida = req.body.imgBase64;
+  res.send("Imagen recibida correctamente");
+  console.log(imagenSubida);
+
+});
 
 // controladores
 app.post("/p", async (req, res) => {

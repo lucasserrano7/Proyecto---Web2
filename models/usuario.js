@@ -26,6 +26,21 @@ export class Usuario extends Model {
         }
         catch(err){console.log(err.mesage)}  
     }
+    static async login(email, password) {
+        try {
+            const usuario = await Usuario.findOne({ where: { email } });
+            if (!usuario) {
+                return { data: null, err: "Usuario no encontrado" };
+            }
+            if (usuario.password !== password) {
+                return { data: null, err: "Contraseña incorrecta" };
+            }
+            return { data: usuario, err: null };
+        } catch (err) {
+            console.error("Error en login:", err);
+            return { data: null, err: "Error interno del servidor" };
+        }
+    }
 }
 
 Usuario.init(

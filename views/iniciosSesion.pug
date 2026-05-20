@@ -14,7 +14,7 @@ block contenido
             background-attachment: fixed;
             background-repeat: no-repeat;
         }
-    form#form(action='/registro' method='POST' autocomplete='off' class='flex flex-col gap-2.5 max-w-2xl my-22  m-auto p-20 bg-blue-900/10 backdrop-blur-lg  border-2 border-white/20 rounded-xl shadow-xl' )
+    form#form(action='/login' method='POST' autocomplete='off' class='flex flex-col gap-2.5 max-w-2xl my-22  m-auto p-20 bg-blue-900/10 backdrop-blur-lg  border-2 border-white/20 rounded-xl shadow-xl' )
         h3(class='text-[30px] text-white text-center font-bold pb-5 ') INICIAR SESIÓN
       
         div(class='relative mb-8')
@@ -31,7 +31,10 @@ block contenido
 
 
         input#enviar(type='submit' value='INICIAR SESIÓN' class='w-full cursor-pointer border-2 border-white/30 rounded-md py-3 text-white bg-white/10 backdrop-blur-md hover:bg-white/20 hover:border-white/50 transition-all text-xl font-bold tracking-widest shadow-lg' )
-        div#mensajes(class='mt-2 text-center text-sm text-red-200 border-red-500 bg-red-900 p-3 m-auto rounded-xs font-bold empty:hidden shadow-lg')
+        if err
+            div#mensajes(class='mt-2 text-center text-sm text-red-200 border-red-500 bg-red-900 p-3 m-auto rounded-xs font-bold shadow-lg') #{err}
+        else
+            div#mensajes(class='mt-2 text-center text-sm text-red-200 border-red-500 bg-red-900 p-3 m-auto rounded-xs font-bold empty:hidden shadow-lg')
 
 
     script.
