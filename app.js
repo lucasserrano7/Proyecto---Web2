@@ -8,7 +8,8 @@ import { connectDatabase } from "./models/sync.js";
 import { publicacion } from "./models/publicacion.js";
 import { Usuario } from "./models/usuario.js";
 import { notificacion } from "./models/notificacion.js";
-import RegyLogin from "./controller/RegYLogin.js"
+import RegyLogin from "./controller/RegYLogin.js";
+import newPubli from "./controller/newPubli.js";
 import { authMiddleware } from "./middlewares/auth.js";
 import { config } from "dotenv";
 
@@ -17,13 +18,14 @@ const app = express();
 const PORT = process.env.PORT;
 
 // MIDDLEWARES
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(express.static("public"));
 //MOTOR DE PLANTILLAS
 app.set("view engine", "pug");
 app.set("views", "./views");
 app.use(RegyLogin);
+
 
 //RUTAS
 app.get("/index", (req, res) => {
@@ -49,42 +51,12 @@ app.get("/user", (req, res) => {
 app.get("/p", (req, res) => {
   res.render("nuevaPubli");
 });
+app.use(newPubli);
 
-app.post(/nuevaPubli/, (req, res) => {
-  const imagenSubida = req.body.imgBase64;
-  res.send("Imagen recibida correctamente");
-  console.log(imagenSubida);
 
-});
-
-// controladores
-app.post("/p", async (req, res) => {
-  try {
-    const { titulo, descripcion } = req.body;
-    const receptor_id = 1;
-
-    const nuevaPublicacion = await publicacion.create({
-      title: titulo,
-      description: descripcion,
-      comments_allowed: true,
-      UsuarioId: receptor_id,
-    });
-    await notificacion.create({
-      titulo: "Nueva publicación",
-      mensaje: `Sesubio la publicaion "${titulo}" correctamente`,
-      fecha: new Date(),
-      leida: false,
-      link_: `/p/${nuevaPublicacion.id}`,
-      UsuarioId: receptor_id,
-    });
-    console.log("publicacion y notificacion creada");
-    res.redirect(`/p/${nuevaPublicacion.id}`);
-  }catch(err){
-    console.error(err);
-    res.status(500).send("fallo");
-  }});
 // CONEXION A BASE DE DATOS
-connectDatabase().then(() => {
+connectDatabase()
+  .then(() => {
     app.listen(PORT, (err) => {
       if (err) {
         console.error(" [X] Error al iniciar el servidor: ", err);
@@ -95,3 +67,24 @@ connectDatabase().then(() => {
   .catch((err) => {
     console.error(" [X] Error al conectar a la base de datos: ", err);
   });
+
+
+  // controladores
+// app.post("/p", async (req, res) => {
+//   try {
+//     const { titulo, descripcion } = req.body;
+
+//     const nuevaPublicacion = await publicacion.create({
+//       title: titulo,
+//       description: descripcion,
+//       comments_allowed: true,
+//       UsuarioId: receptor_id,
+//     });
+//     
+//     console.log("publicacion y notificacion creada");
+//     res.redirect(`/p/${nuevaPublicacion.id}`);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).send("fallo");
+//   }
+// });

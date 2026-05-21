@@ -10,12 +10,8 @@ Imagen.init({
     primaryKey: true,
     allowNull: false,
   },
-  post_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
   url: {
-    type: DataTypes.STRING,
+    type: DataTypes.BLOB,
     allowNull: false,
   },
   tipo: {
@@ -24,7 +20,7 @@ Imagen.init({
   promedio: {
     type: DataTypes.FLOAT,
   },
-  copyrigth: {
+  copyright: {
     type: DataTypes.BOOLEAN,
   },
   marcaAgua: {
@@ -40,3 +36,4 @@ Imagen.init({
   createdAt: true,
   deletedAt: true,
 });
+

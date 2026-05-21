@@ -10,59 +10,116 @@ block contenido
 
                 button#btn_cerrar(class="absolute top-4 right-4 text-white/60 hover:text-red-500 hover:font-bold text-xl cursor-pointer z-10 hover:bg-white/10 rounded-full w-10 h-10 items-center justify-center") ✕
 
-                form(action="/p" method="POST" autocomplete='off'  class='flex flex-col gap-2.5 m-auto p-10 md:p-20 bg-blue-900/20 backdrop-blur-xl border-2 border-white/10 rounded-xl shadow-2xl')
+                form#form_publi(action="/p" method="POST" autocomplete='off'  class='flex flex-col gap-2.5 m-auto p-10 md:p-20 bg-blue-900/20 backdrop-blur-xl border-2 border-white/10 rounded-xl shadow-2xl')
 
-                    input(type="text" name="titulo"  placeholder="Título de la publicacion" class='border-white/50 border-2 rounded-xs p-1 text-white peer w-full bg-transparent py-2 outline-none focus:border-white transition-colors')
+                    input(type="text" name="title"  placeholder="Título de la publicacion" class='border-white/50 border-2 rounded-xs p-1 text-white peer w-full bg-transparent py-2 outline-none focus:border-white transition-colors')
 
                     textarea(name="descripcion" placeholder="Descripción" class='border-white/50 border-2 rounded-xs p-1 text-white peer w-full bg-transparent py-2 outline-none focus:border-white transition-colors')
 
-                    p(class='text-xl text-white/80') Comentarios 
-                    input(type="checkbox", name="")
+                    div 
+                        p(class='text-xl text-white/80') Comentarios 
+                            input(type="checkbox", name="comentario_permitido" checked class='')
 
-
-                    input#img(type="file" name="img" multiple class='text-white file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20 file:cursor-pointer') 
-                div#container_preview(class='flex flex-wrap gap-4 mt-4')
-                    img#preview(src="", alt="preview" class="hidden w-50 h-50 object-cover rounded-lg border-2 border-white/30 mt-4 shadow-lg transition-all")
-                    textarea#imgBase64(name="imgBase64" hidden) 
+                    label(for="img" class='w-max cursor-pointer py-2 px-4 rounded-md text-sm font-semibold bg-white/10 text-white hover:bg-white/20 transition-colors') Elegir imagenes
+                    input#img(type="file" name="img" multiple hidden) 
+                    div#container_preview(class='flex flex-wrap gap-4 mt-4')
+                        img#preview(src="", alt="preview" class="hidden w-50 h-50 object-cover rounded-lg border-2 border-white/30 mt-4 shadow-lg transition-all")
+                        textarea#imgBase64(name="imgBase64" hidden) 
 
                     input#subir(type='submit' value='Publicar' class='w-full cursor-pointer border-2 border-white/30 rounded-md py-3 text-white bg-white/10 backdrop-blur-md hover:text-green-600/80 hover:bg-green-400/20 hover:border-green-600/50 transition-all text-xl font-bold tracking-widest shadow-lg mt-4')
 
         script. 
+            console.log("Script de imágenes cargado correctamente");
             const fileInput = document.getElementById('img');
-            const imgBase64 = document.getElementById('imgBase64');
-            const preview = document.getElementById('preview');
             const previewContainer = document.getElementById('container_preview');
+            const formularioPubli = document.getElementById('form_publi');
+            const form = document.forms[0];
+
+            const arregloImg = [];
+            console.log("Elementos capturados:", { fileInput, previewContainer, formularioPubli });
 
             fileInput.addEventListener('change', (e) =>{
-                const file = e.target.files;
-                for (let i = 0 ; i < file.length; i++){
-                    const files= file[i];
+                console.log("Seleccionaste imágenes nuevas");
+                const archivos = e.target.files;
+
+                for (let i = 0 ; i < archivos.length; i++){
+                    const archivo= archivos[i];
+
                     const reader = new FileReader();
                     reader.onload = () => {
+                        const imagen = {
+                            src: reader.result,
+                            name: archivo.name
+                        }
+                    arregloImg.push(imagen);
+                    console.log(" Imagen agregada al array. Total:", arregloImg.length);
+
                     const divWrapper = document.createElement('div');
                     divWrapper.className = 'relative inline-block mt-4';
+
+                    divWrapper.dataset.name = archivo.name;
+
                     const imgNode = document.createElement('img');
                     imgNode.src = reader.result;
                     imgNode.className = 'w-32 max-h-32 object-cover rounded-lg border-2 border-white/30 shadow-lg';
-                    const hiddenInput = document.createElement('input');
-                    hiddenInput.type = 'hidden';
-                    hiddenInput.name = 'imgBase64'; 
-                    hiddenInput.value = reader.result;
+
+
                     const btnDelete = document.createElement('button');
                     btnDelete.type = 'button';
                     btnDelete.innerHTML = '✕';
                     btnDelete.className = 'absolute -top-2 -right-2 bg-white/40 text-red-500 hover:text-white hover:font-bold text-xl cursor-pointer z-10 hover:bg-red-500  rounded-full w-6 h-6 flex items-center justify-center font-bold shadow-md cursor-pointer transition-colors';
                     btnDelete.onclick = () => {
+                        const index = arregloImg.findIndex(img => img.name === archivo.name);
+                        if (index !== -1){
+                            arregloImg.splice(index, 1);
+                            console.log("Imagen borrada. Quedan:", arregloImg.length);
+                        }
                             divWrapper.remove();
                         };
                     
                     divWrapper.appendChild(imgNode);
-                    divWrapper.appendChild(hiddenInput);
                     divWrapper.appendChild(btnDelete);
 
                     previewContainer.appendChild(divWrapper);
                 };
-                    reader.readAsDataURL(files);
+
+                    reader.readAsDataURL(archivo);
                 }
                 fileInput.value = '';
             });
+
+            formularioPubli.addEventListener('submit', (e)=>{
+                e.preventDefault();
+                console.log("Iniciando envío al servidor...");
+
+                const formdata = new FormData(form);
+                const bodtoSend = {
+                    title: formdata.get('title'),
+                    descripcion: formdata.get('descripcion'),
+                    comentario_allowed: formdata.get('comentario_permitido') === 'on',
+                    img: arregloImg,
+                    fech: new Date().toLocaleTimeString(),
+
+                };
+                console.log("Paquete listo para enviar:", bodtoSend);
+                fetch(formularioPubli.action, {
+                    method: 'POST',
+                    headers:{
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify(bodtoSend)
+
+                })
+                .then(response => {
+                    console.log(" Respuesta del servidor:", response.status);
+                    if (response.ok){
+                        alert('Publicacion subida con exito');
+                        window.location.href = '/';
+                    }
+                    else{
+                        alert('Error al enviar publicacion');
+                    }
+                })
+                .catch (err=> console.error('Error', err));
+            })

@@ -1,5 +1,5 @@
 export function authMiddleware(req, res, next) {
-  const usuarioLogeado = req.app.locals.usuarioLoggeado;
+  const usuarioLogeado = req.app.locals.usuarioLogeado;
 
   const rutasProtegidas = ["/user", "/p", "/notis", "/welcome"];
   const necesiraLogin = rutasProtegidas.some((ruta) =>

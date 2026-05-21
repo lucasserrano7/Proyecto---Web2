@@ -21,7 +21,7 @@ publicacion.init(
       allowNull: false,
     },
     description: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.STRING,
       allowNull: true,
     },
     comments_allowed: {

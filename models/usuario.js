@@ -78,7 +78,7 @@ Usuario.init(
         estado: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
-            defaultValue: false,
+            defaultValue: true,
         },
         ofertas: {
             type: DataTypes.BOOLEAN,
