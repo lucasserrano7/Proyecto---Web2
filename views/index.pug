@@ -6,8 +6,31 @@ block metadata
         link(rel="stylesheet", href="/css/style.css")
 
 block contenido
-        main(class='mx-auto p-4')
-        button#btn_abrir(type="button" class='group fixed bottom-8 right-8 z-40 bg-green-400/20 border-green-600/50  border py-3 px-4 rounded-full text-white font-bold text-xl shadow-2xl transition-all duration-500 hover:scale-105 cursor-pointer flex items-center gap-0 hover:gap-2') 
+        main(class='mx-auto p-4 ')
+        if publicaciones && publicaciones.length > 0
+                div(class='flex flex-col gap-8')
+                        each publis in publicaciones
+                                div(class='bg-white/70 backdrop-blur-md rounded-3xl shadow-2xl border border-white/40 flex overflow-hidden h-112.5 transition-transform hover:scale-[1.01]')
+                                        div(class='w-16 flex flex-col items-center py-6 border-r border-gray-200/50 bg-gray-50/30')
+                                                div(class="w-10 h-10 bg-black rounded-lg flex items-center justify-center text-white font-black mb-10 shadow-md")
+                                                        p(class="vertical-text font-bold text-gray-600 tracking-widest text-xs uppercase" style="writing-mode: vertical-rl; transform: rotate(180deg)") 
+                                                        | #{publis.Usuario.username}
+                                        div(class="flex-1 bg-gray-200 overflow-hidden relative group")
+                                                if publis.img && publis.img.length > 0
+                                                        img(src=publis.img class="w-full h-full object-cover")
+                                        div(class="w-64 p-6 flex flex-col justify-between bg-white/40")
+                                                div 
+                                                        h3(class='font-bold text-xl text-blue-900 drop-shadow-sm')= publis.title
+                                                        p(class="text-sm text-gray-700 mt-2 leading-relaxed")= publis.description
+                                                div(class="flex flex-col gap-4")
+                                                        div(class="flex justify-around text-2xl text-gray-600")
+                                                            button(class="hover:text-red-500 transition-colors cursor-pointer") corazon
+                                                            button(class="hover:text-blue-500 transition-colors cursor-pointer") nose
+                                                            button(class="hover:text-green-500 transition-colors cursor-pointer") nose
+
+                                                
+
+        button#btn_abrir(type="button" class='group fixed bottom-8 right-8 z-40 bg-green-400/20 border-green-600/50  border py-3 px-4 rounded-full text-black font-bold text-xl shadow-2xl transition-all duration-500 hover:scale-105 cursor-pointer flex items-center gap-0 hover:gap-2') 
                 | + 
                 span(class='max-w-0 inline-block overflow-hidden opacity-0 transition-all duration-500 ease-in-out group-hover:max-w-xs group-hover:opacity-100 text-sm font-semibold tracking-wide whitespace-nowrap') Nueva Publicacion
         include mixins/subirPubli.pug

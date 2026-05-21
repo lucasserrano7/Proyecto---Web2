@@ -11,7 +11,7 @@ Imagen.init({
     allowNull: false,
   },
   url: {
-    type: DataTypes.BLOB,
+    type: DataTypes.BLOB('long'),
     allowNull: false,
   },
   tipo: {

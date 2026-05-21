@@ -28,12 +28,11 @@ app.use(RegyLogin);
 
 
 //RUTAS
+app.use('/', newPubli);
 app.get("/index", (req, res) => {
   res.render("index", { usuario: req.app.locals.usuarioLogeado });
 });
-app.get("/", (req, res) => {
-  res.render("index", { usuario: req.app.locals.usuarioLogeado });
-});
+
 app.get("/iniciosSesion", (req, res) => {
   res.render("iniciosSesion");
 });
