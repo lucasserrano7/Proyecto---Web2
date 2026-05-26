@@ -92,7 +92,7 @@ block contenido
                 e.preventDefault();
                 console.log("Iniciando envío al servidor...");
 
-                const formdata = new FormData(form);
+                const formdata = new FormData(formularioPubli);
                 const bodtoSend = {
                     title: formdata.get('title'),
                     descripcion: formdata.get('descripcion'),
@@ -115,7 +115,7 @@ block contenido
                     console.log(" Respuesta del servidor:", response.status);
                     if (response.ok){
                         alert('Publicacion subida con exito');
-                        window.location.href = '/';
+                        window.location.href = '/index';
                     }
                     else{
                         alert('Error al enviar publicacion');

@@ -1,6 +1,6 @@
 import sequelize from "./config.js";
 import { Coleccion } from "./coleccion.js";
-import { Comentario } from "./comentario.js";
+import { Comentarios } from "./comentarios.js";
 import { Compra } from "./compra.js";
 import { denunciaComentario } from "./denunciaComentario.js";
 import { denunciaPublicacion } from "./denunciaPublicacion.js";
@@ -60,8 +60,8 @@ denunciaPublicacion.belongsTo(publicacion);
 publicacion.hasMany(Imagen);
 Imagen.belongsTo(publicacion);
 
-publicacion.hasMany(Comentario);
-Comentario.belongsTo(publicacion);
+Imagen.hasMany(Comentarios);
+Comentarios.belongsTo(Imagen);
 
 publicacion.hasMany(Etiquetas);
 Etiquetas.belongsTo(publicacion);
@@ -69,8 +69,8 @@ Etiquetas.belongsTo(publicacion);
 publicacion.hasMany(Validador);
 Validador.belongsTo(publicacion);
 
-Comentario.hasMany(denunciaComentario);
-denunciaComentario.belongsTo(Comentario);
+Comentarios.hasMany(denunciaComentario);
+denunciaComentario.belongsTo(Comentarios);
 
 Imagen.hasMany(Valoracion);
 Valoracion.belongsTo(Imagen);
@@ -78,14 +78,12 @@ Valoracion.belongsTo(Imagen);
 Usuario.hasMany(notificacion);
 notificacion.belongsTo(Usuario);
 
-
-
 export async function connectDatabase() {
   try {
     await sequelize.authenticate(); // testear la conexión
     console.log(" [+] Conexión a la BdD establecida.");
 
-    await sequelize.sync({ alter: true}); // sincronizar los modelos con la BdD
+    await sequelize.sync({ alter: true }); // sincronizar los modelos con la BdD
     console.log(" [+] sincronizado de modelos.");
   } catch (error) {
     console.error(" [x] No se pudo conectar a la BdD:", error);

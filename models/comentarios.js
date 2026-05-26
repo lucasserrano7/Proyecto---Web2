@@ -1,9 +1,9 @@
 import { Model,DataTypes } from "sequelize";
 import sequelize from "./config.js";
 
-export class Comentario extends Model {}
+export class Comentarios extends Model {}
 
-Comentario.init(
+Comentarios.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -15,7 +15,7 @@ Comentario.init(
       type: DataTypes.DATE,
       allowNull: false,
     },
-    contenido: {
+    texto: {
       type: DataTypes.STRING(255),
       allowNull: false,
     },
@@ -29,3 +29,5 @@ Comentario.init(
     updatedAt: true,
   },
 );
+
+export default Comentarios;

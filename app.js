@@ -10,6 +10,7 @@ import { Usuario } from "./models/usuario.js";
 import { notificacion } from "./models/notificacion.js";
 import RegyLogin from "./controller/RegYLogin.js";
 import newPubli from "./controller/newPubli.js";
+import newComentarios from "./controller/comentarios.js";
 import { authMiddleware } from "./middlewares/auth.js";
 import { config } from "dotenv";
 
@@ -29,7 +30,7 @@ app.use(RegyLogin);
 
 //RUTAS
 app.use('/', newPubli);
-app.get("/index", (req, res) => {
+app.get("/", (req, res) => {
   res.render("index", { usuario: req.app.locals.usuarioLogeado });
 });
 
@@ -50,7 +51,7 @@ app.get("/user", (req, res) => {
 app.get("/p", (req, res) => {
   res.render("nuevaPubli");
 });
-app.use(newPubli);
+app.use('/comentarios' ,newComentarios);
 
 
 // CONEXION A BASE DE DATOS

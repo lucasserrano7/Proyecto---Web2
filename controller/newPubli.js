@@ -3,17 +3,17 @@ import { publicacion } from "../models/publicacion.js";
 import { Usuario } from "../models/usuario.js";
 import { Imagen } from "../models/Imagen.js";
 import { notificacion } from "../models/notificacion.js";
+import { Comentarios } from "../models/comentarios.js";
 
 const newPubli = express.Router();
 
 newPubli.post("/p", async (req, res) => {
 
   try {
+    
     const { title, descripcion, img , comentario_allowed} = req.body;
-    console.log("Datos recibidos:", { title, descripcion, comentario_allowed, img });
 
     const idUsuario = req.app.locals.usuarioLogeado.id;
-
 
     const nuevaPubli = await publicacion.create({
       title: title,
@@ -62,7 +62,6 @@ newPubli.post("/p", async (req, res) => {
   }
 });
 newPubli.get("/index", async (req, res) => {
-  console.log("Obteniendo publicaciones...");
   try {
     const publicaciones = await publicacion.findAll({
       include: [
@@ -72,18 +71,28 @@ newPubli.get("/index", async (req, res) => {
         },
         {
           model: Imagen,
-          attributes: ["url"],
-        },
+          attributes: ['id', "url"],
+          include: [
+            {
+              model: Comentarios,
+            }
+          ]
+          },
       ],
+      order: [['createdAt', 'DESC']]
     });
 const publis = publicaciones.map((instancia) => {
     const publi = instancia.toJSON();
     if (publi.Imagens && publi.Imagens.length > 0 && publi.Imagens[0].url) {
       const image = publi.Imagens[0].url;
+      const imageData = publi.Imagens[0];
     const bufferCrudo = Buffer.isBuffer(image)
     ? image
     : Buffer.from(image.data || image);
     publi.img = 'data:image/jpeg;base64,' + bufferCrudo.toString('base64');
+    publi.comentarios = imageData.comentarios || [];
+    publi.ImagenId = imageData.id;
+
     } else {
       publi.img = '/img/camalardo.jpg';
     }
