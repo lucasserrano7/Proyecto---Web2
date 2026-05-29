@@ -21,13 +21,13 @@ RegYLogin.post("/login", async (req, res) => {
       return res.render("iniciosSesion", { error: "Contraseña incorrecta." });
     }
     console.log("Usuario logeado:", usuario);
-    req.app.locals.usuarioLogeado = {
+    
+    req.session.usuario={
       id: usuario.id,
-      username: usuario.username,
-      email: usuario.email,
     };
-
     return res.redirect("/index");
+
+
   } catch (error) {
     console.error("Error en el proceso de login:", error);
     return res

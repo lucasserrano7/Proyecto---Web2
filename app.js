@@ -2,6 +2,7 @@ import sequelize from "./models/config.js";
 import "./models/usuario.js";
 import "dotenv/config";
 import express from "express";
+import session from "express-session";
 import pug from "pug";
 import "./models/sync.js";
 import { connectDatabase } from "./models/sync.js";
@@ -17,21 +18,35 @@ import { config } from "dotenv";
 // CONSTANTES
 const app = express();
 const PORT = process.env.PORT;
+app.use(session({
+  secret: process.env.SESSION_KEY,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: false, // cunado se sube al servidor poner true
+    maxAge: 24 * 60 * 60 * 1000, //  un dia
+    httpOnly: true,
+    sameSite: 'lax', //SSR
+  },
+}));
 
 // MIDDLEWARES
+app.use(express.static("public"));
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
-app.use(express.static("public"));
 //MOTOR DE PLANTILLAS
 app.set("view engine", "pug");
 app.set("views", "./views");
 app.use(RegyLogin);
 
-
-//RUTAS
+app.use((req, res, next)=>{
+  res.locals.usuario = req.session.usuario || null;
+  next();
+});
+//RUTAS PUBLICAS
 app.use('/', newPubli);
 app.get("/", (req, res) => {
-  res.render("index", { usuario: req.app.locals.usuarioLogeado });
+  res.render("index", { usuario: req.session.usuario });
 });
 
 app.get("/iniciosSesion", (req, res) => {
@@ -41,6 +56,7 @@ app.get("/welcome", (req, res) => {
   res.render("welcome");
 });
 
+//RUTAS PRIVADAS (Despues de inicio de sesion)
 app.use(authMiddleware);
 app.get("/notis", (req, res) => {
   res.render("notis");

@@ -1,0 +1,10 @@
+mixin alert(alert=undefined class='obsulute p-4 rounded-sm')
+  if alert
+    case alert.status
+      when "error"
+        div.alert.error(class='bg-red-600 text-white')
+          p(class='text-center')#{alert.text}
+      when "success"
+      default
+        div.alert.success
+          p(class='text-center')#{alert.text}
