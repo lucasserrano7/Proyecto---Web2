@@ -1,4 +1,5 @@
 import { Comentarios } from "../models/comentarios.js";
+import { Usuario } from "../models/usuario.js";
 import express from "express";
 
 const newComentarios = express.Router();
@@ -10,10 +11,18 @@ newComentarios.post("/new", async (req, res) => {
       texto,
       fecha: new Date(),
       ImagenId,
+      UsuarioId: req.session.usuario.id,
+    });
+    const comentarioConUsuario = await Comentarios.findOne({
+      where: { id: nuevoComentario.id },
+      include: {
+        model: Usuario,
+        attributes: ["username", "foto_de_perfil"],
+      },
     });
     res.status(200).json({
       message: "Comentario creado exitosamente",
-      comentario: nuevoComentario,
+      comentario: comentarioConUsuario,
     });
   } catch (error) {
     console.error("Error al crear el comentario:", error);

@@ -18,7 +18,7 @@ block contenido
 
                     div 
                         p(class='text-xl text-white/80') Comentarios 
-                            input(type="checkbox", name="comentario_permitido" checked class='')
+                        input(type="checkbox", name="comments_allowed" checked class='')
 
                     label(for="img" class='w-max cursor-pointer py-2 px-4 rounded-md text-sm font-semibold bg-white/10 text-white hover:bg-white/20 transition-colors') Elegir imagenes
                     input#img(type="file" name="img" multiple hidden) 
@@ -91,12 +91,12 @@ block contenido
             formularioPubli.addEventListener('submit', (e)=>{
                 e.preventDefault();
                 console.log("Iniciando envío al servidor...");
-
+                const checked = e.target.comments_allowed.checked
                 const formdata = new FormData(formularioPubli);
                 const bodtoSend = {
                     title: formdata.get('title'),
                     descripcion: formdata.get('descripcion'),
-                    comentario_allowed: formdata.get('comentario_permitido') === 'on',
+                    comments_allowed: checked,
                     img: arregloImg,
                     fech: new Date().toLocaleTimeString(),
 

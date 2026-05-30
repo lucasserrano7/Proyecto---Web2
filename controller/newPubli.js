@@ -9,20 +9,17 @@ import { Comentarios } from "../models/comentarios.js";
 const newPubli = express.Router();
 
 newPubli.post("/p", async (req, res) => {
-
   try {
-    
-    const { title, descripcion, img , comentario_allowed} = req.body;
+    const { title, descripcion, img, comments_allowed } = req.body;
 
     const idUsuario = req.session.usuario.id;
 
     const nuevaPubli = await publicacion.create({
       title: title,
       description: descripcion,
-      comments_allowed: comentario_allowed || true,
+      comments_allowed: comments_allowed ,
       UsuarioId: idUsuario,
     });
-
 
     if (img && img.length > 0) {
       for (let i = 0; i < img.length; i++) {
@@ -34,12 +31,10 @@ newPubli.post("/p", async (req, res) => {
           url: buffer,
           tipo: img[i].type || "image/jpeg",
         });
-       console.log("Imagen guardada en la base de datos");
+        console.log("Imagen guardada en la base de datos");
       }
     }
-      
-      
-    
+
     await notificacion.create({
       titulo: "Nueva publicación",
       mensaje: `Se subio la publicaion "${title}" correctamente`,
@@ -49,12 +44,10 @@ newPubli.post("/p", async (req, res) => {
       UsuarioId: idUsuario,
     });
 
-    return res
-      .status(200)
-      .json({
-        message: "Publicación creada exitosamente",
-        publicacion: nuevaPubli,
-      });
+    return res.status(200).json({
+      message: "Publicación creada exitosamente",
+      publicacion: nuevaPubli,
+    });
   } catch (error) {
     console.error("Error al crear la publicación:", error);
     return res
@@ -68,47 +61,50 @@ newPubli.get("/index", async (req, res) => {
       include: [
         {
           model: Usuario,
-          attributes: ["username"],
+          attributes: ["username", "foto_de_perfil"],
         },
         {
           model: Imagen,
-          attributes: ['id', "url"],
+          attributes: ["id", "url"],
           include: [
             {
               model: Comentarios,
-            }
-          ]
-          },
+              include: [
+                {
+                  model: Usuario,
+                  attributes: ["username", "foto_de_perfil"],
+                }
+              ]
+            },
+          ],
+        },
       ],
-      order: [['createdAt', 'DESC']]
+      order: [["createdAt", "DESC"]],
     });
-const publis = publicaciones.map((instancia) => {
-    const publi = instancia.toJSON();
+    const publis = publicaciones.map((instancia) => {
+      const publi = instancia.toJSON();
 
-    
-    if (publi.Imagens && publi.Imagens.length > 0) {
-      publi.imagenes = publi.Imagens.map((ingInstancia)=>{
-      const image = ingInstancia.url;
-      const bufferCrudo = Buffer.isBuffer(image) ? image : Buffer.from(image.data || image);
-      return 'data:image/jpeg;base64,' + bufferCrudo.toString('base64');
+      if (publi.Imagens && publi.Imagens.length > 0) {
+        publi.imagenes = publi.Imagens.map((ingInstancia) => {
+          const image = ingInstancia.url;
+          const bufferCrudo = Buffer.isBuffer(image)
+            ? image
+            : Buffer.from(image.data || image);
+          return "data:image/jpeg;base64," + bufferCrudo.toString("base64");
+        });
 
-      });
+        const imageData = publi.Imagens[0];
 
-    const imageData = publi.Imagens[0];
-
-    publi.comentarios = imageData.comentarios || [];
-    publi.ImagenId = imageData.id;
-    
-    }
-    return publi;
-  });
-    console.log(publicaciones);
-    res.render("index", { publicaciones: publis});
+        publi.comentarios = imageData.comentarios || [];
+        publi.ImagenId = imageData.id;
+      }
+      return publi;
+    });
+    res.render("index", { publicaciones: publis });
   } catch (error) {
     console.error("Error al obtener publicaciones:", error);
     res.status(500).json({ message: "Error al obtener publicaciones" });
   }
 });
-
 
 export default newPubli;

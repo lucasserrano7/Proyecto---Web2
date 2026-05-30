@@ -63,6 +63,9 @@ Imagen.belongsTo(publicacion);
 Imagen.hasMany(Comentarios);
 Comentarios.belongsTo(Imagen);
 
+Usuario.hasMany(Comentarios);
+Comentarios.belongsTo(Usuario);
+
 publicacion.hasMany(Etiquetas);
 Etiquetas.belongsTo(publicacion);
 
