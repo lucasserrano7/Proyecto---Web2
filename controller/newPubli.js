@@ -1,4 +1,5 @@
 import express from "express";
+import session from "express-session";
 import { publicacion } from "../models/publicacion.js";
 import { Usuario } from "../models/usuario.js";
 import { Imagen } from "../models/Imagen.js";
@@ -13,7 +14,7 @@ newPubli.post("/p", async (req, res) => {
     
     const { title, descripcion, img , comentario_allowed} = req.body;
 
-    const idUsuario = req.app.locals.usuarioLogeado.id;
+    const idUsuario = req.session.usuario.id;
 
     const nuevaPubli = await publicacion.create({
       title: title,
@@ -83,23 +84,26 @@ newPubli.get("/index", async (req, res) => {
     });
 const publis = publicaciones.map((instancia) => {
     const publi = instancia.toJSON();
-    if (publi.Imagens && publi.Imagens.length > 0 && publi.Imagens[0].url) {
-      const image = publi.Imagens[0].url;
-      const imageData = publi.Imagens[0];
-    const bufferCrudo = Buffer.isBuffer(image)
-    ? image
-    : Buffer.from(image.data || image);
-    publi.img = 'data:image/jpeg;base64,' + bufferCrudo.toString('base64');
+
+    
+    if (publi.Imagens && publi.Imagens.length > 0) {
+      publi.imagenes = publi.Imagens.map((ingInstancia)=>{
+      const image = ingInstancia.url;
+      const bufferCrudo = Buffer.isBuffer(image) ? image : Buffer.from(image.data || image);
+      return 'data:image/jpeg;base64,' + bufferCrudo.toString('base64');
+
+      });
+
+    const imageData = publi.Imagens[0];
+
     publi.comentarios = imageData.comentarios || [];
     publi.ImagenId = imageData.id;
-
-    } else {
-      publi.img = '/img/camalardo.jpg';
+    
     }
     return publi;
   });
     console.log(publicaciones);
-    res.render("index", { publicaciones: publis, usuario: req.app.locals.usuarioLogeado });
+    res.render("index", { publicaciones: publis});
   } catch (error) {
     console.error("Error al obtener publicaciones:", error);
     res.status(500).json({ message: "Error al obtener publicaciones" });

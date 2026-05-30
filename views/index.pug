@@ -17,9 +17,17 @@ block contenido
                                                 div(class="w-10 h-10 bg-black rounded-lg flex items-center justify-center text-white font-black mb-10 shadow-md")
                                                         p(class="vertical-text font-bold text-gray-600 tracking-widest text-xs uppercase" style="writing-mode: vertical-rl; transform: rotate(180deg)") 
                                                         | #{publis.Usuario.foto_de_perfil}
-                                        div(class=" bg-gray-200 overflow-hidden relative group h-auto")
-                                                if publis.img && publis.img.length > 0
-                                                        img(src=publis.img class=" w-auto h-auto object-contain max-w-50vw] max-h-[70vh")
+                                        div(class=" bg-gray-200 overflow-hidden relative group h-auto w-[50vw] ")
+                                                if publis.imagenes && publis.imagenes.length > 0
+                                                        div(class="flex transition-transform duration-500 ease-in-out h-full" id=`slider-${publis.id}`)
+                                                                each image in publis.imagenes
+                                                                        div(class="min-w-full h-full flex items-center justify-center bg-black/5")
+                                                                                img(src= image class=" w-auto h-auto object-contain max-w-[50vw] max-h-[70vh]")
+                                                        if publis.imagenes && publis.imagenes.length > 1
+                                                                button(class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity z-10" onclick=`cambiarFoto('${publis.id}', -1)`) 
+                                                                                i(class="fa-solid fa-chevron-left")
+                                                                button(class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity z-10" onclick=`cambiarFoto('${publis.id}', 1)`) 
+                                                                                i(class="fa-solid fa-chevron-right")
                                         div(class="shrink-0 w-70 p-6 flex flex-col justify-between bg-white/40")
                                                 div 
                                                         h3(class='font-bold text-xl text-blue-900 drop-shadow-sm')= publis.title
@@ -100,3 +108,15 @@ block contenido
                     }
                 });
             });
+            const carruselImgs = {};
+            function cambiarFoto(publiId, dir){
+                const slider = document.getElementById(`slider-${publiId}`);
+                const limite = slider.children.length;
+                if (carruselImgs[publiId] === undefined) carruselImgs[publiId] = 0;
+                
+                carruselImgs[publiId] += dir;
+                if (carruselImgs[publiId] >= limite) carruselImgs[publiId] = 0;
+                if (carruselImgs[publiId] < 0) carruselImgs[publiId] = limite - 1;
+                
+                slider.style.transform = `translateX(-${carruselImgs[publiId] * 100}%)`;
+            }
