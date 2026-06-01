@@ -61,8 +61,8 @@ app.use(authMiddleware);
 app.get("/notis", (req, res) => {
   res.render("notis");
 });
-app.get("/user", (req, res) => {
-  res.render("user");
+app.get("/profile", (req, res) => {
+  res.render("profile");
 });
 app.get("/p", (req, res) => {
   res.render("nuevaPubli");
