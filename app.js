@@ -90,7 +90,7 @@ connectDatabase()
     console.error(" [X] Error al conectar a la base de datos: ", err);
   });
 
-
+export default app;
   // controladores
 // app.post("/p", async (req, res) => {
 //   try {

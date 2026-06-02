@@ -1,7 +1,7 @@
 import { parse } from 'dotenv';
 import'dotenv/config';
 import { Sequelize } from "sequelize";
-import pg from "pg";
+import * as pg from "pg";
 
 
 const sequelize = new Sequelize({
