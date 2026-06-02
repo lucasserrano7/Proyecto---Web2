@@ -66,8 +66,8 @@ Comentarios.belongsTo(Imagen);
 Usuario.hasMany(Comentarios);
 Comentarios.belongsTo(Usuario);
 
-publicacion.hasMany(Etiquetas);
-Etiquetas.belongsTo(publicacion);
+publicacion.belongsToMany(Etiquetas, { through: "etiquetas_publicacion" });
+Etiquetas.belongsToMany(publicacion, { through: "etiquetas_publicacion" });
 
 publicacion.hasMany(Validador);
 Validador.belongsTo(publicacion);
