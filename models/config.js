@@ -9,6 +9,9 @@ const sslConn = process.env.DB_SSL === 'true' ? {
     rejectUnauthorized: false,
     }
 } : undefined;
+console.log('DB_SSL:', process.env.DB_SSL);
+console.log('sslConn:', sslConn);
+
 const sequelize = new Sequelize( {
     dialect: 'postgres',
     dialectModule: pg,

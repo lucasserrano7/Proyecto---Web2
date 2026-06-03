@@ -54,6 +54,11 @@ app.use('/', newPubli);
 app.get("/", (req, res) => {
   res.render("index", { usuario: req.session.usuario });
 });
+// En cualquier ruta o controlador
+app.get('/test', (req, res) => {
+  console.log('DB_SSL:', process.env.DB_SSL);
+  res.json({ db_ssl: process.env.DB_SSL });
+});
 
 app.get("/iniciosSesion", (req, res) => {
   res.render("iniciosSesion");
