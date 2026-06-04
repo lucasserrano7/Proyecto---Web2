@@ -2,30 +2,27 @@ extends layout
 
 block metadata
         link(rel="stylesheet", href="/css/style.css")
+        script(src="/seguidorses.js" defer) 
         script(src="https://unpkg.com/@tailwindcss/browser@4")
 block contenido 
-                h1 TEST
-                p Cantidad: #{publicaciones ? publicaciones.length : 0}
-                div(class=' h-80 max-w-7xl mx-auto  flex rounded-b-xl bg-blue-700/30 backdrop-blur-md border-b border-r border-l border-white/70 shadow-lg text-white ')
-
-                        div(class='flex  items-center gap-4 flex-1 p-8')
-                                if usuario.foto_de_perfil
+                div(class=' h-40 max-w-7xl mx-auto  flex rounded-b-xl bg-blue-700/30 backdrop-blur-md border-b border-r border-l border-white/70 shadow-lg text-white  items-center justify-between')
+                        div(class='flex items-center gap-4 flex-1 p-8')
+                                if usuarioPerfil && usuarioPerfil.foto_de_perfil
                                         img(src="/img/camalardo.jpg", alt="" class='rounded-full w-24 h-24 object-cover')
                                 else 
-                                        img(src="/img/camalardo.jpg" class='rounded-full w-60 h-60 bg-amber-600  ')
-                                div(class='flex flex-col gap-1')
+                                        img(src="/img/camalardo.jpg" class='rounded-full w-30 h-30 bg-amber-600  ')
+                                div(class='flex flex-row gap-2')
                                         h2(class='text-3xl font-bold ') @username
                                         span(class='text-xl font-medium') 12
                                         | Seguidores
                                         span(class='text-xl font-medium') 33
                                         | Siguiendo
-                        div(class='flex flex-col gap-4 flex-1 justify-between pt-5')
-                                div(class='flex flex-col')
-                                        h3(class='text-xl uppercase tracking-wider') sobre mi
-                                        if usuario.descrpcion
-                                                p(class='')=  usuario.descrip
-                                        else 
-                                                p(class='') usuario aun no agrego descripcion
+                                div 
+                                        if usuario && usuarioPerfil && usuario.id !== usuarioPerfil.id
+                                                if yaLoSigo
+                                                        button(type="button" class='seguir-btn bg-green-600 hover:bg-green-700 h-auto rounded-2xl border-white border p-2 pl-4 pr-4 font-medium' data-creator-id=usuarioPerfil.id) Siguiendo
+                                                else
+                                                        button(type="button" class='seguir-btn bg-blue-300/30 hover:bg-blue-200/30 h-auto rounded-2xl border-white border p-2 pl-4 pr-4 font-medium' data-creator-id=usuarioPerfil.id) Seguir
                 if publicaciones && publicaciones.length > 0
                 div(class='flex flex-col gap-8 m-7 ')
                         each publis in publicaciones

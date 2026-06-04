@@ -44,7 +44,10 @@ block contenido
                                                                                         if publis.comentarios && publis.comentarios.length > 0
                                                                                                 each comentario in publis.comentarios
                                                                                                         div(class=' p-2  border-b border-black/20')
-                                                                                                                p(class='text-blue-500')= comentario.Usuario.username
+                                                                                                                if comentario.Usuario
+                                                                                                                        p(class='text-blue-500')= comentario.Usuario.username
+                                                                                                                else
+                                                                                                                        p(class='text-gray-400 italic') Usuario eliminado
                                                                                                                 span= comentario.texto
                                                                                         else    
                                                                                                 p(class='text-gray-600') Se el primero en comentar...

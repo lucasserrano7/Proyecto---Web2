@@ -15,6 +15,8 @@ import RegyLogin from "./controller/RegYLogin.js";
 import newPubli from "./controller/newPubli.js";
 import newComentarios from "./controller/comentarios.js";
 import valoraciones from "./controller/valoraciones.js";
+import seguidoresRt from "./controller/seguidores.js";
+import perfil from "./controller/perfil.js";
 import { buscador } from "./controller/buscador.js";
 import { authMiddleware } from "./middlewares/auth.js";
 import { config } from "dotenv";
@@ -62,11 +64,13 @@ app.get("/iniciosSesion", (req, res) => {
 app.get("/welcome", (req, res) => {
   res.render("welcome");
 });
+app.use('/', perfil);
 
 app.get("/explorar", buscador);
 
 //RUTAS PRIVADAS (Despues de inicio de sesion)
 app.use(authMiddleware);
+app.use('/seguidores', seguidoresRt);
 app.get("/notis", (req, res) => {
   res.render("notis");
 });

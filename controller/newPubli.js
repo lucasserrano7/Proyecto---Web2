@@ -55,7 +55,7 @@ newPubli.post("/p", async (req, res) => {
       }
     }
 
-    const todasEtiquetas = await etiquetaDB.findAll();
+    const todasEtiquetas = await Etiquetas.findAll();
 
     return res.status(200).json({
       message: "Publicación creada exitosamente",
@@ -127,19 +127,25 @@ newPubli.get("/index", async (req, res) => {
           comentarios: ingInstancia.comentarios,
           votoUsuario: votoUsuario,
         };
-
+   
       }));
+      publi.comentarios = publi.imagenes[0].comentarios;
+      } else {
+        publi.imagenes = [];
+        publi.comentarios = [];
       }
-      return publi;
+
+        return publi;
+        }));
+   
+     
 
       const todasEtiquetas = await Etiquetas.findAll({
         attributes: ["nombre"],
       });
 
-      res.render("index", { publicaciones: publis, etiquetas: todasEtiquetas, usuario: req.session.usuario });
-
-    }));
-    res.render("index", { publicaciones: publis });
+    res.render("index", { publicaciones: publis, etiquetas: todasEtiquetas, usuario: req.session.usuario });
+   
   } catch (error) {
     console.error("Error al obtener publicaciones:", error);
     res.status(500).json({ message: "Error al obtener publicaciones" });
