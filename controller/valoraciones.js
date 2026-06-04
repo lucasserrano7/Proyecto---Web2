@@ -9,7 +9,7 @@ const valoraciones = e.Router();
 
 valoraciones.post("/valoraciones", async (req, res) => {
   try {
-    const { puntaje, publicacionId } = req.body;
+    const { puntaje, imagenId } = req.body;
 
     if (!req.session || !req.session.usuario) {
       return res.status(401).json({ message: "¡Tenes que iniciar sesión para poder valorar una imagen!" });
@@ -18,7 +18,7 @@ valoraciones.post("/valoraciones", async (req, res) => {
     const idUsuario = req.session.usuario.id;
 
     const valoracionExistente = await Valoracion.findOne({
-      where: { usuarioId: idUsuario, publicacionId: publicacionId },
+      where: { UsuarioId: idUsuario, ImagenId: imagenId },
     });
 
 if (valoracionExistente) {
@@ -27,11 +27,11 @@ if (valoracionExistente) {
     await Valoracion.create({
       puntaje: puntaje,
       UsuarioId: idUsuario,
-      publicacionId: publicacionId,
+      ImagenId: imagenId,
     });
 
     const resultado = await Valoracion.findAll({
-      where: { publicacionId: publicacionId },
+      where: { ImagenId: imagenId },
       attributes: [[Valoracion.sequelize.fn("AVG", Valoracion.sequelize.col("puntaje")), "promedio"]],
       raw: true,
     });
@@ -39,7 +39,7 @@ if (valoracionExistente) {
 
     await Imagen.update(
       { promedio: promedio },
-      { where: { id: publicacionId } }
+      { where: { id: imagenId } }
     );
     return res.status(200).json({ message: "Valoración creada exitosamente", promedio: promedio });
 }

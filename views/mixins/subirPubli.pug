@@ -16,6 +16,8 @@ block contenido
 
                     textarea(name="descripcion" placeholder="Descripción" class='border-white/50 border-2 rounded-xs p-1 text-white peer w-full bg-transparent py-2 outline-none focus:border-white transition-colors')
 
+                    input(type="text" name="etiquetas" placeholder="Etiquetas (ej: viejs, paisaje)" class='border-white/50 border-2 rounded-xs p-1 text-white peer w-full bg-transparent py-2 outline-none focus:border-white transition-colors')
+
                     div 
                         p(class='text-xl text-white/80') Comentarios 
                         input(type="checkbox", name="comments_allowed" checked class='')
@@ -93,11 +95,14 @@ block contenido
                 console.log("Iniciando envío al servidor...");
                 const checked = e.target.comments_allowed.checked
                 const formdata = new FormData(formularioPubli);
+                const etiquetasInput = formdata.get('etiquetas');
+                const arrayEtiquetas = etiquetasInput ? etiquetasInput.split(',').map(e => e.trim().toLowerCase()).filter(e => e !== '') : [];
                 const bodtoSend = {
                     title: formdata.get('title'),
                     descripcion: formdata.get('descripcion'),
                     comments_allowed: checked,
                     img: arregloImg,
+                    etiquetas: arrayEtiquetas,
                     fech: new Date().toLocaleTimeString(),
 
                 };

@@ -78,6 +78,9 @@ denunciaComentario.belongsTo(Comentarios);
 Imagen.hasMany(Valoracion);
 Valoracion.belongsTo(Imagen);
 
+Valoracion.belongsTo(Usuario);
+Usuario.hasMany(Valoracion);
+
 Usuario.hasMany(notificacion);
 notificacion.belongsTo(Usuario);
 
