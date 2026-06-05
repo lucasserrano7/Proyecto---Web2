@@ -205,8 +205,31 @@ block contenido
                 const contraOk = verSiLasContraseniasSonIguales();
 
                 if(emailOk && usuarioOk && tycOk && contraOk){ 
-                    HTMLFormElement.prototype.submit.call(form);
-                } else {
+                    const email = campoEmail.value;
+                    const usuario = campoUsuario.value;
+                    const contrasenia = campoContrasenia.value;
+                    const ofertas = document.querySelector("#ofertas").checked ? "on" : "off";
+
+                    try {
+                        const respuesta = await fetch('/registro', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email, usuario, contrasenia, ofertas })
+                        });
+                        const data = await respuesta.json();
+                            
+                            if(!data.success){
+                                const errorMsg = document.createElement("p");
+                                errorMsg.innerHTML = data.error;
+                                mensajes.appendChild(errorMsg);
+                                temporizadorErr();
+                            } else {
+                                window.location.href = '/login';
+                            }
+                    } catch(err){
+                                console.error('error en el registro', err);
+                            }
+                } else{
                     temporizadorErr();
-                }
-            });
+                    }
+                        });

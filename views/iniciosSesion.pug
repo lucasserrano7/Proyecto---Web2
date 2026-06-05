@@ -2,6 +2,7 @@ extend layout
 
 block metadata 
         script(src="https://unpkg.com/@tailwindcss/browser@4")
+        script(src="/login.js" defer)
         link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200")
 
 block contenido  
@@ -30,30 +31,6 @@ block contenido
 
 
         input#enviar(type='submit' value='INICIAR SESIÓN' class='w-full cursor-pointer border-2 border-white/30 rounded-md py-3 text-white bg-white/10 backdrop-blur-md hover:bg-white/20 hover:border-white/50 transition-all text-xl font-bold tracking-widest shadow-lg' )
-        if err
-            div#mensajes(class='mt-2 text-center text-sm text-red-200 border-red-500 bg-red-900 p-3 m-auto rounded-xs font-bold shadow-lg') #{err}
-        else
-            div#mensajes(class='mt-2 text-center text-sm text-red-200 border-red-500 bg-red-900 p-3 m-auto rounded-xs font-bold empty:hidden shadow-lg')
 
+        div#mensajes(class='mt-2 text-center  text-sm text-white border border-red-500 bg-red-600/40 backdrop-blur-md m-auto p-3 rounded-md font-bold empty:hidden shadow-lg')
 
-    script.
-          const mensajes = document.querySelector("#mensajes");
-          const enviar  = document.querySelector("#enviar");
-          const campoEmail = document.querySelector("#email");
-          const form = document.querySelector("#form");
-          function verContrasenia(inputId, iconoId){
-              const input = document.getElementById(inputId);
-              const icono = document.getElementById(iconoId);
-              if (input.type === 'password'){
-                  input.type = 'text';
-                  icono.innerText = 'visibility';
-              }else{
-                  input.type = 'password';
-                  icono.innerText = 'visibility_off';
-              }
-          }
-          function temporizadorErr(){
-              setTimeout(()=>{
-                  mensajes.innerHTML = "";
-              }, 4000);
-          }
