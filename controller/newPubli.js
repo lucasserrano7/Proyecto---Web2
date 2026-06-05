@@ -74,7 +74,7 @@ newPubli.get("/index", async (req, res) => {
       include: [
         {
           model: Usuario,
-          attributes: ["username", "foto_de_perfil"],
+          attributes: ["id","username", "foto_de_perfil"],
         },
         {
           model: Imagen,

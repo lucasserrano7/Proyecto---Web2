@@ -18,8 +18,9 @@ document.addEventListener("DOMContentLoaded", () => {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const inputTexto = form.querySelector('input[name="texto"]');
-      const imagenId = form.querySelector('input[name="ImagenId"]').value;
-      if (!inputTexto.value.trim()) return;
+      const inputOculto = form.querySelector('input[name="ImagenId"]');
+      const imagenId = inputOculto ? inputOculto.value : null;
+      if (!inputTexto.value.trim() || !imagenId) return;
 
       const response = await fetch("/comentarios/new", {
         method: "POST",
@@ -35,13 +36,22 @@ document.addEventListener("DOMContentLoaded", () => {
         const nuevoComentario = await response.json();
 
         const lista = document.getElementById(`lista-comentarios-${imagenId}`);
+        if(lista){
         const nuevoDiv = document.createElement("div");
-        nuevoDiv.className = "bg-white p-2 rounded-lg mb-2";
+        nuevoDiv.className = "p-2 border-b border-black/20";
 
-        nuevoDiv.innerHTML = `${nuevoComentario.comentario.texto}`;
+        nuevoDiv.innerHTML = `
+            <p class="text-blue-500 font-semibold">@${nuevoComentario.comentario.Usuario ? nuevoComentario.comentario.Usuario.username : (document.querySelector('h2.text-3xl') ? document.querySelector('h2.text-3xl').textContent.replace('@', '') : 'Tú')}</p>
+            <span>${nuevoComentario.comentario.texto}</span>
+          `;
         lista.appendChild(nuevoDiv);
 
+        const primero = lista.querySelector('.text-gray-600');
+        if (primero) {
+          primero.remove();
+        }
         inputTexto.value = "";
+      }
       }
     });
   });

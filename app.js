@@ -17,6 +17,7 @@ import newComentarios from "./controller/comentarios.js";
 import valoraciones from "./controller/valoraciones.js";
 import seguidoresRt from "./controller/seguidores.js";
 import perfil from "./controller/perfil.js";
+import logout from "./controller/logout.js";
 import { buscador } from "./controller/buscador.js";
 import { authMiddleware } from "./middlewares/auth.js";
 import { config } from "dotenv";
@@ -55,7 +56,11 @@ app.use(valoraciones);
 //RUTAS PUBLICAS
 app.use('/', newPubli);
 app.get("/", (req, res) => {
+  if(req.session && req.session.usuario){
   res.render("index", { usuario: req.session.usuario });
+  } else {
+    res.render("bienvenida");
+  }
 });
 
 app.get("/iniciosSesion", (req, res) => {
@@ -63,6 +68,15 @@ app.get("/iniciosSesion", (req, res) => {
 });
 app.get("/welcome", (req, res) => {
   res.render("welcome");
+});
+app.get('/T&C', (req, res) => {
+  res.render('T&C', {usuario: req.session ? req.session.usuario : null});
+});
+app.get("/profile", (req, res) => {
+  if (req.session && req.session.usuario) {
+    return res.redirect(`/user/${req.session.usuario.id}`);
+  }
+  res.redirect("/iniciosSesion");
 });
 app.use('/', perfil);
 
@@ -74,17 +88,11 @@ app.use('/seguidores', seguidoresRt);
 app.get("/notis", (req, res) => {
   res.render("notis");
 });
-app.get("/profile", async (req, res) => {
-    const publicaciones = await publicacion.findAll();
-
-  res.render("profile", {
-    publicaciones
-  });
-});
 app.get("/p", (req, res) => {
   res.render("nuevaPubli");
 });
 app.use('/comentarios' ,newComentarios);
+app.use(logout);
 
 
 // CONEXION A BASE DE DATOS
