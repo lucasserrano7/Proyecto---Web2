@@ -1,9 +1,9 @@
 import { Model, DataTypes } from "sequelize";
 import sequelize from "./config.js";
 
-export class seguidores extends Model {}
+export class Seguidores extends Model {}
 
-seguidores.init(
+Seguidores.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -36,3 +36,5 @@ seguidores.init(
     deletedAt: true,
   },
 );
+
+export default Seguidores;

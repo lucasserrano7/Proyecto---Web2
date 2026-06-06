@@ -1,0 +1,44 @@
+extends layout
+
+block metadata 
+        title user
+        script(src="https://unpkg.com/@tailwindcss/browser@4")
+        script(src="/main.js" defer) 
+        link(rel="stylesheet" href="/css/style.css")
+        link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=arrow_circle_up")
+
+block navbar
+block contenido
+    div(class="max-w-4xl mx-auto p-8 my-10 bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20 text-white")
+            h1(class="text-4xl font-black mb-6 text-center drop-shadow-md") Términos y Condiciones
+
+            div(class="space-y-6 text-lg text-white/90 leading-relaxed")
+                p ¡Qué bueno tenerte por acá! Antes de empezar a compartir tus mejores capturas, te pedimos que leas estas reglas básicas de convivencia. Usar Fotaza significa que estás de acuerdo con estos puntos.
+
+                h2(class="text-2xl font-bold text-white mt-8") 1. Tu Contenido y tus Fotos
+                p Todo lo que subas (fotos, descripciones, comentarios y valoraciones) es 100% tuyo. No nos adueñamos de tus recuerdos. Sin embargo, al publicarlo acá, nos das permiso para alojarlo y mostrarlo en la plataforma para que otros usuarios puedan descubrirlo e interactuar con él.
+
+                h2(class="text-2xl font-bold text-white mt-8") 2. Comportamiento en la Comunidad
+                p Queremos que este sea un espacio genial, seguro y respetuoso para todos. Por eso, no está permitido:
+                ul(class="list-disc list-inside ml-4 space-y-2 text-white/80")
+                    li Subir contenido ofensivo, violento, ilegal o que falte el respeto a terceros.
+                    li Hacer spam, molestar a otros usuarios en los comentarios o abusar del sistema de estrellas.
+                    li Crear cuentas falsas o hacerte pasar por otra persona.
+
+                h2(class="text-2xl font-bold text-white mt-8") 3. Tu Cuenta y Seguridad 
+                p Vos sos el responsable de mantener tu contraseña segura (nosotros ya nos encargamos de encriptarla en la base de datos para protegerte). Si detectamos actividad extraña o que alguien rompe estas reglas de convivencia, nos reservamos el derecho de suspender o eliminar la cuenta para cuidar al resto de la comunidad.
+
+                h2(class="text-2xl font-bold text-white mt-8") 4. Cambios en las Reglas 
+                p Es posible que actualicemos estos términos de vez en cuando para sumar nuevas funciones o mejorar la plataforma. Si hacemos un cambio muy drástico, te vamos a avisar con anticipación.
+
+                div(class="mt-12 text-center")
+                    p(class="font-bold text-2xl text-white drop-shadow-md") ¡Gracias por ser parte de esta comunidad! 
+                    p(class="text-xl mt-2") A disfrutar, explorar y compartir. 
+
+                div(class="mt-8 flex justify-center")
+                    a(href="/" class="bg-white/20 hover:bg-white/30 border border-white/40 backdrop-blur-sm text-white font-bold py-3 px-8 rounded-xl shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 flex items-center gap-2")
+                        i(class="fa-solid fa-arrow-left")
+                        | Volver al Inicio
+
+            block contenido 
+

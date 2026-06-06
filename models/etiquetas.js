@@ -25,3 +25,5 @@ Etiquetas.init(
     }
 
 );
+
+export default Etiquetas;

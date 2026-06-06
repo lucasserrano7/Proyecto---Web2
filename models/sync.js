@@ -10,7 +10,7 @@ import { Favoritos } from "./favoritos.js";
 import { Imagen } from "./Imagen.js";
 import { notificacion } from "./notificacion.js";
 import { publicacion } from "./publicacion.js";
-import { seguidores } from "./seguidor.js";
+import { Seguidores } from "./seguidor.js";
 import { Usuario } from "./usuario.js";
 import { Validador } from "./validador.js";
 import { Valoracion } from "./valoracion.js";
@@ -25,13 +25,13 @@ publicacion.belongsTo(Usuario);
 
 Usuario.belongsToMany(Usuario, {
   as: "Seguidos",
-  through: seguidores,
+  through: Seguidores,
   foreignKey: "user_id",
   otherKey: "seguido_id",
 });
 Usuario.belongsToMany(Usuario, {
   as: "Seguidores",
-  through: seguidores,
+  through: Seguidores,
   foreignKey: "seguido_id",
   otherKey: "user_id",
 });
@@ -77,6 +77,9 @@ denunciaComentario.belongsTo(Comentarios);
 
 Imagen.hasMany(Valoracion);
 Valoracion.belongsTo(Imagen);
+
+Valoracion.belongsTo(Usuario);
+Usuario.hasMany(Valoracion);
 
 Usuario.hasMany(notificacion);
 notificacion.belongsTo(Usuario);

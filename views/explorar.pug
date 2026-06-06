@@ -1,40 +1,42 @@
-extends layout 
+extend layout 
 
-block metadata
+block metadata 
+        title Explorar
         link(rel="stylesheet", href="/css/style.css")
-        script(src="/seguidorses.js" defer) 
         script(src="https://unpkg.com/@tailwindcss/browser@4")
+        link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=arrow_circle_up")
+
 block contenido 
-                div(class=' h-40 max-w-7xl mx-auto  flex rounded-b-xl bg-blue-700/30 backdrop-blur-md border-b border-r border-l border-white/70 shadow-lg text-white  items-center justify-between p-4')
-                                div(class='flex flex-row items-baseline  gap-4 flex-wrap')
-                                        h2(class='text-3xl font-bold ') @#{usuarioPerfil.username}
-                                        span(class='text-xl font-medium') #{constSeguidores || 0} 
-                                        | Seguidores
-                                        span(class='text-xl font-medium') #{constSeguidos || 0}
-                                        | Siguiendo
-                                div 
-                                        if usuario && usuarioPerfil && usuario.id !== usuarioPerfil.id
-                                                if yaLoSigo
-                                                        button(type="button" class='seguir-btn bg-green-600 hover:bg-green-700 h-auto rounded-2xl border-white border p-2 pl-4 pr-4 font-medium' data-creator-id=usuarioPerfil.id) Siguiendo
-                                                else
-                                                        button(type="button" class='seguir-btn bg-blue-300/30 hover:bg-blue-200/30 h-auto rounded-2xl border-white border p-2 pl-4 pr-4 font-medium' data-creator-id=usuarioPerfil.id) Seguir
-                                        else if usuario && usuarioPerfil && usuario.id === usuarioPerfil.id
-                                                a(href="/logout" class="bg-red-500/80 hover:bg-red-600 border border-white/30 text-white font-semibold py-2 px-4 rounded-2xl transition-all shadow-md flex items-center gap-2 text-sm cursor-pointer" ) 
-                                                        i(class='fa-solid fa-right-from-bracket')
-                                                        | Cerrar Sesion
-                if publicaciones && publicaciones.length > 0
+    main(class='mx-auto p-4 flex flex-col items-center')
+        form(action="/explorar" method="GET" class="flex items-center gap-2 bg-black/20 p-2 rounded-full border border-white/30 backdrop-blur-sm ")
+            input(type="text" name="keyword" placeholder="Buscar en publicaciones..." class="bg-transparent border-none outline-none text-white px-3 w-full text-xl")
+            button(type="submit" class="text-white hover:text-blue-300 cursor-pointer px-2") 
+                i(class="fa-solid fa-magnifying-glass")
+                    
+        if etiquetasGuardadas && etiquetasGuardadas.length > 0
+            div(class="flex flex-wrap gap-2 mt-2")
+                p(class="text-xs text-white/70 w-full font-semibold") Filtrar por etiquetas:
+                each tag in etiquetasGuardadas
+                    a(href=`/explorar?tag=${tag.nombre}` class="text-xs font-semibold text-blue-100 bg-blue-600/40 px-3 py-1.5 rounded-full hover:bg-blue-500 cursor-pointer transition-colors border border-blue-400/30 drop-shadow-md") 
+                    | ##{tag.nombre}
+          
+
+        
+        div(class="mb-8 text-center mt-6")
+            if palabraBuscada
+                h2(class='text-sm text-blue-900 font-bold drop-shadow-md bg-white/40 px-6 py-2 rounded-full inline-block') Resultados para: "#{palabraBuscada}"
+            else
+                h2(class='text-sm text-blue-900 font-bold drop-shadow-md bg-white/40 px-6 py-2 rounded-full inline-block') Explorando todas las publicaciones
+
+        if publicaciones && publicaciones.length > 0
                         div(class='flex flex-col gap-8 m-7 ')
                                 each publis in publicaciones
                                         div(class='relative flex flex-col items-center mb-16 mt-9 mx-auto w-fit')
                                                 div(class='bg-white/70  backdrop-blur-md rounded-3xl z-20 shadow-2xl border border-white/40 flex overflow-hidden w-fit  transition-transform hover:scale-[1.01]')
                                                         div(class='w-16 shrink-0 flex flex-col items-center py-6 border-r border-gray-200/50 bg-gray-50/30')
-                                                                if publis.Usuario && publis.Usuario.id
-                                                                        a(href=`/user/${publis.Usuario.id}` 
-                                                                        class="vertical-text text-center font-bold text-gray-600 hover:text-blue-600 tracking-widest text-sm uppercase transition-colors" 
-                                                                        style="writing-mode: vertical-rl; transform: rotate(180deg);"
-                                                                ) @#{publis.Usuario.username}
-                                                                else 
-                                                                        p(class="vertical-text font-bold text-gray-400 tracking-widest text-xs uppercase" style="writing-mode: vertical-rl; transform: rotate(180deg);") @anonimo
+                                                                div(class="w-10 h-10 bg-black rounded-lg flex items-center justify-center text-white font-black mb-10 shadow-md")
+                                                                        p(class="vertical-text font-bold text-gray-600 tracking-widest text-xs uppercase" style="writing-mode: vertical-rl; transform: rotate(180deg)") 
+                                                                        | #{publis.Usuario.foto_de_perfil}
                                                         div(class=" bg-gray-200 overflow-hidden relative group h-auto w-[50vw] ")
                                                                 if publis.imagenes && publis.imagenes.length > 0
                                                                         div(class="flex transition-transform duration-500 ease-in-out h-full" id=`slider-${publis.id}`)
@@ -54,32 +56,24 @@ block contenido
                                                                 if publis.comments_allowed
                                                                         p Comentarios
                                                                         div(class='max-h-60 overflow-y-auto  space-y-2 mb-3 pr-1 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-black/30 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-blue-400' id=`contenedor-comentarios-${publis.id}`)
-                                                                                if publis.imagenes && publis.imagenes.length > 0
-                                                                                        each image, index in publis.imagenes
-                                                                                                div(id=`lista-comentarios-${image.id}` class='bg-white/40 rounded' class=(index === 0 ? 'block' : 'hidden'))
-                                                                                                        if publis.comentarios && publis.comentarios.length > 0
-                                                                                                                each comentario in publis.comentarios
-                                                                                                                        div(class=' p-2  border-b border-black/20')
-                                                                                                                                if comentario.Usuario
-                                                                                                                                        p(class='text-blue-500')= comentario.Usuario.username
-                                                                                                                                else
-                                                                                                                                        p(class='text-gray-400 italic') Usuario eliminado
-                                                                                                                                span= comentario.texto
-                                                                                                        else    
-                                                                                                                p(class='text-gray-600') Se el primero en comentar...
+                                                                        if publis.imagenes && publis.imagenes.length > 0
+                                                                                each image, index in publis.imagenes
+                                                                                        div(id=`lista-comentarios-${imageId}` class='bg-white/40 rounded' class=(index === 0 ? 'block' : 'hidden'))
+                                                                                                if publis.comentarios && publis.comentarios.length > 0
+                                                                                                        each comentario in publis.comentarios
+                                                                                                                div(class=' p-2  border-b border-black/20')
+                                                                                                                        p(class='text-blue-500')= comentario.Usuario.username
+                                                                                                                        span= comentario.texto
+                                                                                                else    
+                                                                                                        p(class='text-gray-600') Se el primero en comentar...
+
                                                                         form.form_comentario(class='flex items-center')
-                                                                                if publis.imagenes && publis.imagenes.length > 0
-                                                                                        input(type="hidden", name="ImagenId" value=publis.imagenes[0].id id=`input-img-${publis.id}`)
-                                                                                else
-                                                                                                input(type="hidden", name="ImagenId" value="" id=`input-img-${publis.id}`)
+                                                                                input(type="hidden", name="ImagenId" value=publis.ImagenId id=`input-img-${publis.id}`)
                                                                                 input(type="text" placeholder='Escribe un comentario..' name="texto" class='flex-1 border bg-white/40 rounded pl-2')
-                                                                                button(type='submit' class='cursor-pointer flex-row') 
+                                                                                button(type='submit'  class ='cursor-pointer flex-row') 
                                                                                         i(class="fa-solid fa-circle-arrow-up text-3xl text-blue-500/90 border-blue-600 hover:text-blue-500")
-
-
                                                                 else 
                                                                         p comentarios desactivados
-
                                                                         div(class="flex flex-col gap-4")
                                                                                 div(class="flex justify-around text-2xl text-gray-600")
                                                                                     button(class="hover:text-red-500 transition-colors cursor-pointer") corazon
@@ -95,3 +89,8 @@ block contenido
                                                                                         i.fa-regular.fa-star(class="text-yellow-400 cursor-pointer text-xl transition-all duration-200" data-valor=num onclick=`enviarValoracion('${publis.imagenes[0].id}', ${num}, '${publis.id}')`)     
 
                                                                         span(id="promedio-"+publis.imagenes[0].id class="text-white font-semibold ml-2 promedio-span") #{publis.imagenes[0].promedio || '0.0'}
+
+        else
+            div(class="bg-white/20 p-10 rounded-3xl text-center shadow-lg mt-10 border-white border")
+                p(class='text-white text-2xl font-semibold ') No se encontraron publicaciones que coincidan con la busqueda.
+                p(class='text-white/80 mt-2') Probá buscando con otras palabras.
