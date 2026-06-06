@@ -23,6 +23,7 @@ import logout from "./controller/logout.js";
 import { buscador } from "./controller/buscador.js";
 import { authMiddleware } from "./middlewares/auth.js";
 import { config } from "dotenv";
+import connectSessionSequelize from "connect-session-sequelize";
 
 
 
@@ -30,9 +31,14 @@ import { config } from "dotenv";
 // CONSTANTES
 const app = express();
 const PORT = process.env.PORT;
+const SequelizeStore = connectSessionSequelize(session.Store);
+const sessionStore = new SequelizeStore({
+  db: sequelize,
+});
 app.set('trust proxy', 1);
 app.use(session({
   secret: process.env.SESSION_KEY,
+  store: sessionStore,
   resave: false,
   saveUninitialized: false,
   cookie: {
