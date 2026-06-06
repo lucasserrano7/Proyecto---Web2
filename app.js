@@ -4,7 +4,8 @@ import "dotenv/config";
 import express from "express";
 import session from "express-session";
 import pug from "pug";
-import path from "path";
+import path, {dirname} from "path";
+import { fileURLToPath } from "url";
 import "./models/sync.js";
 import { connectDatabase } from "./models/sync.js";
 import { publicacion } from "./models/publicacion.js";
@@ -23,6 +24,9 @@ import { buscador } from "./controller/buscador.js";
 import { authMiddleware } from "./middlewares/auth.js";
 import { config } from "dotenv";
 
+
+
+
 // CONSTANTES
 const app = express();
 const PORT = process.env.PORT;
@@ -37,6 +41,8 @@ app.use(session({
     sameSite: 'lax', //SSR
   },
 }));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // MIDDLEWARES
 app.use(express.static("public"));
@@ -44,7 +50,7 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 //MOTOR DE PLANTILLAS
 app.set("view engine", "pug");
-app.set("views", path.join(process.cwd()), ".views");
+app.set("views", path.join(__dirname), ".views");
 
 
 app.use((req, res, next)=>{
