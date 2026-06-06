@@ -30,6 +30,7 @@ import { config } from "dotenv";
 // CONSTANTES
 const app = express();
 const PORT = process.env.PORT;
+app.set('trust proxy', 1);
 app.use(session({
   secret: process.env.SESSION_KEY,
   resave: false,
