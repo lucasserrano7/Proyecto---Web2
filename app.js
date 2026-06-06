@@ -4,6 +4,8 @@ import "dotenv/config";
 import express from "express";
 import session from "express-session";
 import pug from "pug";
+import path, {dirname} from "path";
+import { fileURLToPath } from "url";
 import "./models/sync.js";
 import { connectDatabase } from "./models/sync.js";
 import { publicacion } from "./models/publicacion.js";
@@ -21,21 +23,33 @@ import logout from "./controller/logout.js";
 import { buscador } from "./controller/buscador.js";
 import { authMiddleware } from "./middlewares/auth.js";
 import { config } from "dotenv";
+import connectSessionSequelize from "connect-session-sequelize";
+
+
+
 
 // CONSTANTES
 const app = express();
 const PORT = process.env.PORT;
+const SequelizeStore = connectSessionSequelize(session.Store);
+const sessionStore = new SequelizeStore({
+  db: sequelize,
+});
+app.set('trust proxy', 1);
 app.use(session({
   secret: process.env.SESSION_KEY,
+  store: sessionStore,
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false, // cunado se sube al servidor poner true
+    secure: true, // cunado se sube al servidor poner true
     maxAge: 24 * 60 * 60 * 1000, //  un dia
     httpOnly: true,
     sameSite: 'lax', //SSR
   },
 }));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // MIDDLEWARES
 app.use(express.static("public"));
@@ -43,7 +57,7 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 //MOTOR DE PLANTILLAS
 app.set("view engine", "pug");
-app.set("views", "./views");
+app.set("views", path.join(__dirname, "views"));
 
 
 app.use((req, res, next)=>{
@@ -61,6 +75,11 @@ app.get("/", (req, res) => {
   } else {
     res.render("bienvenida");
   }
+});
+// En cualquier ruta o controlador
+app.get('/test', (req, res) => {
+  console.log('DB_SSL:', process.env.DB_SSL);
+  res.json({ db_ssl: process.env.DB_SSL });
 });
 
 app.get("/iniciosSesion", (req, res) => {

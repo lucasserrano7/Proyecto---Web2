@@ -29,7 +29,7 @@ const verificarToken = (req, res, next) => {
   }
 };
 RegYLogin.get("/login", (req, res) => {
-  res.render("login");
+  res.render("iniciosSesion");
 });
 
 RegYLogin.post("/login", async (req, res) => {
@@ -94,7 +94,7 @@ RegYLogin.post("/registro", async (req, res) => {
 });
 
 RegYLogin.get("/welcome", (req, res) => {
-  res.render("");
+  res.render("welcome");
 });
 
 RegYLogin.get("/revisarEmail", async (req, res) => {
