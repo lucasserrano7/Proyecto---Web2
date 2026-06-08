@@ -42,7 +42,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: true, // cunado se sube al servidor poner true
+    secure: process.env.NODE_ENV === 'production', // cunado se sube al servidor poner true
     maxAge: 24 * 60 * 60 * 1000, //  un dia
     httpOnly: true,
     sameSite: 'lax', //SSR
