@@ -4,7 +4,7 @@ import "dotenv/config";
 import express from "express";
 import session from "express-session";
 import pug from "pug";
-import path, {dirname} from "path";
+import path, { dirname } from "path";
 import { fileURLToPath } from "url";
 import "./models/sync.js";
 import { connectDatabase } from "./models/sync.js";
@@ -13,6 +13,7 @@ import { Usuario } from "./models/usuario.js";
 import { Imagen } from "./models/Imagen.js";
 import { Valoracion } from "./models/valoracion.js";
 import { notificacion } from "./models/notificacion.js";
+import { Coleccion } from "./models/coleccion.js";
 import RegyLogin from "./controller/RegYLogin.js";
 import newPubli from "./controller/newPubli.js";
 import newComentarios from "./controller/comentarios.js";
@@ -20,13 +21,11 @@ import valoraciones from "./controller/valoraciones.js";
 import seguidoresRt from "./controller/seguidores.js";
 import perfil from "./controller/perfil.js";
 import logout from "./controller/logout.js";
+import colecciones from "./controller/colecciones.js";
 import { buscador } from "./controller/buscador.js";
 import { authMiddleware } from "./middlewares/auth.js";
 import { config } from "dotenv";
 import connectSessionSequelize from "connect-session-sequelize";
-
-
-
 
 // CONSTANTES
 const app = express();
@@ -35,19 +34,36 @@ const SequelizeStore = connectSessionSequelize(session.Store);
 const sessionStore = new SequelizeStore({
   db: sequelize,
 });
-app.set('trust proxy', 1);
-app.use(session({
-  secret: process.env.SESSION_KEY,
-  store: sessionStore,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: true, // cunado se sube al servidor poner true
-    maxAge: 24 * 60 * 60 * 1000, //  un dia
-    httpOnly: true,
-    sameSite: 'lax', //SSR
-  },
-}));
+app.set("trust proxy", 1);
+app.use(
+  session({
+    secret: process.env.SESSION_KEY,
+    store: sessionStore,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: true, // cunado se sube al servidor poner true
+      maxAge: 24 * 60 * 60 * 1000, //  un dia
+      httpOnly: true,
+      sameSite: "lax", //SSR
+    },
+  }),
+);
+app.set("trust proxy", 1);
+app.use(
+  session({
+    secret: process.env.SESSION_KEY,
+    store: sessionStore,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === "production", // cunado se sube al servidor poner true
+      maxAge: 24 * 60 * 60 * 1000, //  un dia
+      httpOnly: true,
+      sameSite: "lax", //SSR
+    },
+  }),
+);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -59,8 +75,7 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
 
-
-app.use((req, res, next)=>{
+app.use((req, res, next) => {
   res.locals.usuario = req.session.usuario || null;
   next();
 });
@@ -68,19 +83,23 @@ app.use((req, res, next)=>{
 app.use(RegyLogin);
 app.use(valoraciones);
 //RUTAS PUBLICAS
-app.use('/', newPubli);
+app.use("/", newPubli);
 app.get("/", (req, res) => {
-  if(req.session && req.session.usuario){
-  res.render("index", { usuario: req.session.usuario });
+  if (req.session && req.session.usuario) {
+    res.render("index", { usuario: req.session.usuario });
   } else {
     res.render("bienvenida");
   }
 });
 // En cualquier ruta o controlador
-app.get('/test', (req, res) => {
-  console.log('DB_SSL:', process.env.DB_SSL);
+app.get("/test", (req, res) => {
+  console.log("DB_SSL:", process.env.DB_SSL);
   res.json({ db_ssl: process.env.DB_SSL });
 });
+
+//
+app.use("/colecciones", colecciones);
+//
 
 app.get("/iniciosSesion", (req, res) => {
   res.render("iniciosSesion");
@@ -88,8 +107,8 @@ app.get("/iniciosSesion", (req, res) => {
 app.get("/welcome", (req, res) => {
   res.render("welcome");
 });
-app.get('/T&C', (req, res) => {
-  res.render('T&C', {usuario: req.session ? req.session.usuario : null});
+app.get("/T&C", (req, res) => {
+  res.render("T&C", { usuario: req.session ? req.session.usuario : null });
 });
 app.get("/profile", (req, res) => {
   if (req.session && req.session.usuario) {
@@ -97,22 +116,21 @@ app.get("/profile", (req, res) => {
   }
   res.redirect("/iniciosSesion");
 });
-app.use('/', perfil);
+app.use("/", perfil);
 
 app.get("/explorar", buscador);
 
 //RUTAS PRIVADAS (Despues de inicio de sesion)
 app.use(authMiddleware);
-app.use('/seguidores', seguidoresRt);
+app.use("/seguidores", seguidoresRt);
 app.get("/notis", (req, res) => {
   res.render("notis");
 });
 app.get("/p", (req, res) => {
   res.render("nuevaPubli");
 });
-app.use('/comentarios' ,newComentarios);
+app.use("/comentarios", newComentarios);
 app.use(logout);
-
 
 // CONEXION A BASE DE DATOS
 connectDatabase()
@@ -129,7 +147,7 @@ connectDatabase()
   });
 
 export default app;
-  // controladores
+// controladores
 // app.post("/p", async (req, res) => {
 //   try {
 //     const { titulo, descripcion } = req.body;
@@ -140,7 +158,7 @@ export default app;
 //       comments_allowed: true,
 //       UsuarioId: receptor_id,
 //     });
-//     
+//
 //     console.log("publicacion y notificacion creada");
 //     res.redirect(`/p/${nuevaPublicacion.id}`);
 //   } catch (err) {
