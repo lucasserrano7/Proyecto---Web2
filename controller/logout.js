@@ -16,10 +16,10 @@ logout.get("/logout", async (req, res) => {
             }
             res.clearCookie("connect.sid");
 
-            return res.redirect("/welcome");
+            return res.redirect("/login");
         });
     } else {
-            return res.redirect("/welcome");
+            return res.redirect("/");
     }
     } catch (error) {
         console.error("Error al actualizar el estado del usuario:", error);

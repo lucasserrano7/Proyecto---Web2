@@ -21,6 +21,7 @@ import valoraciones from "./controller/valoraciones.js";
 import seguidoresRt from "./controller/seguidores.js";
 import perfil from "./controller/perfil.js";
 import logout from "./controller/logout.js";
+import validadorRT from "./controller/validaddor.js";
 import colecciones from "./controller/colecciones.js";
 import { buscador } from "./controller/buscador.js";
 import { authMiddleware } from "./middlewares/auth.js";
@@ -99,6 +100,7 @@ app.get("/test", (req, res) => {
 
 //
 app.use("/colecciones", colecciones);
+app.use('/validador', validadorRT);
 //
 
 app.get("/iniciosSesion", (req, res) => {

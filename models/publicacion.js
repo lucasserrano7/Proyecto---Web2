@@ -40,6 +40,9 @@ publicacion.init(
       type: DataTypes.FLOAT,
       allowNull: true,
     },
+    tieneCopy:{
+      type: DataTypes.BOOLEAN,
+    },
 
 
   },

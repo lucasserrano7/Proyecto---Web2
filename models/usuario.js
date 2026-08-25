@@ -24,7 +24,7 @@ export class Usuario extends Model {
         await user.save();
         return user;
         }
-        catch(err){console.log(err.mesage)}  
+        catch(err){console.log(err.message)}  
     }
     static async login(email, password) {
         try {
@@ -79,6 +79,9 @@ Usuario.init(
             type: DataTypes.BOOLEAN,
             allowNull: false,
             defaultValue: true,
+        },
+        rol:{
+            type: DataTypes.TEXT,
         },
         ofertas: {
             type: DataTypes.BOOLEAN,

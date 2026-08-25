@@ -7,26 +7,59 @@ import { notificacion } from "../models/notificacion.js";
 import { Comentarios } from "../models/comentarios.js";
 import { Valoracion } from "../models/valoracion.js";
 import { Etiquetas } from "../models/etiquetas.js";
+import { text } from "stream/consumers";
+import Jimp from "jimp";
 
 const newPubli = express.Router();
 
 newPubli.post("/p", async (req, res) => {
   try {
-    const { title, descripcion, img, comments_allowed, etiquetas } = req.body;
+    const { title, descripcion, img, comments_allowed, etiquetas, tieneCopy, textoMarcaAgua } = req.body;
 
     const idUsuario = req.session.usuario.id;
+
 
     const nuevaPubli = await publicacion.create({
       title: title,
       description: descripcion,
-      comments_allowed: comments_allowed ,
+      comments_allowed: comments_allowed,
+      tieneCopy: tieneCopy,
       UsuarioId: idUsuario,
     });
 
+
+
     if (img && img.length > 0) {
       for (let i = 0; i < img.length; i++) {
+        
         const base64Data = img[i].src.split(",")[1];
-        const buffer = Buffer.from(base64Data, "base64");
+        let buffer = Buffer.from(base64Data, "base64");
+
+        async function ponerMarcaAgua(buffer, textoMarcaAgua) {
+          try {
+            const img = await Jimp.read(buffer);
+            const fuente = await Jimp.loadFont(Jimp.FONT_SANS_32_BLACK);
+            
+            img.print(
+              fuente,
+              0,
+              0,
+              textoMarcaAgua
+              );
+            
+            const bufferSalida = await img.getBufferAsync(Jimp.MIME_JPEG);
+            return bufferSalida ;
+
+
+          } catch (error) {
+            console.error("Errro al procesar el buffer");
+            throw error;
+          }
+        }
+
+        if(tieneCopy){
+          buffer = await ponerMarcaAgua(buffer, textoMarcaAgua)
+        }
 
         await Imagen.create({
           publicacionId: nuevaPubli.id,
@@ -57,20 +90,27 @@ newPubli.post("/p", async (req, res) => {
 
     const todasEtiquetas = await Etiquetas.findAll();
 
-    return res.status(200).json({
-      message: "Publicación creada exitosamente",
-      publicacion: nuevaPubli,
-    });
+    return res.status(200).json({success: true});
   } catch (error) {
     console.error("Error al crear la publicación:", error);
     return res
-      .status(500)
-      .json({ message: "Error al crear la publicación", error: error.message });
+      .status(500).json({})
   }
 });
 newPubli.get("/index", async (req, res) => {
   try {
+    const idUsuario = req.session.usuario ? req.session.usuario.id : null;
+
+    let condicicionBusquedaPublis={};
+
+    if (!idUsuario) {
+      condicicionBusquedaPublis.tieneCopy = false;
+    }
+
+
+
     const publicaciones = await publicacion.findAll({
+      where: condicicionBusquedaPublis,
       include: [
         {
           model: Usuario,
@@ -95,7 +135,7 @@ newPubli.get("/index", async (req, res) => {
       order: [["createdAt", "DESC"]],
     });
 
-    const idUsuario = req.session.usuario ? req.session.usuario.id : null;
+    
 
     const publis = await Promise.all(publicaciones.map(async (instancia) => {
       const publi = instancia.toJSON();
@@ -118,6 +158,8 @@ newPubli.get("/index", async (req, res) => {
             }
           }
 
+   
+
 
 
         return{
@@ -138,13 +180,17 @@ newPubli.get("/index", async (req, res) => {
         return publi;
         }));
    
+        let alertaFeed = undefined;
+    if (req.query.subido === 'true') {
+      alertaFeed = { status: 'success', text: 'Publicación creada exitosamente '};
+    }
      
 
       const todasEtiquetas = await Etiquetas.findAll({
         attributes: ["nombre"],
       });
 
-    res.render("index", { publicaciones: publis, etiquetas: todasEtiquetas, usuario: req.session.usuario });
+    res.render("index", { publicaciones: publis, etiquetas: todasEtiquetas, usuario: req.session.usuario, alert: alertaFeed });
    
   } catch (error) {
     console.error("Error al obtener publicaciones:", error);

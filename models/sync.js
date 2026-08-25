@@ -12,7 +12,6 @@ import { notificacion } from "./notificacion.js";
 import { publicacion } from "./publicacion.js";
 import { Seguidores } from "./seguidor.js";
 import { Usuario } from "./usuario.js";
-import { Validador } from "./validador.js";
 import { Valoracion } from "./valoracion.js";
 import { combineTableNames } from "sequelize/lib/utils";
 
@@ -39,8 +38,23 @@ Usuario.belongsToMany(Usuario, {
 Usuario.hasMany(Coleccion);
 Coleccion.belongsTo(Usuario);
 
-Usuario.hasMany(denunciaUsuario);
-denunciaUsuario.belongsTo(Usuario);
+Usuario.hasMany(denunciaUsuario, { foreignKey: "denunciante_id" });
+denunciaUsuario.belongsTo(Usuario, {
+  foreignKey: "denunciante_id",
+  as: "Denunciante",
+});
+
+Usuario.hasMany(denunciaComentario, { foreignKey: "denunciante_id" });
+denunciaComentario.belongsTo(Usuario, {
+  foreignKey: "denunciante_id",
+  as: "Denunciante",
+});
+
+Usuario.hasMany(denunciaPublicacion, { foreignKey: "denunciante_id" });
+denunciaPublicacion.belongsTo(Usuario, {
+  foreignKey: "denunciante_id",
+  as: "Denunciante",
+});
 
 Usuario.belongsToMany(publicacion, {
   as: "favoritosGuardados",
@@ -54,8 +68,20 @@ publicacion.belongsToMany(Usuario, {
 Usuario.belongsToMany(publicacion, { as: "Compras", through: Compra });
 publicacion.belongsToMany(Usuario, { as: "Compradores", through: Compra });
 
-publicacion.hasMany(denunciaPublicacion);
-denunciaPublicacion.belongsTo(publicacion);
+Coleccion.belongsToMany(publicacion, {
+  through: "colecciones_publicaciones",
+  foreignKey: "coleccion_id",
+});
+publicacion.belongsToMany(Coleccion, {
+  through: "colecciones_publicaciones",
+  foreignKey: "publicacion_id",
+});
+
+publicacion.hasMany(denunciaPublicacion, { foreignKey: "publicacion_id" });
+denunciaPublicacion.belongsTo(publicacion, {
+  foreignKey: "publicacion_id",
+  as: "PubliDenunciada",
+});
 
 publicacion.hasMany(Imagen);
 Imagen.belongsTo(publicacion);
@@ -69,9 +95,6 @@ Comentarios.belongsTo(Usuario);
 publicacion.belongsToMany(Etiquetas, { through: "etiquetas_publicacion" });
 Etiquetas.belongsToMany(publicacion, { through: "etiquetas_publicacion" });
 
-publicacion.hasMany(Validador);
-Validador.belongsTo(publicacion);
-
 Comentarios.hasMany(denunciaComentario);
 denunciaComentario.belongsTo(Comentarios);
 
@@ -83,6 +106,13 @@ Usuario.hasMany(Valoracion);
 
 Usuario.hasMany(notificacion);
 notificacion.belongsTo(Usuario);
+
+Usuario.belongsToMany(Usuario, {
+  as: "ChatMeInteresa",
+  through: "chat",
+  foreignKey: "comprador_id",
+  otherKey: "vendedor_id",
+});
 
 export async function connectDatabase() {
   try {
