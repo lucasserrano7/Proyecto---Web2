@@ -14,6 +14,10 @@ const newPubli = express.Router();
 
 newPubli.post("/p", async (req, res) => {
   try {
+
+    if(!req.session?.usuario){
+      return res.status(401).json({message: "Tenes que iniciar sesion para poder publicar."})
+    }
     const { title, descripcion, img, comments_allowed, etiquetas, tieneCopy, textoMarcaAgua } = req.body;
 
     const idUsuario = req.session.usuario.id;
@@ -22,7 +26,7 @@ newPubli.post("/p", async (req, res) => {
     const nuevaPubli = await publicacion.create({
       title: title,
       description: descripcion,
-      comments_allowed: comments_allowed,
+      comments_allowed: comments_allowed ?? true,
       tieneCopy: tieneCopy,
       UsuarioId: idUsuario,
     });
@@ -70,6 +74,15 @@ newPubli.post("/p", async (req, res) => {
       }
     }
 
+     if (etiquetas && etiquetas.length > 0) {
+      for (let i = 0; i < etiquetas.length; i++) {
+        const [etiquetaDB, creada] = await Etiquetas.findOrCreate({
+          where: { nombre: etiquetas[i] },
+        });
+        await nuevaPubli.addEtiquetas(etiquetaDB);
+      }
+    }
+
     await notificacion.create({
       titulo: "Nueva publicación",
       mensaje: `Se subio la publicaion "${title}" correctamente`,
@@ -79,14 +92,7 @@ newPubli.post("/p", async (req, res) => {
       UsuarioId: idUsuario,
     });
 
-    if (etiquetas && etiquetas.length > 0) {
-      for (let i = 0; i < etiquetas.length; i++) {
-        const [etiquetaDB, creada] = await Etiquetas.findOrCreate({
-          where: { nombre: etiquetas[i] },
-        });
-        await nuevaPubli.addEtiquetas(etiquetaDB);
-      }
-    }
+   
 
     const todasEtiquetas = await Etiquetas.findAll();
 
@@ -117,6 +123,11 @@ newPubli.get("/index", async (req, res) => {
           attributes: ["id","username", "foto_de_perfil"],
         },
         {
+          model: Etiquetas,
+          attributes: ["id", "nombre"],
+          through: {attributes: []},
+        },
+        {
           model: Imagen,
           attributes: ["id", "url", "promedio"],
           include: [
@@ -126,8 +137,12 @@ newPubli.get("/index", async (req, res) => {
                 {
                   model: Usuario,
                   attributes: ["username", "foto_de_perfil"],
-                }
-              ]
+                },
+              ],
+            },
+            {
+              model: Valoracion,
+              attributes: ["UsuarioId", "puntaje"]
             },
           ],
         },
@@ -137,25 +152,22 @@ newPubli.get("/index", async (req, res) => {
 
     
 
-    const publis = await Promise.all(publicaciones.map(async (instancia) => {
+    const publis = publicaciones.map((instancia) => {
       const publi = instancia.toJSON();
 
-      if (publi.Imagens && publi.Imagens.length > 0) {
-        publi.imagenes = await Promise.all(publi.Imagens.map(async(ingInstancia) => {
-          const image = ingInstancia.url;
-          const bufferCrudo = Buffer.isBuffer(image)
-            ? image
-            : Buffer.from(image.data || image);
-          const base64 =  "data:image/jpeg;base64," + bufferCrudo.toString("base64");
+      publi.imagenes = (publi.Imagens || []).map((imgInstancia) => {
+        const image = imgInstancia.url;
+        const bufferCrudo = Buffer.isBuffer(image)
+          ? image
+          : Buffer.from(image?.data || image || []);
+        
+        const base64 = "data:image/jpeg;base64," + bufferCrudo.toString("base64");
         
           let votoUsuario = 0;
-          if (idUsuario) {
-            const valoracionUsuario = await Valoracion.findOne({
-              where: { UsuarioId: idUsuario, ImagenId: ingInstancia.id },
-            });
-            if (valoracionUsuario) {
-              votoUsuario = valoracionUsuario.puntaje;
-            }
+          if (idUsuario && imgInstancia.Valoracion) {
+            const valoracion = imgInstancia.Valoracion.find((v) => v.UsuarioId === idUsuario);
+          if (valoracion) votoUsuario = valoracion.puntaje;
+            
           }
 
    
@@ -163,22 +175,18 @@ newPubli.get("/index", async (req, res) => {
 
 
         return{
-          id: ingInstancia.id,
+          id: imgInstancia.id,
           src: base64,
-          promedio: ingInstancia.promedio,
-          comentarios: ingInstancia.comentarios,
+          promedio: imgInstancia.promedio,
+          comentarios: imgInstancia.Comentarios,
           votoUsuario: votoUsuario,
         };
    
-      }));
-      publi.comentarios = publi.imagenes[0].comentarios;
-      } else {
-        publi.imagenes = [];
-        publi.comentarios = [];
-      }
+      });
+      publi.comentarios = publi.imagenes[0]?.comentarios || [];
 
         return publi;
-        }));
+        });
    
         let alertaFeed = undefined;
     if (req.query.subido === 'true') {
@@ -195,6 +203,37 @@ newPubli.get("/index", async (req, res) => {
   } catch (error) {
     console.error("Error al obtener publicaciones:", error);
     res.status(500).json({ message: "Error al obtener publicaciones" });
+  }
+});
+
+newPubli.post("/p/:id/cerrar_comentarios", async (req, res ) =>{
+  try {
+    if (!req.session?.usuario) {
+       return res.status(401).json({message: "Tenes que iniciar sesion."})
+    }
+    const publicacionID = req.params.id;
+    const IdUsuario = req.session.usuario.id;
+
+    const post = await publicacion.findByPk(publicacionID);
+
+    if (!post) {
+       return res.status(404).json({message: "Publicacion no encontrada."})
+    }
+    if (post.UsuarioId !== IdUsuario) {
+       return res.status(403).json({message: "No tenes los permisos para modificar esta publicaion."})
+    }
+
+    post.comments_allowed = false;
+    await post.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Comentarios desactivados",
+      comments_allowed: post.comments_allowed
+    });
+  } catch (error) {
+    console.error("Error al cerrar los comentarios", error);
+    return res.status(500).json({message: "Error"});
   }
 });
 

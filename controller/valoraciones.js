@@ -2,6 +2,7 @@ import e from "express";
 import session from "express-session";
 import {Valoracion} from "../models/valoracion.js";
 import {Imagen} from "../models/Imagen.js";
+import {publicacion} from "../models/publicacion.js"
 import { Usuario } from "../models/usuario.js";
 
 
@@ -17,6 +18,18 @@ valoraciones.post("/valoraciones", async (req, res) => {
 
     const idUsuario = req.session.usuario.id;
 
+    const img = await Imagen.findByPk(imagenId,{
+      include: [{model: Publicacion}]
+    })
+    if(!img){
+      return res.status(404).json({message: "La imagen no existe"})
+    }
+
+    const Idautor = img.Publicacion ? img.Publicacion.UsuarioId : null;
+
+     if(Idautor === idUsuario){
+      return res.status(403).json({message: "No podes valorar tus publicaciones."})
+    }
     const valoracionExistente = await Valoracion.findOne({
       where: { UsuarioId: idUsuario, ImagenId: imagenId },
     });
