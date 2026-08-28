@@ -1,6 +1,6 @@
 import { Usuario } from "../models/usuario.js";
 
-export const verificarRol = (rolrequerido) =>{
+export const verificarRol = (rolRequerido) =>{
     return (req, res, next)=>{
         const usuario = res.locals.usuario;
 

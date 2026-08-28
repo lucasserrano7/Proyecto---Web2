@@ -21,10 +21,12 @@ import valoraciones from "./controller/valoraciones.js";
 import seguidoresRt from "./controller/seguidores.js";
 import perfil from "./controller/perfil.js";
 import logout from "./controller/logout.js";
+import denunciaPubli from "./controller/denunciaPubli.js";
 import validadorRT from "./controller/validaddor.js";
 import colecciones from "./controller/colecciones.js";
 import { buscador } from "./controller/buscador.js";
 import { authMiddleware } from "./middlewares/auth.js";
+
 import { config } from "dotenv";
 import connectSessionSequelize from "connect-session-sequelize";
 
@@ -100,7 +102,7 @@ app.get("/test", (req, res) => {
 
 //
 app.use("/colecciones", colecciones);
-app.use('/validador', validadorRT);
+app.use("/validador", validadorRT);
 //
 
 app.get("/iniciosSesion", (req, res) => {
@@ -133,6 +135,7 @@ app.get("/p", (req, res) => {
 });
 app.use("/comentarios", newComentarios);
 app.use(logout);
+app.use(denunciaPubli);
 
 // CONEXION A BASE DE DATOS
 connectDatabase()
