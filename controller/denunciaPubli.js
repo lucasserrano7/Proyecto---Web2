@@ -14,11 +14,11 @@ denunciaPubli.post("/denunciar/publicacion/:id", async (req, res) => {
     }
     const publicacionId = req.params.id;
     const usuarioId = req.session.usuario.id;
-    const { motivo, justificacion } = req.body;
+    const { motivo, description } = req.body;
 
-    if (!motivo || !justificacion) {
+    if (!motivo || !description) {
       return res.status(400).json({
-        message: "La denuncia tiene que tener motivo y justificacion",
+        message: "La denuncia tiene que tener motivo y descripcion",
       });
     }
 
@@ -36,8 +36,8 @@ denunciaPubli.post("/denunciar/publicacion/:id", async (req, res) => {
     }
     const yaDenuncio = await denunciaPublicacion.findOne({
       where: {
-        publicacionId: publicacionId,
-        UsuarioId: usuarioId,
+        publicacion_id: publicacionId,
+        denunciante_id: usuarioId,
       },
     });
 
@@ -49,7 +49,7 @@ denunciaPubli.post("/denunciar/publicacion/:id", async (req, res) => {
 
     await denunciaPublicacion.create({
       motivo: motivo,
-      justificacion: justificacion,
+      description: description,
       publicacionId: publicacionId,
       UsuarioId: usuarioId,
     });
@@ -62,11 +62,11 @@ denunciaPubli.post("/denunciar/publicacion/:id", async (req, res) => {
 
     const nuevoEstado = post.estado;
     if (totalDenuncias > 3) {
-      nuevoEstado = "enRevision";
+      let nuevoEstado = false;
     }
 
     await post.update({
-      cantidad_denunncias: totalDenuncias,
+      cantidad_denuncias: totalDenuncias,
       estado: nuevoEstado,
     });
 
@@ -74,7 +74,7 @@ denunciaPubli.post("/denunciar/publicacion/:id", async (req, res) => {
       success: true,
       message: "Denuncia registrada",
       totalDenuncias: totalDenuncias,
-      estado: estado,
+      estado: nuevoEstado,
     });
   } catch (error) {
     console.error("Error al registrar la denuncia", error);

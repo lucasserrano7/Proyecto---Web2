@@ -18,14 +18,19 @@ validadorRT.get(
         include: [
           {
             model: Usuario,
-            attributes: ["id", "username", "email", "strikes", "estado"],
+            attributes: [
+              "id",
+              "username",
+              "email",
+              "Nro_publicaciones_bajadas",
+              "estado",
+            ],
           },
           {
             model: Imagen,
           },
           {
             model: denunciaPublicacion,
-            as: "PubliDenunciada",
             include: [
               {
                 model: Usuario,
@@ -53,7 +58,10 @@ validadorRT.get(
       });
     } catch (err) {
       console.error(err);
-      res.status(500).render("Error", { mensaje: "erroe ene le servidor" });
+      res.status(500).json("Error", {
+        mensaje: "erroe ene le servidor",
+        detalle: err.message,
+      });
     }
   },
 );
@@ -73,7 +81,7 @@ validadorRT.post(
       await denunciaPublicacion.destroy({
         where: { publicacion_id: publicacionId },
       });
-      post.estado = "activa";
+      post.estado = false;
       post.cantidad_denuncias = 0;
       await post.save();
 
@@ -106,33 +114,30 @@ validadorRT.post(
         return res.status(404).json({ message: "Publicacion no encontrada." });
       }
 
-      post.estado = "bajada";
+      post.estado = false;
       await post.save();
 
-      const autor = await publicacion.findByPk(post.UsuarioId);
+      const autor = await Usuario.findByPk(post.UsuarioId);
       let cuentaSuspendida = false;
 
       if (autor) {
-        const newStrickes = (autor.strickes || 0) + 1;
-        autor.strickes = newStrickes;
+        const publisBajadas = (autor.Nro_publicaciones_bajadas || 0) + 1;
+        autor.Nro_publicaciones_bajadas = publisBajadas;
 
-        if (newStrickes >= 3) {
-          autor.estado = "inactivo";
+        if (publisBajadas >= 3) {
+          autor.estado = false;
           cuentaSuspendida = true;
         }
         await autor.save();
       }
 
-
       if (req.xhr || req.headers.accept?.includes("json")) {
-        return res
-          .status(200)
-          .json({
-            success: true,
-            message: "Publicacion dada de baja.",
-            strickesAutor: autor ? autor.strickes : 0,
-            cuentaSuspendida: cuentaSuspendida,
-          });
+        return res.status(200).json({
+          success: true,
+          message: "Publicacion dada de baja.",
+          strickesAutor: autor ? autor.Nro_publicaciones_bajadas : 0,
+          cuentaSuspendida: cuentaSuspendida,
+        });
       }
       res.redirect("/validador/validar");
     } catch (err) {
