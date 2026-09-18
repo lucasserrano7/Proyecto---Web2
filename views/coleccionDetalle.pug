@@ -1,0 +1,90 @@
+extends layout
+
+block metadata 
+  title #{coleccion.titulo} - Colección
+  link(rel="stylesheet", href="/css/style.css")
+  script(src="https://unpkg.com/@tailwindcss/browser@4")
+
+include mixins/publicaciones.pug
+
+block contenido
+  div(class="max-w-7xl mx-auto px-6 py-6")
+    
+    div(class="mb-8 bg-white/10 backdrop-blur-md border border-white/30 rounded-3xl p-6 shadow-xl text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6")
+      
+      div(class="flex flex-col gap-3")
+        
+        a(href="/colecciones" class="inline-flex items-center gap-2 text-xs font-bold text-white/70 hover:text-white transition-colors w-fit bg-white/10 px-3 py-1.5 rounded-xl border border-white/20")
+          i(class="fa-solid fa-arrow-left text-xs")
+          | Volver a Colecciones
+
+        div(class="flex items-center gap-3 flex-wrap mt-1")
+          h1(class="text-3xl font-black tracking-tight drop-shadow-md")= coleccion.titulo
+          
+          span(class="text-[11px] font-bold uppercase tracking-wider bg-blue-500/30 text-blue-200 border border-blue-400/30 px-3 py-1 rounded-xl")
+            = coleccion.categoria
+
+          if coleccion.publico
+            span(class="text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-3 py-1 rounded-xl flex items-center gap-1.5")
+              i(class="fa-solid fa-globe text-[10px]")
+              | Pública
+          else
+            span(class="text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30 px-3 py-1 rounded-xl flex items-center gap-1.5")
+              i(class="fa-solid fa-lock text-[10px]")
+              | Privada
+
+        p(class="text-xs text-white/80 font-medium")
+          | Creada por 
+          span(class="font-bold text-white") @#{coleccion.Usuario ? coleccion.Usuario.username : 'Usuario'} 
+          |  • #{publicaciones ? publicaciones.length : 0} publicaciones guardadas
+
+      if esDuenio
+        div(class="flex items-center gap-2 self-end md:self-center")
+          button#btn-eliminar-coleccion(
+            type="button"
+            data-id=coleccion.id
+            class="bg-red-500/70 hover:bg-red-600 border border-white/30 text-white font-bold text-xs uppercase tracking-wider py-2.5 px-4 rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
+          )
+            i(class="fa-solid fa-trash-can text-xs")
+            | Eliminar Colección
+
+    if publicaciones && publicaciones.length > 0
+      div(class="mt-4")
+        +publicaciones(usuario)
+    else
+      div(class="bg-white/10 backdrop-blur-md rounded-3xl border border-white/30 p-12 text-center max-w-md mx-auto shadow-xl text-white mt-8")
+        div(class="w-16 h-16 bg-white/10 border border-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white text-2xl")
+          i(class="fa-regular fa-images text-white/60")
+        h3(class="text-lg font-bold mb-1") Este álbum está vacío
+        p(class="text-xs text-white/70 mb-6 font-medium") Guardá fotos desde el feed usando el botón de marcador en cualquier publicación.
+        a(href="/" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider py-2.5 px-5 rounded-xl shadow-md transition-all active:scale-95")
+          | Explorar Fotos
+
+  if esDuenio
+    script.
+      const btnEliminar = document.getElementById("btn-eliminar-coleccion");
+      if (btnEliminar) {
+        btnEliminar.addEventListener("click", async () => {
+          if (!confirm("¿Estás seguro de que querés eliminar esta colección? Las publicaciones no se borrarán, solo la carpeta.")) return;
+
+          const colId = btnEliminar.dataset.id;
+          try {
+            const res = await fetch(`/colecciones/${colId}`, {
+              method: "DELETE",
+              headers: { "Accept": "application/json" },
+              credentials: "same-origin"
+            });
+
+            const data = await res.json();
+            if (res.ok && data.success) {
+              if (window.mostrarAlerta) mostrarAlerta(data.message, "success");
+              setTimeout(() => window.location.href = "/colecciones", 800);
+            } else {
+              if (window.mostrarAlerta) mostrarAlerta(data.message || "Error al eliminar", "error");
+            }
+          } catch (err) {
+            console.error(err);
+            if (window.mostrarAlerta) mostrarAlerta("Error de conexión al eliminar la colección.", "error");
+          }
+        });
+      }

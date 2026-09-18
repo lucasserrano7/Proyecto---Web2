@@ -23,7 +23,7 @@ import perfil from "./controller/perfil.js";
 import logout from "./controller/logout.js";
 import denunciaPubli from "./controller/denunciaPubli.js";
 import validadorRT from "./controller/validaddor.js";
-import colecciones from "./controller/colecciones.js";
+import coleccionRt from "./controller/colecciones.js";
 import { buscador } from "./controller/buscador.js";
 import { authMiddleware } from "./middlewares/auth.js";
 
@@ -101,7 +101,7 @@ app.get("/test", (req, res) => {
 });
 
 //
-app.use("/colecciones", colecciones);
+app.use("/colecciones", coleccionRt);
 app.use("/validador", validadorRT);
 //
 

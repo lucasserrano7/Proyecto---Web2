@@ -1,0 +1,21 @@
+extends layout
+
+block contenido
+  div(class="min-h-[70vh] flex items-center justify-center p-4")
+    div(class="bg-white/80 backdrop-blur-md rounded-3xl p-8 max-w-md w-full text-center shadow-2xl border border-white/60")
+      //- Ícono de advertencia destacado
+      div(class="w-16 h-16 bg-red-500 text-white rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-red-500/30")
+        i(class="fa-solid fa-triangle-exclamation text-2xl")
+      
+      h1(class="text-2xl font-black text-blue-950 tracking-tight mb-2")
+        = titulo || "¡Ups! Algo salió mal"
+      
+      p(class="text-xs text-gray-600 font-medium leading-relaxed mb-6")
+        = mensaje || "No tenés los permisos necesarios para acceder a esta sección o la página no existe."
+
+      div(class="flex flex-col gap-2")
+        a(href="/" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black text-xs py-3 px-4 rounded-xl shadow-md transition-all active:scale-95 uppercase tracking-wider")
+          i(class="fa-solid fa-house mr-2")
+          | Volver al Inicio
+        if error && error.status
+          span(class="text-[10px] text-gray-400 mt-2") Código de estado: #{error.status}

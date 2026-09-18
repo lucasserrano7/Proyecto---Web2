@@ -1,27 +1,67 @@
 extends layout 
 
 block metadata
-        script(src="/seguidorses.js" defer) 
-        script(src="https://cdn.tailwindcss.com")
+  script(src="/seguidorses.js" defer) 
+  script(src="https://cdn.tailwindcss.com")
+
 include mixins/publicaciones.pug
+
 block contenido 
-                div(class=' h-40 max-w-7xl mx-auto  flex rounded-b-xl bg-blue-700/30 backdrop-blur-md border-b border-r border-l border-white/70 shadow-lg text-white  items-center justify-between p-4')
-                                div(class='flex flex-row items-baseline  gap-4 flex-wrap')
-                                        h2(class='text-3xl font-bold ') @#{usuarioPerfil.username}
-                                        span(class='text-xl font-medium') #{constSeguidores || 0} 
-                                        | Seguidores
-                                        span(class='text-xl font-medium') #{constSeguidos || 0}
-                                        | Siguiendo
-                                div 
-                                        if usuario && usuarioPerfil && usuario.id !== usuarioPerfil.id
-                                                if yaLoSigo
-                                                        button(type="button" class='seguir-btn bg-green-600 hover:bg-green-700 h-auto rounded-2xl border-white border p-2 pl-4 pr-4 font-medium' data-creator-id=usuarioPerfil.id) Siguiendo
-                                                else
-                                                        button(type="button" class='seguir-btn bg-blue-300/30 hover:bg-blue-200/30 h-auto rounded-2xl border-white border p-2 pl-4 pr-4 font-medium' data-creator-id=usuarioPerfil.id) Seguir
-                                        else if usuario && usuarioPerfil && usuario.id === usuarioPerfil.id
-                                                a(href="/logout" class="bg-red-500/80 hover:bg-red-600 border border-white/30 text-white font-semibold py-2 px-4 rounded-2xl transition-all shadow-md flex items-center gap-2 text-sm cursor-pointer" ) 
-                                                        i(class='fa-solid fa-right-from-bracket')
-                                                        | Cerrar Sesion
-                
-                block publicaciones      
-                        +publicaciones(usuario)
+  div(class='max-w-7xl mx-auto flex flex-col sm:flex-row rounded-b-2xl bg-blue-700/30 backdrop-blur-lg border-b border-r border-l border-white/30 shadow-lg text-white items-center justify-between px-8 py-5 gap-4')
+    
+    div(class='flex items-center gap-4 flex-wrap')
+      div(class="w-14 h-14 rounded-2xl overflow-hidden bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white font-black text-2xl shadow-inner shrink-0")
+        if fotoPerfilSrc || (usuarioPerfil && (usuarioPerfil.avatar || usuarioPerfil.foto))
+          img(src=(fotoPerfilSrc || usuarioPerfil.avatar || usuarioPerfil.foto) alt=usuarioPerfil.username class="w-full h-full object-cover")
+        else if usuarioPerfil && usuarioPerfil.username
+          span= usuarioPerfil.username.charAt(0).toUpperCase()
+        else
+          i(class="fa-solid fa-user text-lg text-white/80")
+
+      h2(class='text-3xl font-black tracking-tight drop-shadow-sm') @#{usuarioPerfil.username}
+      
+      div(class='flex items-center gap-2 ml-2')
+        div(class='flex items-center gap-2 bg-white/30 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-white/50 shadow-sm')
+          span#contador-seguidores(class='text-lg font-black text-white') #{constSeguidores || 0}
+          span(class='text-[10px] font-bold uppercase tracking-wider text-white/90') Seguidores
+
+        div(class='flex items-center gap-2 bg-white/30 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-white/50 shadow-sm')
+          span(class='text-lg font-black text-white') #{constSeguidos || 0}
+          span(class='text-[10px] font-bold uppercase tracking-wider text-white/90') Siguiendo
+
+    div 
+      if usuario && usuarioPerfil && usuario.id !== usuarioPerfil.id
+        if yaLoSigo
+          button(
+            type="button" 
+            class='seguir-btn bg-emerald-500/80 hover:bg-emerald-600 border border-white/50 text-white font-bold py-2 px-5 rounded-2xl transition-all shadow-md active:scale-95 cursor-pointer text-sm flex items-center gap-2' 
+            data-creator-id=usuarioPerfil.id
+          )
+            i(class="fa-solid fa-user-check text-xs")
+            span Siguiendo
+        else
+          button(
+            type="button" 
+            class='seguir-btn bg-white/20 hover:bg-white/30 border border-white/40 text-white font-bold py-2 px-5 rounded-2xl transition-all shadow-md active:scale-95 cursor-pointer text-sm flex items-center gap-2' 
+            data-creator-id=usuarioPerfil.id
+          )
+            i(class="fa-solid fa-user-plus text-xs")
+            span Seguir
+
+      else if usuario && usuarioPerfil && usuario.id === usuarioPerfil.id
+        a(
+          href="/logout" 
+          class="bg-red-500/70 hover:bg-red-600 border border-white/30 text-white font-bold py-2 px-5 rounded-2xl transition-all shadow-md flex items-center gap-2 text-sm cursor-pointer active:scale-95"
+        ) 
+          i(class='fa-solid fa-right-from-bracket text-xs')
+          | Cerrar Sesion
+
+  if publicaciones && publicaciones.length > 0
+    div(class="mt-6")
+      +publicaciones(usuario)
+  else
+    div(class="bg-white/10 backdrop-blur-md rounded-3xl border border-white/30 p-12 text-center max-w-md mx-auto shadow-xl text-white mt-12")
+      div(class="w-16 h-16 bg-white/10 border border-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white text-2xl")
+        i(class="fa-regular fa-image text-white/60")
+      h3(class="text-lg font-bold mb-1") Sin publicaciones aún
+      p(class="text-xs text-white/70 font-medium") Este usuario todavía no compartió ninguna foto.
