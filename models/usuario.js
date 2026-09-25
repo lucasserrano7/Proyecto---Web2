@@ -67,7 +67,7 @@ Usuario.init(
             unique: true,
         },
         foto_de_perfil: {
-            type: DataTypes.STRING,
+            type: DataTypes.BLOB("long"),
             allowNull: true,
         },
         Nro_publicaciones_bajadas: {

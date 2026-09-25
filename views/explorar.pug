@@ -1,35 +1,83 @@
-extend layout 
+extends layout 
 
 block metadata 
-        title Explorar
-        script(src="https://cdn.tailwindcss.com")
-        link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=arrow_circle_up")
+  title Explorar | Fotaza
+  script(src="https://cdn.tailwindcss.com")
+  link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200")
+
 include mixins/publicaciones.pug
+
 block contenido
+  div(class="max-w-7xl mx-auto px-4 py-8 flex flex-col items-center")
+    
+    form(action="/explorar" method="GET" class="flex flex-col sm:flex-row items-center gap-2 bg-blue-950/40 backdrop-blur-md p-2 sm:px-4 sm:py-2 rounded-3xl sm:rounded-full border border-white/30 shadow-xl w-full max-w-2xl transition-all focus-within:border-white/70")
+      
+      div(class="relative inline-block w-full sm:w-auto")
+        input(type="hidden" name="modo" id="input-modo" value=(modoSeleccionado || 'todo'))
 
-        main(class='mx-auto p-4 flex flex-col items-center')
-                form(action="/explorar" method="GET" class="flex items-center gap-2 bg-black/20 p-2 rounded-full border border-white/30 backdrop-blur-sm ")
-                        input(type="text" name="keyword" placeholder="Buscar en publicaciones..." class="bg-transparent border-none outline-none text-white px-3 w-full text-xl")
-                        button(type="submit" class="text-white hover:text-blue-300 cursor-pointer px-2") 
-                                i(class="fa-solid fa-magnifying-glass")
+        button#btn-modo-seleccionado(
+          type="button" 
+          class="flex items-center justify-between gap-2 bg-blue-900/60 text-white text-xs font-bold rounded-full px-3.5 py-2 border border-white/20 outline-none cursor-pointer hover:bg-blue-800/80 transition-colors w-full sm:w-auto shadow-sm"
+      )
+          span#texto-modo
+            if modoSeleccionado === 'texto'
+              | Texto
+            else if modoSeleccionado === 'etiqueta'
+              | Etiqueta
+            else
+              | General
+          i(class="fa-solid fa-chevron-down text-[10px] text-white/70 transition-transform duration-200" id="flecha-modo")
 
-        block publicaciones      
-        +publicaciones(usuario)
-
-                if etiquetasGuardadas && etiquetasGuardadas.length > 0
-                        div(class="flex flex-wrap gap-2 mt-2")
-                                p(class="text-xs text-white/70 w-full font-semibold") Filtrar por etiquetas:
-                                        each tag in etiquetasGuardadas
-                                                a(href=`/explorar?tag=${tag.nombre}` class="text-xs font-semibold text-blue-100 bg-blue-600/40 px-3 py-1.5 rounded-full hover:bg-blue-500 cursor-pointer transition-colors border border-blue-400/30 drop-shadow-md") 
-                                                | ##{tag.nombre}
-                        div(class="mb-8 text-center mt-6")
-                                if palabraBuscada
-                                        h2(class='text-sm text-blue-900 font-bold drop-shadow-md bg-white/40 px-6 py-2 rounded-full inline-block') Resultados para: "#{palabraBuscada}"
-                                else
-                                        h2(class='text-sm text-blue-900 font-bold drop-shadow-md bg-white/40 px-6 py-2 rounded-full inline-block') Explorando todas las publicaciones
-                else
-                        div(class="bg-white/20 p-10 rounded-3xl text-center shadow-lg mt-10 border-white border")
-                                p(class='text-white text-2xl font-semibold ') No se encontraron publicaciones que coincidan con la busqueda.
-                                p(class='text-white/80 mt-2') Probá buscando con otras palabras.
+        div#menu-modo(class="hidden absolute left-0 mt-2 bg-blue-950/95 backdrop-blur-md border border-white/20 rounded-2xl shadow-xl z-50 min-w-[170px] p-1.5 space-y-1")
+          button(type="button" class="modo-btn flex items-center w-full px-3 py-2 text-xs font-bold text-white hover:bg-blue-800/80 rounded-xl transition-colors cursor-pointer" data-modo="todo") 
+            i(class="fa-solid fa-compass text-blue-300 text-xs mr-2.5")
+            | General
+          button(type="button" class="modo-btn flex items-center w-full px-3 py-2 text-xs font-bold text-white hover:bg-blue-800/80 rounded-xl transition-colors cursor-pointer" data-modo="texto") 
+            i(class="fa-solid fa-font text-blue-300 text-xs mr-2.5")
+            | Por Texto
+          button(type="button" class="modo-btn flex items-center w-full px-3 py-2 text-xs font-bold text-white hover:bg-blue-800/80 rounded-xl transition-colors cursor-pointer" data-modo="etiqueta") 
+            i(class="fa-solid fa-hashtag text-blue-300 text-xs mr-2.5")
+            | Por Etiqueta
 
 
+      div(class="flex items-center gap-2 w-full px-2")
+        input(
+          name="keyword" 
+          value=palabraBuscada
+          placeholder="¿Qué estás buscando?..." 
+          class="bg-transparent border-none outline-none text-white placeholder-white/60 w-full text-sm font-medium"
+        )
+        if palabraBuscada
+          a(href="/explorar" class="text-white/60 hover:text-white text-xs mr-1" title="Limpiar búsqueda")
+            i(class="fa-solid fa-xmark")
+      button(type="submit" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-5 py-2.5 rounded-full transition-all active:scale-95 cursor-pointer shadow-md shrink-0 w-full sm:w-auto")
+        i(class="fa-solid fa-magnifying-glass text-white text-sm shrink-0 p-0.5 mr-2")
+        span Buscar
+
+    div(class="mb-4 text-center")
+      if palabraBuscada
+        - const etiquetaModo = modoSeleccionado === 'etiqueta' ? 'en etiquetas' : modoSeleccionado === 'texto' ? 'en texto' : 'en general'
+        h2(class="text-xs sm:text-sm text-white font-bold bg-white/20 backdrop-blur-md px-5 py-2 rounded-t-none-full border border-white/30 shadow-sm inline-flex items-center gap-2")
+          i(class="fa-solid fa-filter text-blue-300 text-xs")
+          span Resultados #{etiquetaModo} para: "#{palabraBuscada}"
+      else
+        h2(class="text-xs sm:text-sm text-white/90 font-bold bg-white/10 backdrop-blur-md px-5 py-2 rounded-b-lg border-b border-r border-l border-white/20 0 border-t-none shadow-sm inline-flex items-center gap-2")
+          i(class="fa-solid fa-compass text-blue-300 text-xs")
+          span Viendo todas las publicaciones
+
+  if publicaciones && publicaciones.length > 0
+    div(class="w-full")
+      +publicaciones(usuario)
+  else
+    div(class="bg-white/10 backdrop-blur-md border border-white/30 p-10 rounded-3xl text-center max-w-md mx-auto shadow-xl text-white mt-4")
+      div(class="w-16 h-16 bg-white/10 border border-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white text-2xl")
+        i(class="fa-solid fa-magnifying-glass text-white/60")
+      h3(class="text-lg font-black mb-1") Sin coincidencias
+      if palabraBuscada
+        p(class="text-xs text-white/80 font-medium") No se encontraron publicaciones para "#{palabraBuscada}".
+      else
+        p(class="text-xs text-white/80 font-medium") Todavía no hay publicaciones registradas.
+      p(class="text-xs text-white/60 mt-1") Probá buscando con otro término o cambiando el filtro.
+
+    
+  script(src="/explorar.js")

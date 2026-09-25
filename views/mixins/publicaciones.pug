@@ -14,47 +14,58 @@ mixin publicaciones(usuario)
                                 else 
                                     p(class="vertical-text font-black text-gray-400 tracking-widest text-xs uppercase" style="writing-mode: vertical-rl; transform: rotate(180deg);") @anonimo
 
-                            div(class="bg-slate-950/5 overflow-hidden relative group h-auto w-[50vw]")
+                            div(class=(publis.imagenes && publis.imagenes.length > 1 ? "overflow-hidden relative group w-[500px] h-[500px] bg-transparent shrink-0" : "relative shrink-0 flex items-center justify-center bg-white"))
                                 if publis.imagenes && publis.imagenes.length > 0
                                     div(class="flex transition-transform duration-500 ease-in-out h-full" id=`slider-${publis.id}`)
                                         each image in publis.imagenes
-                                            div(class="min-w-full h-full flex items-center justify-center bg-black/5" data-imgid=image.id data-promedio=(image.promedio || '0.0') data-votousuario=image.votoUsuario)
-                                                img(src=image.src class="w-auto h-auto object-contain max-w-[50vw] max-h-[70vh]")
-                                    if publis.imagenes && publis.imagenes.length > 1
-                                        button(class="absolute left-3 top-1/2 -translate-y-1/2 bg-slate-900/40 hover:bg-slate-900/70 backdrop-blur-xs text-white w-9 h-9 flex items-center justify-center rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-all z-10 shadow-md" onclick=`cambiarFoto('${publis.id}', -1)`) 
-                                            i(class="fa-solid fa-chevron-left text-xs")
-                                        button(class="absolute right-3 top-1/2 -translate-y-1/2 bg-slate-900/40 hover:bg-slate-900/70 backdrop-blur-xs text-white w-9 h-9 flex items-center justify-center rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-all z-10 shadow-md" onclick=`cambiarFoto('${publis.id}', 1)`) 
-                                            i(class="fa-solid fa-chevron-right text-xs")
-
+                                            div(class=(publis.imagenes.length > 1 ? "min-w-full w-full h-full shrink-0 flex items-center justify-center bg-transparent" : "flex items-center justify-center bg-white") data-imgid=image.id data-promedio=(image.promedio || '0.0') data-votousuario=image.votoUsuario)
+                                                img(
+                                                    src=image.src 
+                                                    class=(publis.imagenes.length > 1 ? "max-h-full max-w-full object-contain block select-none" : "max-h-[550px] w-auto max-w-[50vw] block select-none")
+                                                    alt=publis.title
+                                                )
+                                if publis.imagenes && publis.imagenes.length > 1
+                                    button(class="absolute left-3 top-1/2 -translate-y-1/2 bg-slate-900/40 hover:bg-slate-900/70 backdrop-blur-xs text-white w-9 h-9 flex items-center justify-center rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-all z-10 shadow-md" onclick=`cambiarFoto('${publis.id}', -1)`) 
+                                        i(class="fa-solid fa-chevron-left text-xs")
+                                    button(class="absolute right-3 top-1/2 -translate-y-1/2 bg-slate-900/40 hover:bg-slate-900/70 backdrop-blur-xs text-white w-9 h-9 flex items-center justify-center rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-all z-10 shadow-md" onclick=`cambiarFoto('${publis.id}', 1)`)
+                                        i(class="fa-solid fa-chevron-right text-xs")
                             div(class="shrink-0 w-80 p-6 flex flex-col justify-between bg-white/50 border-l border-white/40")
                                 div 
                                     h3(class='font-black text-xl text-blue-950 tracking-tight leading-snug drop-shadow-xs')= publis.title
                                     p(class="text-xs text-gray-600 mt-2 leading-relaxed")= publis.description
+                                    
+                                    if publis.Etiquetas && publis.Etiquetas.length > 0
+                                        div(class="flex flex-wrap gap-1.5 mt-2.5 ")
+                                        each tag in publis.Etiquetas
+                                            a(
+                                                href=`/explorar?modo=etiqueta&keyword=${tag.nombre}` 
+                                                class="mr-1 text-[11px] font-semibold text-black bg-blue-600/30 hover:bg-blue-600/60 px-2.5 py-0.5 rounded-full border border-blue-400/20 backdrop-blur-sm  inline-flex items-center gap-0.5"
+                                            )= `#${tag.nombre}`
 
                                 if publis.comments_allowed
                                     p(class='text-xs font-black text-blue-950 uppercase tracking-wider mt-4 mb-2 flex items-center gap-1.5')
-                                        i(class="fa-solid fa-comments text-blue-600")
+                                        i(class="fa-regular fa-comments text-blue-600")
                                         | Comentarios
 
                                     div(class='max-h-60 overflow-y-auto space-y-2 mb-3 pr-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-blue-400' id=`contenedor-comentarios-${publis.id}`)
                                         if publis.imagenes && publis.imagenes.length > 0
                                             each image, index in publis.imagenes
                                                 div(id=`lista-comentarios-${image.id}` class=(index === 0 ? 'block space-y-2' : 'hidden space-y-2'))
-                                                    if publis.comentarios && publis.comentarios.length > 0
-                                                        each comentario in publis.comentarios
+                                                    if image.comentarios && image.comentarios.length > 0
+                                                        each comentario in image.comentarios
                                                             div(class='p-2.5 bg-white/70 backdrop-blur-xs border border-white/80 rounded-xl shadow-xs flex justify-between items-start gap-2 hover:bg-white/90 transition-all' id=`comentario-${comentario.id}`)
                                                                 div(class='flex-1')
                                                                     if comentario.Usuario
                                                                         p(class='text-blue-600 font-bold text-xs') @#{comentario.Usuario.username}
                                                                     else
                                                                         p(class='text-gray-400 italic text-xs') Usuario eliminado
-                                                                    span(class='text-xs text-gray-800 font-medium break-words leading-relaxed')= comentario.texto
+                                                                    span(class='text-xs text-gray-800 font-medium wrap-break-words leading-relaxed')= comentario.texto
                                                                 
                                                                 if usuario && comentario.UsuarioId !== usuario.id
                                                                     button(type="button" class="btn-denunciar-comentario text-gray-400 hover:text-red-500 transition-colors p-1 cursor-pointer" data-id=comentario.id title="Denunciar comentario")
                                                                         i(class="fa-regular fa-flag text-xs")
                                                     else    
-                                                        div(class="p-4 bg-white/30 rounded-xl border border-white/40 text-center")
+                                                        div(class="p-4 rounded-xl  text-center")
                                                             p(class='text-xs font-bold text-gray-600 sin-comentarios uppercase tracking-wider') Sin comentarios
                                                             p(class='text-xs text-gray-500 mt-0.5') Sé el primero en comentar...
                                     
@@ -75,22 +86,19 @@ mixin publicaciones(usuario)
                                     div(class="flex items-center justify-between gap-3")
                                         button(type="button" class='flex-1 bg-blue-600 hover:bg-blue-700 text-white font-black text-xs py-2 px-3 rounded-xl shadow-md transition-all active:scale-95 uppercase tracking-wider' ) Me interesa
                                         div(class="flex items-center gap-3 text-lg")
-                                            button(class="group text-red-500 hover:text-red-600 transition-transform active:scale-90 cursor-pointer p-1") 
-                                                i(class="fa-regular fa-heart group-hover:hidden")
-                                                i(class="fa-solid fa-heart hidden group-hover:inline")
                                             button(type="button"  class="btn-guardar-coleccion text-blue-500 hover:text-blue-600 transition-transform active:scale-90 cursor-pointer p-1.5" data-publi-id=publis.id title="Guardar en colección")
                                                 i(class="fa-regular fa-bookmark text-base")
 
                         if publis.imagenes && publis.imagenes.length > 0
-                            div(class="bg-white/80 backdrop-blur-md p-3 pt-7 -mt-5 rounded-b-2xl shadow-lg w-max px-6 text-center border border-white/60 relative z-10 transition-all hover:translate-y-0.5 hover:shadow-xl")
+                            div(class="bg-transparent backdrop-blur-md p-3 pt-7 -mt-5 rounded-b-2xl shadow-lg w-max px-6 text-center border border-white/60 relative z-10 transition-all hover:translate-y-0.5 hover:shadow-xl")
                                 div.valoracion(id="caja-estrellas-"+publis.id class="flex items-center justify-center gap-1.5" data-id=publis.imagenes[0].id data-elegido="0")
                                     each num in [1, 2, 3, 4, 5]
-                                        if num <= publis.imagenes[0].votoUsuario
+                                        if num <= (publis.imagenes[0].votoUsuario || Math.round(publis.imagenes[0].promedio || 0))
                                             i.fa-solid.fa-star(class="text-amber-400 cursor-pointer text-base transition-transform hover:scale-110" data-valor=num onclick=`enviarValoracion('${publis.imagenes[0].id}',${num}, '${publis.id}')`) 
                                         else    
                                             i.fa-regular.fa-star(class="text-amber-400 cursor-pointer text-base transition-transform hover:scale-110" data-valor=num onclick=`enviarValoracion('${publis.imagenes[0].id}', ${num}, '${publis.id}')`)    
 
-                                    span(id="promedio-"+publis.imagenes[0].id class="text-xs font-black text-blue-950 ml-2 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full shadow-inner promedio-span") #{publis.imagenes[0].promedio || '0.0'}
+                                    span(id="promedio-"+publis.imagenes[0].id class="text-xl font-black text-white ml-2 bg-transparent  py-0.5 promedio-span") #{publis.imagenes[0].promedio || '0.0'}
 
         div#modal-denuncia-comentario(class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4")
             div(class="bg-white/95 backdrop-blur-md border border-white/70 p-6 rounded-3xl max-w-md w-full shadow-2xl")

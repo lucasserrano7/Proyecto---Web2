@@ -5,6 +5,10 @@ import { Imagen } from "../models/Imagen.js";
 import { Comentarios } from "../models/comentarios.js";
 import { Valoracion } from "../models/valoracion.js";
 import Seguidores from "../models/seguidor.js";
+import sharp from "sharp";
+import multer from "multer";
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 const perfil = express.Router();
 
@@ -26,12 +30,18 @@ perfil.get("/user/:id", async (req, res) => {
     if (perfilUsuario.foto_de_perfil) {
       const bufferFoto = Buffer.isBuffer(perfilUsuario.foto_de_perfil)
         ? perfilUsuario.foto_de_perfil
-        : Buffer.from(perfilUsuario.foto_de_perfil.data || perfilUsuario.foto_de_perfil);
+        : Buffer.from(
+            perfilUsuario.foto_de_perfil.data || perfilUsuario.foto_de_perfil,
+          );
       fotoPerfilSrc = `data:image/webp;base64,${bufferFoto.toString("base64")}`;
     }
 
-    const constSeguidores = await Seguidores.count({ where: { seguido_id: id } });
-    const constSeguidos = await Seguidores.count({ where: { seguidor_id: id } });
+    const constSeguidores = await Seguidores.count({
+      where: { seguido_id: id },
+    });
+    const constSeguidos = await Seguidores.count({
+      where: { seguidor_id: id },
+    });
 
     const publicaciones = await publicacion.findAll({
       where: { UsuarioId: perfilUsuario.id },
@@ -66,8 +76,9 @@ perfil.get("/user/:id", async (req, res) => {
               const bufferCrudo = Buffer.isBuffer(image)
                 ? image
                 : Buffer.from(image.data || image);
-              
-              const base64 = "data:image/webp;base64," + bufferCrudo.toString("base64");
+
+              const base64 =
+                "data:image/webp;base64," + bufferCrudo.toString("base64");
 
               let votoUsuario = 0;
               if (idUsuario) {
@@ -86,7 +97,7 @@ perfil.get("/user/:id", async (req, res) => {
                 comentarios: imgInstancia.comentarios || [],
                 votoUsuario,
               };
-            })
+            }),
           );
 
           publi.comentarios = publi.imagenes[0].comentarios || [];
@@ -96,7 +107,7 @@ perfil.get("/user/:id", async (req, res) => {
         }
 
         return publi;
-      })
+      }),
     );
 
     let yaLoSigo = false;
@@ -125,6 +136,46 @@ perfil.get("/user/:id", async (req, res) => {
       titulo: "Error en el perfil",
       mensaje: "No se pudo cargar la información del usuario.",
     });
+  }
+});
+perfil.post("/user/editar", upload.single("avatar"), async (req, res) => {
+  try {
+    if (!req.session.usuario) {
+      return res.status(401).json({ success: false, message: "No autorizado" });
+    }
+
+    const { username } = req.body;
+    const usuarioId = req.session.usuario.id;
+    const usuario = await Usuario.findByPk(usuarioId);
+
+    if (!usuario) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Usuario no encontrado" });
+    }
+
+    usuario.username = username.trim();
+    if (req.file) {
+      const webpBuffer = await sharp(req.file.buffer)
+        .resize(300, 300, { fit: "cover" })
+        .toFormat("webp", { quality: 80 })
+        .toBuffer();
+
+      usuario.foto_de_perfil = webpBuffer;
+    }
+
+    await usuario.save();
+    req.session.usuario.username = usuario.username;
+
+    return res.json({
+      success: true,
+      message: "Perfil actualizado correctamente",
+    });
+  } catch (error) {
+    console.error("Error al editar perfil:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Error interno del servidor" });
   }
 });
 

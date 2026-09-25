@@ -1,191 +1,212 @@
 block metadata 
-
-    script(src="https://cdn.tailwindcss.com")
+  script(src="https://cdn.tailwindcss.com")
 
 block contenido
-    div#bg_subir(class="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center p-4  bg-black/30 hidden")
+  div#bg_subir(class="fixed inset-0 backdrop-blur-md z-50 flex items-center justify-center p-4 bg-slate-950/70 hidden transition-all duration-300")
 
-        div(class="relative w-full max-w-2xl")
+    div(class="relative w-full max-w-2xl bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-2xl p-6 sm:p-8 max-h-[92vh] overflow-y-auto text-white")
 
-            button#btn_cerrar(class="absolute top-4 right-4 text-white/60 hover:text-red-500 hover:font-bold text-xl cursor-pointer z-10 hover:bg-white/10 rounded-full w-10 h-10 items-center justify-center") ✕
+      button#btn_cerrar(type="button" class="absolute top-5 right-5 text-white/70 hover:text-white hover:bg-white/20 rounded-2xl w-9 h-9 flex items-center justify-center transition-all cursor-pointer border border-white/20 active:scale-90")
+        i(class="fa-solid fa-xmark text-sm")
 
-            form#form_publi(action="/p" method="POST" autocomplete='off'  class='flex flex-col gap-2.5 m-auto p-10 md:p-20 bg-blue-900/20 backdrop-blur-xl border-2 border-white/10 rounded-xl shadow-2xl')
+      div(class="mb-6 flex items-center gap-3")
+       div
+          h3(class="text-xl font-black tracking-tight drop-shadow-sm") Nueva Publicación
+          p(class="text-xs text-white/60 font-medium") Compartí tu fotografía con la comunidad de Fotaza
 
-                input(type="text" name="title"  placeholder="Título de la publicacion" class='border-white border-2 rounded-md p-1 text-white peer w-full bg-gray-900/60 py-2 outline-none focus:border-white transition-colors')
+      form#form_publi(action="/p" method="POST" autocomplete="off" class="flex flex-col gap-4")
 
-                textarea(name="descripcion" placeholder="Descripción" class='border-white border-2 rounded-md p-1 text-white peer w-full bg-gray-900/60 py-2 outline-none focus:border-white transition-colors')
+        div(class="flex flex-col gap-1.5")
+          label(class="text-[11px] font-black uppercase tracking-wider text-white/80") Título
+          input(
+            type="text" 
+            name="title" 
+            placeholder="Dale un título a tu foto..." 
+            class="w-full bg-white/10 border border-white/20 rounded-2xl px-4 py-2.5 text-sm text-white placeholder-white/40 outline-none focus:border-blue-400 focus:bg-white/15 transition-all shadow-inner"
+          )
 
-                input(type="text" name="etiquetas" placeholder="Etiquetas (ej: Viajes, Paisaje)" class='border-white border-2 rounded-md p-1 text-white peer w-full bg-gray-900/60 py-2 outline-none focus:border-white transition-colors')
+        div(class="flex flex-col gap-1.5")
+          label(class="text-[11px] font-black uppercase tracking-wider text-white/80") Descripción
+          textarea(
+            name="descripcion" 
+            rows="3"
+            placeholder="Contá la historia detrás del disparo, cámara o técnica utilizada..." 
+            class="w-full bg-white/10 border border-white/20 rounded-2xl px-4 py-2.5 text-sm text-white placeholder-white/40 outline-none focus:border-blue-400 focus:bg-white/15 transition-all resize-none shadow-inner"
+          )
 
-                div(class="flex flex-col gap-3")
-                    label(class="flex items-center gap-2 cursor-pointer text-gray-200 hover:text-white")
-                        input(type="checkbox" name="comentarios" checked class="w-4 h-4 rounded border-gray-400 bg-gray-800 text-blue-600 focus:ring-blue-500")
-                        span Permitir comentarios
-                
-                    label(class="flex items-center gap-2 cursor-pointer text-gray-200 hover:text-white")
-                        input(type="checkbox" id='tieneCopy' name="tieneCopy" class="w-4 h-4 rounded border-gray-400 bg-gray-800 text-blue-600/60 focus:ring-blue-500")
-                        span Tiene copyrigth
-                div(id="divMarcaAgua" class="mt-1")
-                    span(class='text-white font-bold') Marca de agua:
-                    input(type="text" id='textoMarcaAgua' name="textoMarcaAgua" disabled placeholder="Ej: @TuUsuario" class="w-full bg-gray-900/50 border border-gray-500 text-white placeholder-gray-400 rounded-md p-2 text-sm focus:outline-none focus:border-blue-500")
+        div(class="flex flex-col gap-1.5")
+          label(class="text-[11px] font-black uppercase tracking-wider text-white/80 flex items-center justify-between")
+            span Etiquetas
+            span(class="text-[10px] text-white/50 normal-case font-medium") Separadas por comas
+          div(class="relative")
+            span(class="absolute left-4 top-2.5 text-blue-300 font-bold text-sm") #
+            input(
+              type="text" 
+              name="etiquetas" 
+              placeholder="naturaleza, retrato, atardecer" 
+              class="w-full bg-white/10 border border-white/20 rounded-2xl pl-8 pr-4 py-2.5 text-sm text-white placeholder-white/40 outline-none focus:border-blue-400 focus:bg-white/15 transition-all shadow-inner"
+            )
 
+        div(class="grid grid-cols-1 sm:grid-cols-2 gap-3 py-1")
+          label(class="flex items-center gap-3 p-3 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/15 cursor-pointer transition-all shadow-sm")
+            input(type="checkbox" name="comentarios" checked class="w-4 h-4 rounded-md accent-blue-600 bg-white/20 border-white/30 cursor-pointer")
+            div(class="text-xs")
+              span(class="font-bold block text-white") Permitir comentarios
+              span(class="text-[10px] text-white/60") Deja que opinen de tu foto
 
-                label(for="img" class='w-max cursor-pointer py-2 px-4 rounded-md text-sm font-semibold bg-white/10 text-white hover:bg-white/20 transition-colors ') Elegir imagenes
-                input#img(type="file" name="img" multiple hidden) 
-                div#container_preview(class='flex flex-wrap gap-4 mt-4')
-                    img#preview(src="", alt="preview" class="hidden w-50 h-50 object-cover rounded-lg border-2 border-white/30 mt-4 shadow-lg transition-all")
-                    textarea#imgBase64(name="imgBase64" hidden) 
+          label(class="flex items-center gap-3 p-3 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/15 cursor-pointer transition-all shadow-sm")
+            input(type="checkbox" id="tieneCopy" name="tieneCopy" class="w-4 h-4 rounded-md accent-blue-600 bg-white/20 border-white/30 cursor-pointer")
+            div(class="text-xs")
+              span(class="font-bold block text-white") Marca de agua
+              span(class="text-[10px] text-white/60") Protege los derechos de autor
 
-                input#subir(type='submit' value='Publicar' class='w-full cursor-pointer border-2 border-white/30 rounded-md py-3 text-white bg-white/10 backdrop-blur-md hover:text-green-600/80 hover:bg-green-400/20 hover:border-green-600/50 transition-all text-xl font-bold tracking-widest shadow-lg mt-4')
+        div#divMarcaAgua(class="flex flex-col gap-1.5 transition-all")
+          label(class="text-[11px] font-black uppercase tracking-wider text-white/80") Texto de Marca de Agua
+          input(
+            type="text" 
+            id="textoMarcaAgua" 
+            name="textoMarcaAgua" 
+            disabled 
+            placeholder="Ej: @TuUsuario o © Tu Nombre" 
+            class="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5 text-sm text-white placeholder-white/30 outline-none focus:border-blue-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-inner"
+          )
 
-    script. 
-        console.log("Script de imágenes cargado correctamente");
-        const fileInput = document.getElementById('img');
-        const previewContainer = document.getElementById('container_preview');
-        const formularioPubli = document.getElementById('form_publi');
-        const form = document.forms[0];
+        div(class="flex flex-col gap-2 pt-2")
+          label(
+            for="img" 
+            class="w-full flex flex-col items-center justify-center p-5 rounded-2xl border-2 border-dashed border-white/30 bg-white/5 hover:bg-white/10 hover:border-blue-400 transition-all cursor-pointer group shadow-sm text-center"
+          )
+            i(class="fa-solid fa-images text-2xl text-white/60 group-hover:text-blue-300 group-hover:scale-110 transition-all mb-2")
+            span(class="text-xs font-bold uppercase tracking-wider text-white") Seleccionar fotografías
+            span(class="text-[11px] text-white/50 mt-0.5") Podés elegir una o varias imágenes
 
-        const arregloImg = [];
-        console.log("Elementos capturados:", { fileInput, previewContainer, formularioPubli });
+          input#img(type="file" name="img" multiple hidden)
+          
+          div#container_preview(class="flex flex-wrap gap-3 mt-1 empty:hidden")
+            img#preview(src="" alt="preview" class="hidden")
+            textarea#imgBase64(name="imgBase64" hidden)
 
-        fileInput.addEventListener('change', (e) =>{
-            console.log("Seleccionaste imágenes nuevas");
-            const archivos = e.target.files;
+        input#subir(
+          type="submit" 
+          value="Publicar Fotografía" 
+          class="w-full cursor-pointer bg-blue-600 hover:bg-blue-500 border border-white/30 text-white font-black py-3 rounded-2xl transition-all text-sm uppercase tracking-wider shadow-lg active:scale-98 mt-3"
+        )
 
-            for (let i = 0 ; i < archivos.length; i++){
-                const archivo= archivos[i];
+  script.
+    const fileInput = document.getElementById('img');
+    const previewContainer = document.getElementById('container_preview');
+    const formularioPubli = document.getElementById('form_publi');
+    const arregloImg = [];
 
-                const reader = new FileReader();
-                reader.onload = () => {
-                    const imagen = {
-                        src: reader.result,
-                        name: archivo.name
-                    }
-                arregloImg.push(imagen);
-                console.log(" Imagen agregada al array. Total:", arregloImg.length);
+    fileInput.addEventListener('change', (e) => {
+      const archivos = e.target.files;
+      for (let i = 0; i < archivos.length; i++) {
+        const archivo = archivos[i];
+        const reader = new FileReader();
 
-                const divWrapper = document.createElement('div');
-                divWrapper.className = 'relative inline-block mt-4';
+        reader.onload = () => {
+          arregloImg.push({ src: reader.result, name: archivo.name });
 
-                divWrapper.dataset.name = archivo.name;
+          const divWrapper = document.createElement('div');
+          divWrapper.className = 'relative inline-block w-24 h-24 rounded-2xl overflow-hidden border border-white/40 shadow-md group';
+          divWrapper.dataset.name = archivo.name;
 
-                const imgNode = document.createElement('img');
-                imgNode.src = reader.result;
-                imgNode.className = 'w-32 max-h-32 object-cover rounded-lg border-2 border-white/30 shadow-lg';
+          const imgNode = document.createElement('img');
+          imgNode.src = reader.result;
+          imgNode.className = 'w-full h-full object-cover';
 
+          const btnDelete = document.createElement('button');
+          btnDelete.type = 'button';
+          btnDelete.innerHTML = '<i class="fa-solid fa-xmark text-[10px]"></i>';
+          btnDelete.className = 'absolute top-1.5 right-1.5 bg-red-500/80 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center shadow-md cursor-pointer transition-all border border-white/40';
+          btnDelete.onclick = () => {
+            const index = arregloImg.findIndex(img => img.name === archivo.name);
+            if (index !== -1) arregloImg.splice(index, 1);
+            divWrapper.remove();
+          };
 
-                const btnDelete = document.createElement('button');
-                btnDelete.type = 'button';
-                btnDelete.innerHTML = '✕';
-                btnDelete.className = 'absolute -top-2 -right-2 bg-white/40 text-red-500 hover:text-white hover:font-bold text-xl cursor-pointer z-10 hover:bg-red-500  rounded-full w-6 h-6 flex items-center justify-center font-bold shadow-md cursor-pointer transition-colors';
-                btnDelete.onclick = () => {
-                    const index = arregloImg.findIndex(img => img.name === archivo.name);
-                    if (index !== -1){
-                        arregloImg.splice(index, 1);
-                        console.log("Imagen borrada. Quedan:", arregloImg.length);
-                    }
-                        divWrapper.remove();
-                    };
+          divWrapper.appendChild(imgNode);
+          divWrapper.appendChild(btnDelete);
+          previewContainer.appendChild(divWrapper);
+        };
+        reader.readAsDataURL(archivo);
+      }
+      fileInput.value = '';
+    });
 
-                divWrapper.appendChild(imgNode);
-                divWrapper.appendChild(btnDelete);
+    document.addEventListener('DOMContentLoaded', () => {
+      const checkCpy = document.getElementById('tieneCopy');
+      const inputMarcaAgua = document.getElementById('textoMarcaAgua');
 
-                previewContainer.appendChild(divWrapper);
-            };
+      checkCpy.addEventListener('change', (e) => {
+        if (e.target.checked) {
+          inputMarcaAgua.disabled = false;
+          inputMarcaAgua.classList.remove('bg-white/5', 'border-white/10');
+          inputMarcaAgua.classList.add('bg-white/10', 'border-white/20');
+          inputMarcaAgua.focus();
+        } else {
+          inputMarcaAgua.disabled = true;
+          inputMarcaAgua.value = '';
+          inputMarcaAgua.classList.remove('bg-white/10', 'border-white/20');
+          inputMarcaAgua.classList.add('bg-white/5', 'border-white/10');
+        }
+      });
+    });
 
-                reader.readAsDataURL(archivo);
-            }
-            fileInput.value = '';
-        });
+    formularioPubli.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const inputTitle = formularioPubli.querySelector('[name="title"]');
+      const labelImg = formularioPubli.querySelector('label[for="img"]');
 
-        document.addEventListener('DOMContentLoaded',()=>{
-            const checkCpy = document.getElementById('tieneCopy');
-            const inputMarcaAgua = document.getElementById('textoMarcaAgua');
+      inputTitle.classList.remove('border-red-500', 'ring-2', 'ring-red-400');
+      labelImg.classList.remove('border-red-500', 'bg-red-500/20');
 
-            checkCpy.addEventListener('change',(e)=>{
-              if(e.target.checked){
-                inputMarcaAgua.disabled = false;
-                inputMarcaAgua.focus();
-              } else{
-                inputMarcaAgua.disabled = true;
-                inputMarcaAgua.value = '';
-              } 
-            });
+      const formdata = new FormData(formularioPubli);
+      const txtTitle = formdata.get('title') ? formdata.get('title').trim() : '';
+      const txtDesc = formdata.get('descripcion') ? formdata.get('descripcion').trim() : '';
+      const checked = formdata.get('comentarios') === 'on';
+      const tieneCopy = formdata.get('tieneCopy') === 'on';
+      const txtMarcaAgua = formdata.get('textoMarcaAgua') ? formdata.get('textoMarcaAgua').trim() : '';
 
-        });
+      let tieneError = false;
+      if (!txtTitle) {
+        inputTitle.classList.add('border-red-500', 'ring-2', 'ring-red-400');
+        tieneError = true;
+      }
+      if (arregloImg.length === 0) {
+        labelImg.classList.add('border-red-500', 'bg-red-500/20');
+        tieneError = true;
+      }
+      if (tieneError) return;
 
+      const etiquetasInput = formdata.get('etiquetas');
+      const arrayEtiquetas = etiquetasInput
+        ? etiquetasInput.split(',').map(e => e.trim().toLowerCase()).filter(e => e !== '')
+        : [];
 
-        formularioPubli.addEventListener('submit', (e) => {
-            e.preventDefault();
-            console.log("Iniciando validacion de titulo y fotos...");
+      const bodtoSend = {
+        title: txtTitle,
+        descripcion: txtDesc,
+        comments_allowed: checked,
+        tieneCopy: tieneCopy,
+        textoMarcaAgua: txtMarcaAgua,
+        img: arregloImg,
+        etiquetas: arrayEtiquetas,
+        fech: new Date().toLocaleTimeString(),
+      };
 
-            const inputTitle = formularioPubli.querySelector('[name="title"]');
-            const labelImg = formularioPubli.querySelector('label[for="img"]');
-
-            inputTitle.classList.remove('border-red-500', 'focus:border-red-500');
-            inputTitle.classList.add('border-white/50', 'focus:border-white');
-
-            labelImg.classList.remove('border-red-500', 'border-2', 'bg-red-500/20');
-            labelImg.classList.add('bg-white/10');
-
-            
-            const formdata = new FormData(formularioPubli);
-            const txtTitle = formdata.get('title') ? formdata.get('title').trim() : '';
-            const txtDesc = formdata.get('descripcion') ? formdata.get('descripcion').trim() : '';
-            const checked = formdata.get('comentarios') === 'on';
-            const tieneCopy = formdata.get('tieneCopy') === 'on';
-            const txtMarcaAgua = formdata.get('textoMarcaAgua') ? formdata.get('textoMarcaAgua').trim() : '';
-
-            let tieneError = false;
-
-            if (!txtTitle) {
-                inputTitle.classList.remove('border-white/50', 'focus:border-white');
-                inputTitle.classList.add('border-red-500', 'focus:border-red-500');
-                tieneError = true;
-            }
-
-            if (arregloImg.length === 0) {
-                labelImg.classList.remove('bg-white/10');
-                labelImg.classList.add('border-2', 'border-red-500', 'bg-red-500/20');
-                tieneError = true;
-            }
-
-            if (tieneError) {
-                console.log("Envio cancelado: Faltan campos obligatorios");
-                return;
-            }
-
-            const etiquetasInput = formdata.get('etiquetas');
-            const arrayEtiquetas = etiquetasInput ? etiquetasInput.split(',').map(e => e.trim().toLowerCase()).filter(e => e !== '') : [];
-
-            const bodtoSend = {
-                title: txtTitle,
-                descripcion: txtDesc,
-                comments_allowed: checked,
-                tieneCopy: tieneCopy,
-                textoMarcaAgua: txtMarcaAgua,
-                img: arregloImg,
-                etiquetas: arrayEtiquetas,
-                fech: new Date().toLocaleTimeString(),
-            };
-
-            console.log("Paquete listo y validado. Enviando:", bodtoSend);
-
-            fetch(formularioPubli.action, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'same-origin',
-                body: JSON.stringify(bodtoSend)
-            })
-            .then(response => {
-                console.log("Respuesta del servidor:", response.status);
-                if (response.ok) {
-                    window.location.href = '/index?subido=true';
-                } else {
-                    console.error('Error al enviar publicacion en el servidor');
-                }
-            })
-            .catch(err => console.error('Error general:', err));
-        });
+      fetch(formularioPubli.action, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify(bodtoSend)
+      })
+      .then(response => {
+        if (response.ok) {
+          window.location.href = '/index?subido=true';
+        } else {
+          alert('Ocurrió un error al procesar la publicación.');
+        }
+      })
+      .catch(err => console.error('Error general:', err));
+    });
