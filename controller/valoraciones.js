@@ -55,19 +55,35 @@ valoraciones.post("/valoraciones", async (req, res) => {
             Valoracion.sequelize.fn("AVG", Valoracion.sequelize.col("puntaje")),
             "promedio",
           ],
+          [
+            Valoracion.sequelize.fn("COUNT", Valoracion.sequelize.col("id")),
+            "cantidad",
+          ],
         ],
         raw: true,
       });
       const promedio = resultado[0].promedio
         ? parseFloat(resultado[0].promedio).toFixed(1)
         : "0.0";
+      const cantidad = parseInt(resultado[0].cantidad) || 0;
 
       await Imagen.update({ promedio: promedio }, { where: { id: imagenId } });
+
+      // Actualizar también los campos de la publicación
+      const img = await Imagen.findByPk(imagenId);
+      if (img && img.publicacionId) {
+        await Publicacion.update(
+          { cantidad_valoraciones: cantidad, promedio_valoraciones: parseFloat(promedio) },
+          { where: { id: img.publicacionId } }
+        );
+      }
+
       return res
         .status(200)
         .json({
           message: "Valoración creada exitosamente",
           promedio: promedio,
+          cantidad: cantidad,
         });
     }
   } catch (error) {

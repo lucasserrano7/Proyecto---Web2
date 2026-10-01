@@ -1,6 +1,8 @@
 import { Comentarios } from "../models/comentarios.js";
 import { denunciaComentario } from "../models/denunciaComentario.js";
 import { Usuario } from "../models/usuario.js";
+import { Imagen } from "../models/Imagen.js";
+import { publicacion } from "../models/publicacion.js";
 import { authMiddleware } from "../middlewares/auth.js";
 import express from "express";
 
@@ -14,6 +16,17 @@ newComentarios.post("/new", async (req, res) => {
       });
     }
     const { ImagenId, texto } = req.body;
+
+    const imagen = await Imagen.findByPk(ImagenId, {
+      include: [{ model: publicacion, attributes: ["id", "comments_allowed"] }],
+    });
+    if (!imagen) {
+      return res.status(404).json({ message: "La imagen no existe." });
+    }
+    if (imagen.publicacion && !imagen.publicacion.comments_allowed) {
+      return res.status(403).json({ message: "Los comentarios están cerrados para esta publicación." });
+    }
+
     const nuevoComentario = await Comentarios.create({
       texto,
       fecha: new Date(),

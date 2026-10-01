@@ -50,8 +50,9 @@ denunciaPubli.post("/denunciar/publicacion/:id", async (req, res) => {
     await denunciaPublicacion.create({
       motivo: motivo,
       description: description,
-      publicacionId: publicacionId,
-      UsuarioId: usuarioId,
+      contenido: `Denuncia sobre publicación #${publicacionId}`,
+      publicacion_id: publicacionId,
+      denunciante_id: usuarioId,
     });
 
     const totalDenuncias = await denunciaPublicacion.count({
@@ -60,9 +61,9 @@ denunciaPubli.post("/denunciar/publicacion/:id", async (req, res) => {
       },
     });
 
-    const nuevoEstado = post.estado;
-    if (totalDenuncias > 3) {
-      let nuevoEstado = false;
+    let nuevoEstado = post.estado;
+    if (totalDenuncias >= 3) {
+      nuevoEstado = false;
     }
 
     await post.update({

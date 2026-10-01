@@ -170,6 +170,7 @@ newPubli.get("/index", async (req, res) => {
           id: imgInstancia.id,
           src: base64,
           promedio: imgInstancia.promedio,
+          cantidadValoraciones: imgInstancia.Valoracion ? imgInstancia.Valoracion.length : 0,
           comentarios:
             imgInstancia.Comentarios || imgInstancia.comentarios || [],
           votoUsuario: votoUsuario,

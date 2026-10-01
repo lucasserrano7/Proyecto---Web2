@@ -18,7 +18,7 @@ mixin publicaciones(usuario)
                                 if publis.imagenes && publis.imagenes.length > 0
                                     div(class="flex transition-transform duration-500 ease-in-out h-full" id=`slider-${publis.id}`)
                                         each image in publis.imagenes
-                                            div(class=(publis.imagenes.length > 1 ? "min-w-full w-full h-full shrink-0 flex items-center justify-center bg-transparent" : "flex items-center justify-center bg-white") data-imgid=image.id data-promedio=(image.promedio || '0.0') data-votousuario=image.votoUsuario)
+                                            div(class=(publis.imagenes.length > 1 ? "min-w-full w-full h-full shrink-0 flex items-center justify-center bg-transparent" : "flex items-center justify-center bg-white") data-imgid=image.id data-promedio=(image.promedio || '0.0') data-votousuario=image.votoUsuario data-cantidadvaloraciones=(image.cantidadValoraciones || 0))
                                                 img(
                                                     src=image.src 
                                                     class=(publis.imagenes.length > 1 ? "max-h-full max-w-full object-contain block select-none" : "max-h-[550px] w-auto max-w-[50vw] block select-none")
@@ -88,6 +88,9 @@ mixin publicaciones(usuario)
                                         div(class="flex items-center gap-3 text-lg")
                                             button(type="button"  class="btn-guardar-coleccion text-blue-500 hover:text-blue-600 transition-transform active:scale-90 cursor-pointer p-1.5" data-publi-id=publis.id title="Guardar en colección")
                                                 i(class="fa-regular fa-bookmark text-base")
+                                            if usuario && publis.Usuario && publis.Usuario.id !== usuario.id
+                                                button(type="button" class="btn-denunciar-publi text-gray-400 hover:text-red-500 transition-colors cursor-pointer p-1.5" data-publi-id=publis.id title="Denunciar publicación")
+                                                    i(class="fa-regular fa-flag text-base")
 
                         if publis.imagenes && publis.imagenes.length > 0
                             div(class="bg-transparent backdrop-blur-md p-3 pt-7 -mt-5 rounded-b-2xl shadow-lg w-max px-6 text-center border border-white/60 relative z-10 transition-all hover:translate-y-0.5 hover:shadow-xl")
@@ -99,6 +102,7 @@ mixin publicaciones(usuario)
                                             i.fa-regular.fa-star(class="text-amber-400 cursor-pointer text-base transition-transform hover:scale-110" data-valor=num onclick=`enviarValoracion('${publis.imagenes[0].id}', ${num}, '${publis.id}')`)    
 
                                     span(id="promedio-"+publis.imagenes[0].id class="text-xl font-black text-white ml-2 bg-transparent  py-0.5 promedio-span") #{publis.imagenes[0].promedio || '0.0'}
+                                    span(id="cantidad-val-"+publis.imagenes[0].id class="text-xs font-semibold text-white/70 ml-1 cantidad-val-span") (#{publis.imagenes[0].cantidadValoraciones || 0} votos)
 
         div#modal-denuncia-comentario(class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4")
             div(class="bg-white/95 backdrop-blur-md border border-white/70 p-6 rounded-3xl max-w-md w-full shadow-2xl")
@@ -121,4 +125,28 @@ mixin publicaciones(usuario)
                         textarea#textarea-desc-denuncia(class="w-full p-2.5 rounded-xl bg-white border border-gray-200 text-xs font-medium text-gray-800 outline-none focus:border-blue-500 h-20 shadow-xs resize-none" placeholder="Explicá brevemente el motivo...")
                     div(class="flex justify-end gap-2 mt-2")
                         button#btn-cancelar-modal-comentario(type="button" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold rounded-xl text-xs uppercase tracking-wider transition-all cursor-pointer") Cancelar
+                        button(type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-md active:scale-95 cursor-pointer") Enviar denuncia
+
+        //- Modal para denunciar publicaciones
+        div#modal-denuncia-publi(class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4")
+            div(class="bg-white/95 backdrop-blur-md border border-white/70 p-6 rounded-3xl max-w-md w-full shadow-2xl")
+                h4(class="text-lg font-black text-blue-950 mb-4 flex items-center gap-2")
+                    i(class="fa-solid fa-shield-halved text-red-600")
+                    | Denunciar Publicación
+                form#form-denunciar-publi(class="flex flex-col gap-4")
+                    input#input-denuncia-publi-id(type="hidden")
+                    div
+                        label(class="block text-xs font-black text-gray-700 uppercase tracking-wider mb-1.5") Motivo de la denuncia:
+                        select#select-motivo-denuncia-publi(required class="w-full p-2.5 rounded-xl bg-white border border-gray-200 text-xs font-semibold text-gray-800 outline-none focus:border-blue-500 shadow-xs")
+                            option(value="") Seleccioná un motivo
+                            option(value="Contenido ofensivo") Contenido ofensivo
+                            option(value="Spam") Spam o publicidad
+                            option(value="Derechos de autor") Violación de derechos de autor
+                            option(value="Contenido inapropiado") Contenido inapropiado
+                            option(value="Otro") Otro
+                    div
+                        label(class="block text-xs font-black text-gray-700 uppercase tracking-wider mb-1.5") Descripción de la denuncia:
+                        textarea#textarea-desc-denuncia-publi(required class="w-full p-2.5 rounded-xl bg-white border border-gray-200 text-xs font-medium text-gray-800 outline-none focus:border-blue-500 h-20 shadow-xs resize-none" placeholder="Describí el motivo de la denuncia...")
+                    div(class="flex justify-end gap-2 mt-2")
+                        button#btn-cancelar-modal-publi(type="button" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold rounded-xl text-xs uppercase tracking-wider transition-all cursor-pointer") Cancelar
                         button(type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-md active:scale-95 cursor-pointer") Enviar denuncia

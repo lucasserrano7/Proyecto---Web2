@@ -168,6 +168,72 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+
+  const modalDenunciaPubli = document.getElementById("modal-denuncia-publi");
+  const formDenunciaPubli = document.getElementById("form-denunciar-publi");
+  const inputPubliId = document.getElementById("input-denuncia-publi-id");
+  const selectMotivoPubli = document.getElementById("select-motivo-denuncia-publi");
+  const textareaDescPubli = document.getElementById("textarea-desc-denuncia-publi");
+  const btnCancelarPubli = document.getElementById("btn-cancelar-modal-publi");
+
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".btn-denunciar-publi");
+    if (!btn) return;
+
+    if (inputPubliId) inputPubliId.value = btn.dataset.publiId;
+    if (selectMotivoPubli) selectMotivoPubli.value = "";
+    if (textareaDescPubli) textareaDescPubli.value = "";
+
+    if (modalDenunciaPubli) {
+      modalDenunciaPubli.classList.remove("hidden");
+      modalDenunciaPubli.classList.add("flex");
+    }
+  });
+
+  if (btnCancelarPubli && modalDenunciaPubli) {
+    btnCancelarPubli.addEventListener("click", () => {
+      modalDenunciaPubli.classList.add("hidden");
+      modalDenunciaPubli.classList.remove("flex");
+    });
+  }
+
+  if (formDenunciaPubli) {
+    formDenunciaPubli.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const publiId = inputPubliId.value;
+      const motivo = selectMotivoPubli.value;
+      const description = textareaDescPubli.value.trim();
+
+      if (!motivo) return mostrarAlerta("Seleccioná un motivo.", "warning");
+      if (!description) return mostrarAlerta("Escribí una descripción.", "warning");
+
+      try {
+        const res = await fetch(`/denunciar/publicacion/${publiId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "same-origin",
+          body: JSON.stringify({ motivo, description }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          modalDenunciaPubli.classList.add("hidden");
+          modalDenunciaPubli.classList.remove("flex");
+          mostrarAlerta("¡Denuncia enviada! Será revisada por moderación.", "success");
+        } else {
+          mostrarAlerta(data.message || "No se pudo registrar la denuncia.", "error");
+        }
+      } catch (err) {
+        console.error("Error al enviar denuncia de publicación:", err);
+        mostrarAlerta("Error de conexión al procesar la denuncia.", "error");
+      }
+    });
+  }
 });
 
 const carruselImgs = {};
@@ -217,6 +283,13 @@ function cambiarFoto(publiId, dir) {
     if (spanPromedio) {
       spanPromedio.id = `promedio-${nuevaImagenId}`;
       spanPromedio.textContent = nuevoPromedio;
+    }
+
+    const nuevaCantidad = slideActual.getAttribute("data-cantidadvaloraciones") || "0";
+    const spanCantidad = cajaEstrellas.querySelector(".cantidad-val-span");
+    if (spanCantidad) {
+      spanCantidad.id = `cantidad-val-${nuevaImagenId}`;
+      spanCantidad.textContent = `(${nuevaCantidad} votos)`;
     }
   }
 
@@ -283,6 +356,15 @@ async function enviarValoracion(imagenId, puntaje, publiId) {
       if (promedioElem) {
         promedioElem.textContent = `${data.promedio}`;
       }
+
+      const cantidadElem = document.getElementById(`cantidad-val-${imagenId}`);
+      if (cantidadElem && data.cantidad !== undefined) {
+        cantidadElem.textContent = `(${data.cantidad} votos)`;
+      }
+      if (imagenSlide && data.cantidad !== undefined) {
+        imagenSlide.setAttribute("data-cantidadvaloraciones", data.cantidad);
+      }
+
       mostrarAlerta("¡Valoración enviada!", "success");
     }
   } catch (error) {

@@ -54,6 +54,10 @@ perfil.get("/user/:id", async (req, res) => {
               model: Comentarios,
               include: [{ model: Usuario, attributes: ["id", "username"] }],
             },
+            {
+              model: Valoracion,
+              attributes: ["UsuarioId", "puntaje"],
+            },
           ],
         },
         {
@@ -81,19 +85,16 @@ perfil.get("/user/:id", async (req, res) => {
                 "data:image/webp;base64," + bufferCrudo.toString("base64");
 
               let votoUsuario = 0;
-              if (idUsuario) {
-                const valoracionUsuario = await Valoracion.findOne({
-                  where: { UsuarioId: idUsuario, ImagenId: imgInstancia.id },
-                });
-                if (valoracionUsuario) {
-                  votoUsuario = valoracionUsuario.puntaje;
-                }
+              if (idUsuario && imgInstancia.Valoracions) {
+                const val = imgInstancia.Valoracions.find(v => v.UsuarioId === idUsuario);
+                if (val) votoUsuario = val.puntaje;
               }
 
               return {
                 id: imgInstancia.id,
                 src: base64,
                 promedio: imgInstancia.promedio,
+                cantidadValoraciones: imgInstancia.Valoracions ? imgInstancia.Valoracions.length : 0,
                 comentarios: imgInstancia.comentarios || [],
                 votoUsuario,
               };

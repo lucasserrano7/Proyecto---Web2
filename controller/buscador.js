@@ -56,6 +56,10 @@ export const buscador = async (req, res) => {
               model: Comentarios,
               include: [{ model: Usuario, attributes: ["id", "username"] }],
             },
+            {
+              model: Valoracion,
+              attributes: ["UsuarioId", "puntaje"],
+            },
           ],
         },
         {
@@ -82,17 +86,16 @@ export const buscador = async (req, res) => {
                 "data:image/webp;base64," + bufferCrudo.toString("base64");
 
               let votoUsuario = 0;
-              if (idUsuario) {
-                const valoracion = await Valoracion.findOne({
-                  where: { UsuarioId: idUsuario, ImagenId: imgDB.id },
-                });
-                if (valoracion) votoUsuario = valoracion.puntaje;
+              if (idUsuario && imgDB.Valoracions) {
+                const val = imgDB.Valoracions.find(v => v.UsuarioId === idUsuario);
+                if (val) votoUsuario = val.puntaje;
               }
 
               return {
                 id: imgDB.id,
                 src: base64,
                 promedio: imgDB.promedio || "0.0",
+                cantidadValoraciones: imgDB.Valoracions ? imgDB.Valoracions.length : 0,
                 comentarios: imgDB.comentarios || [],
                 votoUsuario,
               };
