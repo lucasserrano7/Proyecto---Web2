@@ -142,7 +142,7 @@ newPubli.get("/index", async (req, res) => {
       ],
       order: [
         ["createdAt", "DESC"],
-        [Imagen, "id", "ASC"]
+        [Imagen, "id", "ASC"],
       ],
     });
 
@@ -170,7 +170,9 @@ newPubli.get("/index", async (req, res) => {
           id: imgInstancia.id,
           src: base64,
           promedio: imgInstancia.promedio,
-          cantidadValoraciones: imgInstancia.Valoracion ? imgInstancia.Valoracion.length : 0,
+          cantidadValoraciones: imgInstancia.Valoracion
+            ? imgInstancia.Valoracion.length
+            : 0,
           comentarios:
             imgInstancia.Comentarios || imgInstancia.comentarios || [],
           votoUsuario: votoUsuario,
@@ -178,6 +180,15 @@ newPubli.get("/index", async (req, res) => {
       });
 
       publi.comentarios = publi.imagenes[0]?.comentarios || [];
+
+      const totalVotos = publi.imagenes.reduce(
+        (acc, img) => acc + (img.cantidadValoraciones || 0),
+        0,
+      );
+      const promedioPubli = publi.imagenes[0]?.promedio || 0;
+
+      publi.votos = totalVotos;
+      publi.promedio = promedioPubli;
 
       return publi;
     });
@@ -193,6 +204,14 @@ newPubli.get("/index", async (req, res) => {
     const todasEtiquetas = await Etiquetas.findAll({
       attributes: ["nombre"],
     });
+
+    publis.sort((a, b) => {
+      const scoreA = a.promedio * 0.7 + Math.log10(a.votos + 1) * 0.3;
+      const scoreB = b.promedio * 0.7 + Math.log10(b.votos + 1) * 0.3;
+      return scoreB - scoreA;
+    });
+
+    
 
     res.render("index", {
       publicaciones: publis,
@@ -220,11 +239,9 @@ newPubli.post("/p/:id/cerrar_comentarios", async (req, res) => {
       return res.status(404).json({ message: "Publicacion no encontrada." });
     }
     if (post.UsuarioId !== IdUsuario) {
-      return res
-        .status(403)
-        .json({
-          message: "No tenes los permisos para modificar esta publicaion.",
-        });
+      return res.status(403).json({
+        message: "No tenes los permisos para modificar esta publicaion.",
+      });
     }
 
     post.comments_allowed = false;

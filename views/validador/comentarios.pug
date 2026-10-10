@@ -4,17 +4,12 @@ block contenido
   div(class="max-w-5xl w-full mx-auto p-6 my-6")
     div(class="bg-white/70 backdrop-blur-md p-6 rounded-3xl shadow-xl border border-white/40 mb-8 flex flex-col md:flex-row justify-between items-center gap-4")
       div
-        h1(class="text-2xl font-black text-blue-950 flex items-center gap-2")
-          i(class="fa-solid fa-shield-halved text-blue-600")
-          | Panel de Moderación: Comentarios
-        p(class="text-sm text-gray-600 mt-1") Revisá los reportes de la comunidad y decidí qué acciones tomar.
+        h1(class="text-2xl font-black text-blue-950 flex items-center gap-2") Panel de Validador : Comentarios
 
       div(class="flex gap-2 bg-white/40 p-1.5 rounded-2xl border border-white/50")
         a(href="/validador/validar" class="px-4 py-1.5 text-sm font-semibold text-gray-600 hover:text-blue-900 rounded-xl transition-all")
-          i(class="fa-solid fa-image mr-1.5")
           | Publicaciones
         a(href="/validador/comentarios" class="px-4 py-1.5 text-sm font-bold bg-blue-600 text-white rounded-xl shadow-md")
-          i(class="fa-solid fa-comments mr-1.5")
           | Comentarios (#{comentarios ? comentarios.length : 0})
 
     if comentarios && comentarios.length > 0

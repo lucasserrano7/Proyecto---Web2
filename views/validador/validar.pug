@@ -1,0 +1,25 @@
+extends ../layout 
+
+block contenido
+  div(style="max-width: 800px; margin: 40px auto; padding: 20px; background: rgba(255,255,255,0.9); border-radius: 12px; color: #333;")
+    h1(style="font-size: 24px; font-weight: bold; margin-bottom: 20px;") Validar Publicaciones
+
+    if publicaciones && publicaciones.length > 0
+      div(style="display: flex; flex-direction: column; gap: 15px;")
+        each p in publicaciones
+          div(style="border: 1px solid #ddd; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;")
+            div(style="display: flex; align-items: center; gap: 15px;")
+              if p.miniatura
+                img(src=p.miniatura alt="Foto" style="width: 60px; height: 60px; object-fit: cover; border-radius: 6px;")
+              div
+                p(style="margin: 0; font-weight: bold;")
+                  | Publicación ID: 
+                  a(href=`/p/${p.id}` style="color: #2563eb;")= p.title
+                p(style="margin: 4px 0; font-size: 14px;")
+                  | Usuario que la subió: 
+                  a(href=`/user/${p.usuario.id}` style="color: #2563eb; font-weight: 600;") @#{p.usuario.username}
+
+            div
+              a(href=`/validador/validar/${p.id}` style="background: #2563eb; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px;") Validar
+    else
+      p(style="color: #666; font-style: italic;") No hay publicaciones pendientes de validación.

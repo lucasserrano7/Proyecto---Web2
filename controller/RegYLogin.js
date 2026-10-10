@@ -35,9 +35,14 @@ RegYLogin.get("/login", (req, res) => {
 RegYLogin.post("/login", async (req, res) => {
   const { email, contrasenia } = req.body;
   try {
+
+
     const usuario = await Usuario.findOne({ where: { email } });
     if (!usuario) {
       return res.status(404).json({success: false,  error: "El Email no existe." });
+    }
+     if(usuario.estado === false){
+      return res.status(403).json({success: false,  error: "Usuario bloqueado." });
     }
 
     const claveDB = String(usuario.password).trim();
@@ -49,6 +54,8 @@ RegYLogin.post("/login", async (req, res) => {
     console.log("Usuario logeado:", usuario);
 
     let token = jwt.sign({ id: usuario.id }, clave , { expiresIn: "24h" });
+
+   
     
     req.session.usuario={
       id: usuario.id,

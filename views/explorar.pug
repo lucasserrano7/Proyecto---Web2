@@ -57,12 +57,10 @@ block contenido
     div(class="mb-4 text-center")
       if palabraBuscada
         - const etiquetaModo = modoSeleccionado === 'etiqueta' ? 'en etiquetas' : modoSeleccionado === 'texto' ? 'en texto' : 'en general'
-        h2(class="text-xs sm:text-sm text-white font-bold bg-white/20 backdrop-blur-md px-5 py-2 rounded-t-none-full border border-white/30 shadow-sm inline-flex items-center gap-2")
-          i(class="fa-solid fa-filter text-blue-300 text-xs")
+        h2(class="text-xs sm:text-sm text-white/90 font-bold bg-white/10 backdrop-blur-md px-5 py-2 rounded-b-lg border-b border-r border-l border-white/20 0 border-t-none shadow-sm inline-flex items-center gap-2")
           span Resultados #{etiquetaModo} para: "#{palabraBuscada}"
       else
         h2(class="text-xs sm:text-sm text-white/90 font-bold bg-white/10 backdrop-blur-md px-5 py-2 rounded-b-lg border-b border-r border-l border-white/20 0 border-t-none shadow-sm inline-flex items-center gap-2")
-          i(class="fa-solid fa-compass text-blue-300 text-xs")
           span Viendo todas las publicaciones
 
   if publicaciones && publicaciones.length > 0
@@ -70,14 +68,12 @@ block contenido
       +publicaciones(usuario)
   else
     div(class="bg-white/10 backdrop-blur-md border border-white/30 p-10 rounded-3xl text-center max-w-md mx-auto shadow-xl text-white mt-4")
-      div(class="w-16 h-16 bg-white/10 border border-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white text-2xl")
-        i(class="fa-solid fa-magnifying-glass text-white/60")
-      h3(class="text-lg font-black mb-1") Sin coincidencias
+  
       if palabraBuscada
-        p(class="text-xs text-white/80 font-medium") No se encontraron publicaciones para "#{palabraBuscada}".
+        p(class="text-md text-white/80 font-medium") No se encontraron publicaciones para "#{palabraBuscada}"
       else
-        p(class="text-xs text-white/80 font-medium") Todavía no hay publicaciones registradas.
-      p(class="text-xs text-white/60 mt-1") Probá buscando con otro término o cambiando el filtro.
+        p(class="text-md text-white/80 font-medium") Todavía no hay publicaciones registradas.
+      p(class="text-md text-white/60 mt-1") Probá buscando con otro término o cambiando el filtro.
 
     
   script(src="/explorar.js")
