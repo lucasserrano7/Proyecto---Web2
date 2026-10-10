@@ -14,6 +14,8 @@ import { Imagen } from "./models/Imagen.js";
 import { Valoracion } from "./models/valoracion.js";
 import { notificacion } from "./models/notificacion.js";
 import { Coleccion } from "./models/coleccion.js";
+import { Seguidores } from "./models/seguidor.js";
+import { meInteresaRt } from "./controller/meInteresa.js";
 import RegyLogin from "./controller/RegYLogin.js";
 import newPubli from "./controller/newPubli.js";
 import newComentarios from "./controller/comentarios.js";
@@ -127,6 +129,7 @@ app.get("/explorar", buscador);
 //RUTAS PRIVADAS (Despues de inicio de sesion)
 app.use(authMiddleware);
 app.use("/seguidores", seguidoresRt);
+app.use("/me-interesa", meInteresaRt);
 app.get("/notis", (req, res) => {
   res.render("notis");
 });

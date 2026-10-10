@@ -442,3 +442,19 @@ window.mostrarAlerta = (mensaje, tipo = "info") => {
     setTimeout(() => toast.remove(), 300);
   }, 4200);
 };
+document.addEventListener("click", async (e) => {
+  const btn = e.target.closest(".btn-me-interesa");
+  if (!btn) return;
+
+  const res = await fetch(`/me-interesa/${btn.dataset.publiId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" }
+  });
+  const data = await res.json();
+
+  if (data.success) {
+    window.location.href = `/me-interesa/chat/${data.conversacionId}`;
+  } else {
+    alert(data.message);
+  }
+});

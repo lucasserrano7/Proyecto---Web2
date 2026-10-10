@@ -13,6 +13,8 @@ import { publicacion } from "./publicacion.js";
 import { Seguidores } from "./seguidor.js";
 import { Usuario } from "./usuario.js";
 import { Valoracion } from "./valoracion.js";
+import { MeInteresa } from "./meInteresa.js";
+import { Mensaje } from "./mensaje.js";
 import { combineTableNames } from "sequelize/lib/utils";
 
 // To create a One-To-One relationship, the hasOne and belongsTo associations are used together;
@@ -107,19 +109,27 @@ Usuario.hasMany(Valoracion);
 Usuario.hasMany(notificacion);
 notificacion.belongsTo(Usuario);
 
-Usuario.belongsToMany(Usuario, {
-  as: "ChatMeInteresa",
-  through: "chat",
-  foreignKey: "comprador_id",
-  otherKey: "vendedor_id",
-});
+Usuario.hasMany(MeInteresa, { foreignKey: "comprador_id", as: "Intereses" });
+MeInteresa.belongsTo(Usuario, { foreignKey: "comprador_id", as: "Comprador" });
+
+Usuario.hasMany(MeInteresa, { foreignKey: "vendedor_id", as: "Ventas" });
+MeInteresa.belongsTo(Usuario, { foreignKey: "vendedor_id", as: "Vendedor" });
+
+publicacion.hasMany(MeInteresa, { foreignKey: "publicacion_id" });
+MeInteresa.belongsTo(publicacion, { foreignKey: "publicacion_id" });
+
+MeInteresa.hasMany(Mensaje, { foreignKey: "conversacion_id" });
+Mensaje.belongsTo(MeInteresa, { foreignKey: "conversacion_id" });
+
+Usuario.hasMany(Mensaje, { foreignKey: "emisor_id" });
+Mensaje.belongsTo(Usuario, { foreignKey: "emisor_id", as: "Emisor" });
 
 export async function connectDatabase() {
   try {
     await sequelize.authenticate(); // testear la conexión
     console.log(" [+] Conexión a la BdD establecida.");
 
-    // await sequelize.sync({ alter  : true , force: true }); // sincronizar los modelos con la BdD
+    await sequelize.sync({ alter  : true }); // sincronizar los modelos con la BdD
     console.log(" [+] sincronizado de modelos.");
   } catch (error) {
     console.error(" [x] No se pudo conectar a la BdD:", error);

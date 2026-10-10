@@ -1,0 +1,26 @@
+extends layout
+
+block contenido
+  div(style="max-width: 800px; margin: 40px auto; padding: 20px; background: rgba(255,255,255,0.9); border-radius: 12px; color: #333;")
+    h1(style="font-size: 24px; font-weight: bold; margin-bottom: 20px;") Mis Conversaciones (Me interesa)
+
+    if conversaciones && conversaciones.length > 0
+      div(style="display: flex; flex-direction: column; gap: 15px;")
+        each c in conversaciones
+          div(style="border: 1px solid #ddd; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;")
+            div(style="display: flex; align-items: center; gap: 15px;")
+              if c.publicacion && c.publicacion.miniatura
+                img(src=c.publicacion.miniatura alt="Foto" style="width: 60px; height: 60px; object-fit: cover; border-radius: 6px;")
+              div
+                p(style="margin: 0; font-weight: bold;")
+                  | Publicación: 
+                  a(href=`/p/${c.publicacion.id}` style="color: #2563eb;")= c.publicacion.title
+                p(style="margin: 4px 0; font-size: 14px;")
+                  | Con: 
+                  a(href=`/user/${c.otroUsuario.id}` style="color: #2563eb; font-weight: 600;") @#{c.otroUsuario.username}
+                  span(style="margin-left: 8px; font-size: 12px; color: #666;") (#{c.rol})
+
+            div
+              a(href=`/me-interesa/chat/${c.id}` style="background: #2563eb; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px;") Ir al Chat
+    else
+      p(style="color: #666; font-style: italic;") No tenés ninguna conversación de "Me interesa" todavía.
