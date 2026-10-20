@@ -1,6 +1,7 @@
 import e from "express";
 import { Usuario } from "../models/usuario.js";
 import { Seguidores } from "../models/seguidor.js";
+import { notificacion } from "../models/notificacion.js";
 
 const seguidoresRt = e.Router();
 
@@ -14,6 +15,11 @@ export const seguimientoUsers = async (req, res) => {
 
     if (parseInt(creatorId) === idUsuario) {
       return res.status(400).json({ success: false, error: "No puedes seguirte a ti mismo" });
+    }
+
+    const usuarioSeguido = await Usuario.findByPk(creatorId);
+    if (!usuarioSeguido) {
+      return res.status(404).json({ success: false, error: "Usuario a seguir no encontrado" });
     }
     const ysSesiguen = await Seguidores.findOne({
       where: {
@@ -39,6 +45,14 @@ export const seguimientoUsers = async (req, res) => {
       await Seguidores.create({
         seguidor_id: idUsuario,
         seguido_id: creatorId,
+      });
+
+      await notificacion.create({
+        titulo: "Nuevo Seguidor",
+        mensaje: `${req.session.usuario.username} ha comenzado a seguirte.`,
+        fecha: new Date(),
+        leida: false,
+        UsuarioId: creatorId,
       });
 
       return res.status(200).json({ 

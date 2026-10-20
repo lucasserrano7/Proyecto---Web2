@@ -1,6 +1,8 @@
 import e from "express";
 import { Valoracion } from "../models/valoracion.js";
 import { Imagen } from "../models/Imagen.js";
+import { notificacion } from "../models/notificacion.js";
+import { Usuario } from "../models/usuario.js";
 import { publicacion as Publicacion } from "../models/publicacion.js";
 
 const valoraciones = e.Router();
@@ -9,12 +11,10 @@ valoraciones.post("/valoraciones", async (req, res) => {
   try {
     const { puntaje, imagenId } = req.body;
 
-    if (!req.session || !req.session.usuario) {
-      return res
-        .status(401)
-        .json({
-          message: "¡Tenes que iniciar sesión para poder valorar una imagen!",
-        });
+    if (!req.session?.usuario) {
+      return res.status(401).json({
+        message: "¡Tenés que iniciar sesión para poder valorar una imagen!",
+      });
     }
 
     const idUsuario = req.session.usuario.id;
@@ -22,75 +22,111 @@ valoraciones.post("/valoraciones", async (req, res) => {
     const img = await Imagen.findByPk(imagenId, {
       include: [{ model: Publicacion }],
     });
+
     if (!img) {
-      return res.status(404).json({ message: "La imagen no existe" });
+      return res.status(404).json({
+        message: "La imagen no existe",
+      });
     }
 
-    const Idautor = img.Publicacion ? img.Publicacion.UsuarioId : null;
+    const publicacionImagen = img.publicacion ?? img.Publicacion;
+    const Idautor = publicacionImagen?.UsuarioId ?? null;
 
-    if (Idautor === idUsuario) {
-      return res
-        .status(403)
-        .json({ message: "No podes valorar tus publicaciones." });
+    if (Idautor !== null && Number(Idautor) === Number(idUsuario)) {
+      return res.status(403).json({
+        message: "No podés valorar tus publicaciones.",
+      });
     }
+
     const valoracionExistente = await Valoracion.findOne({
-      where: { UsuarioId: idUsuario, ImagenId: imagenId },
+      where: {
+        UsuarioId: idUsuario,
+        ImagenId: imagenId,
+      },
     });
 
     if (valoracionExistente) {
-      return res
-        .status(400)
-        .json({ message: "Ya has valorado esta publicación" });
-    } else {
-      await Valoracion.create({
-        puntaje: puntaje,
-        UsuarioId: idUsuario,
-        ImagenId: imagenId,
+      return res.status(400).json({
+        message: "Ya has valorado esta publicación",
       });
-
-      const resultado = await Valoracion.findAll({
-        where: { ImagenId: imagenId },
-        attributes: [
-          [
-            Valoracion.sequelize.fn("AVG", Valoracion.sequelize.col("puntaje")),
-            "promedio",
-          ],
-          [
-            Valoracion.sequelize.fn("COUNT", Valoracion.sequelize.col("id")),
-            "cantidad",
-          ],
-        ],
-        raw: true,
-      });
-      const promedio = resultado[0].promedio
-        ? parseFloat(resultado[0].promedio).toFixed(1)
-        : "0.0";
-      const cantidad = parseInt(resultado[0].cantidad) || 0;
-
-      await Imagen.update({ promedio: promedio }, { where: { id: imagenId } });
-
-      // Actualizar también los campos de la publicación
-      const img = await Imagen.findByPk(imagenId);
-      if (img && img.publicacionId) {
-        await Publicacion.update(
-          { cantidad_valoraciones: cantidad, promedio_valoraciones: parseFloat(promedio) },
-          { where: { id: img.publicacionId } }
-        );
-      }
-
-      return res
-        .status(200)
-        .json({
-          message: "Valoración creada exitosamente",
-          promedio: promedio,
-          cantidad: cantidad,
-        });
     }
+
+    await Valoracion.create({
+      puntaje,
+      UsuarioId: idUsuario,
+      ImagenId: imagenId,
+    });
+
+if (Idautor !== null) {
+  const usuarioValorador = await Usuario.findByPk(idUsuario);
+
+  await notificacion.create({
+    titulo: "Nueva Valoración",
+    mensaje: `${usuarioValorador ? usuarioValorador.username : "Un usuario"} valoró tu publicación.`,
+    fecha: new Date(),
+    leida: false,
+    UsuarioId: Idautor,
+  });
+}
+
+    const resultado = await Valoracion.findAll({
+      where: { ImagenId: imagenId },
+      attributes: [
+        [
+          Valoracion.sequelize.fn(
+            "AVG",
+            Valoracion.sequelize.col("puntaje")
+          ),
+          "promedio",
+        ],
+        [
+          Valoracion.sequelize.fn(
+            "COUNT",
+            Valoracion.sequelize.col("id")
+          ),
+          "cantidad",
+        ],
+      ],
+      raw: true,
+    });
+
+    const promedio = resultado[0].promedio
+      ? parseFloat(resultado[0].promedio).toFixed(1)
+      : "0.0";
+
+    const cantidad = parseInt(resultado[0].cantidad) || 0;
+
+    await Imagen.update(
+      { promedio },
+      { where: { id: imagenId } }
+    );
+
+    const imga = await Imagen.findByPk(imagenId);
+
+    if (imga && imga.publicacionId) {
+      await Publicacion.update(
+        {
+          cantidad_valoraciones: cantidad,
+          promedio_valoraciones: parseFloat(promedio),
+        },
+        {
+          where: { id: imga.publicacionId },
+        }
+      );
+    }
+
+    return res.status(200).json({
+      message: "Valoración creada exitosamente",
+      promedio,
+      cantidad,
+    });
   } catch (error) {
     console.error("Error al crear la valoración:", error);
-    return res
-      .status(500)
-      .json({ message: "Error al crear la valoración", error: error.message });
+
+    return res.status(500).json({
+      message: "Error al crear la valoración",
+      error: error.message,
+    });
   }
 });
 

@@ -3,6 +3,7 @@ import { denunciaComentario } from "../models/denunciaComentario.js";
 import { Usuario } from "../models/usuario.js";
 import { Imagen } from "../models/Imagen.js";
 import { publicacion } from "../models/publicacion.js";
+import { notificacion } from "../models/notificacion.js";
 import { authMiddleware } from "../middlewares/auth.js";
 import express from "express";
 
@@ -33,6 +34,17 @@ newComentarios.post("/new", async (req, res) => {
       ImagenId,
       UsuarioId: req.session.usuario.id,
     });
+    const autorId = imagen.publicacion?.UsuarioId;
+    if(autorId !== req.session.usuario.id) {
+      await notificacion.create({
+        titulo: "Nuevo Comentario",
+        mensaje: `${req.session.usuario.username} comento tu publicación.`,
+        fecha: new Date(),
+        leida: false,
+        UsuarioId: autorId,
+      });
+    }
+
     const comentarioConUsuario = await Comentarios.findOne({
       where: { id: nuevoComentario.id },
       include: {

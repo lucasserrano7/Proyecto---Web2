@@ -57,7 +57,7 @@ denunciaPubli.post("/denunciar/publicacion/:id", async (req, res) => {
 
     const totalDenuncias = await denunciaPublicacion.count({
       where: {
-        publicacionId: publicacionId,
+        publicacion_id: publicacionId,
       },
     });
 

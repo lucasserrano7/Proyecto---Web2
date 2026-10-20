@@ -15,6 +15,7 @@ import { Valoracion } from "./models/valoracion.js";
 import { notificacion } from "./models/notificacion.js";
 import { Coleccion } from "./models/coleccion.js";
 import { Seguidores } from "./models/seguidor.js";
+import notisRT from "./controller/notificaciones.js";
 import { meInteresaRt } from "./controller/meInteresa.js";
 import RegyLogin from "./controller/RegYLogin.js";
 import newPubli from "./controller/newPubli.js";
@@ -39,21 +40,6 @@ const SequelizeStore = connectSessionSequelize(session.Store);
 const sessionStore = new SequelizeStore({
   db: sequelize,
 });
-app.set("trust proxy", 1);
-app.use(
-  session({
-    secret: process.env.SESSION_KEY,
-    store: sessionStore,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: true, // cunado se sube al servidor poner true
-      maxAge: 24 * 60 * 60 * 1000, //  un dia
-      httpOnly: true,
-      sameSite: "lax", //SSR
-    },
-  }),
-);
 app.set("trust proxy", 1);
 app.use(
   session({
@@ -130,9 +116,7 @@ app.get("/explorar", buscador);
 app.use(authMiddleware);
 app.use("/seguidores", seguidoresRt);
 app.use("/me-interesa", meInteresaRt);
-app.get("/notis", (req, res) => {
-  res.render("notis");
-});
+app.use("/notis", notisRT);
 app.get("/p", (req, res) => {
   res.render("nuevaPubli");
 });

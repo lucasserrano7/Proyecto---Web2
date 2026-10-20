@@ -1,0 +1,14 @@
+extends layout
+
+block contenido
+  h1 Mis Notificaciones
+
+  each noti in notificaciones
+    div(class= noti.leida ? "leida" : "no-leida")
+      strong= noti.titulo
+      p= noti.mensaje
+      small= noti.fecha
+      if !noti.leida
+        button(data-id=noti.id class="btn-leer") Marcar como leída
+  else
+    p No tenés notificacionesA
