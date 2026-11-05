@@ -129,8 +129,8 @@ export async function connectDatabase() {
     await sequelize.authenticate(); // testear la conexión
     console.log(" [+] Conexión a la BdD establecida.");
 
-    await sequelize.sync({ alter  : true }); // sincronizar los modelos con la BdD
-    console.log(" [+] sincronizado de modelos.");
+   // await sequelize.sync({}); // sincronizar los modelos con la BdD
+    //console.log(" [+] sincronizado de modelos.");
   } catch (error) {
     console.error(" [x] No se pudo conectar a la BdD:", error);
     throw error;

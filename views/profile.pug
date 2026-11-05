@@ -14,8 +14,6 @@ block contenido
       div(class="w-14 h-14 rounded-2xl overflow-hidden bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white font-black text-2xl shadow-inner shrink-0")
         if fotoPerfilSrc || (usuarioPerfil && (usuarioPerfil.avatar || usuarioPerfil.foto))
           img(src=(fotoPerfilSrc || usuarioPerfil.avatar || usuarioPerfil.foto) alt=usuarioPerfil.username class="w-full h-full object-cover")
-        else if usuarioPerfil && usuarioPerfil.username
-          span= usuarioPerfil.username.charAt(0).toUpperCase()
         else
           i(class="fa-solid fa-user text-lg text-white/80")
 
@@ -68,7 +66,6 @@ block contenido
     div#modal-editar-perfil(class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4")
       div(class="bg-white/95 backdrop-blur-md border border-white/70 p-6 rounded-3xl max-w-md w-full shadow-2xl animate-fade-in")
         h4(class="text-lg font-black text-blue-950 mb-4 flex items-center gap-2")
-          i(class="fa-solid fa-user-pen text-blue-600")
           | Editar Información
         
         form#form-editar-perfil(class="flex flex-col gap-4")
@@ -81,7 +78,6 @@ block contenido
                 img#preview-avatar(src="" class="w-full h-full object-cover hidden")
             
             label(for="input-avatar" class="cursor-pointer text-xs font-black text-blue-600 hover:text-blue-700 uppercase tracking-wider flex items-center gap-1.5 mt-1")
-              i(class="fa-solid fa-camera text-xs")
               span Cambiar foto
             input#input-avatar(type="file" name="avatar" accept="image/*" class="hidden")
 
@@ -98,5 +94,5 @@ block contenido
       +publicaciones(usuario)
   else
     div(class="bg-white/10 backdrop-blur-md rounded-3xl border border-white/30 p-12 text-center max-w-md mx-auto shadow-xl text-white mt-12")
-      h3(class="text-lg font-bold mb-1") Sin publicaciones aún
+      h3(class="text-lg font-bold mb-1") Sin publicaciones
       p(class="text-xs text-white/70 font-medium") Este usuario todavía no compartió ninguna foto.

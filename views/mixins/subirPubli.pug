@@ -11,8 +11,7 @@ block contenido
 
       div(class="mb-6 flex items-center gap-3")
        div
-          h3(class="text-xl font-black tracking-tight drop-shadow-sm") Nueva Publicación
-          p(class="text-xs text-white/60 font-medium") Compartí tu fotografía con la comunidad de Fotaza
+          h3(class="text-xl font-black tracking-tight drop-shadow-sm") Nueva Publicacion
 
       form#form_publi(action="/p" method="POST" autocomplete="off" class="flex flex-col gap-4")
 
@@ -37,14 +36,12 @@ block contenido
         div(class="flex flex-col gap-1.5")
           label(class="text-[11px] font-black uppercase tracking-wider text-white/80 flex items-center justify-between")
             span Etiquetas
-            span(class="text-[10px] text-white/50 normal-case font-medium") Separadas por comas
           div(class="relative")
-            span(class="absolute left-4 top-2.5 text-blue-300 font-bold text-sm") #
             input(
               type="text" 
               name="etiquetas" 
               placeholder="naturaleza, retrato, atardecer" 
-              class="w-full bg-white/10 border border-white/20 rounded-2xl pl-8 pr-4 py-2.5 text-sm text-white placeholder-white/40 outline-none focus:border-blue-400 focus:bg-white/15 transition-all shadow-inner"
+              class="w-full bg-white/10 border border-white/20 rounded-2xl px-4 pr-4 py-2.5 text-sm text-white placeholder-white/40 outline-none focus:border-blue-400 focus:bg-white/15 transition-all shadow-inner"
             )
 
         div(class="grid grid-cols-1 sm:grid-cols-2 gap-3 py-1")
@@ -52,13 +49,12 @@ block contenido
             input(type="checkbox" name="comentarios" checked class="w-4 h-4 rounded-md accent-blue-600 bg-white/20 border-white/30 cursor-pointer")
             div(class="text-xs")
               span(class="font-bold block text-white") Permitir comentarios
-              span(class="text-[10px] text-white/60") Deja que opinen de tu foto
 
           label(class="flex items-center gap-3 p-3 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/15 cursor-pointer transition-all shadow-sm")
             input(type="checkbox" id="tieneCopy" name="tieneCopy" class="w-4 h-4 rounded-md accent-blue-600 bg-white/20 border-white/30 cursor-pointer")
             div(class="text-xs")
               span(class="font-bold block text-white") Marca de agua
-              span(class="text-[10px] text-white/60") Protege los derechos de autor
+           
 
         div#divMarcaAgua(class="flex flex-col gap-1.5 transition-all")
           label(class="text-[11px] font-black uppercase tracking-wider text-white/80") Texto de Marca de Agua
@@ -67,7 +63,7 @@ block contenido
             id="textoMarcaAgua" 
             name="textoMarcaAgua" 
             disabled 
-            placeholder="Ej: @TuUsuario o © Tu Nombre" 
+            placeholder="Ej: @Usuario" 
             class="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5 text-sm text-white placeholder-white/30 outline-none focus:border-blue-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-inner"
           )
 
@@ -76,9 +72,8 @@ block contenido
             for="img" 
             class="w-full flex flex-col items-center justify-center p-5 rounded-2xl border-2 border-dashed border-white/30 bg-white/5 hover:bg-white/10 hover:border-blue-400 transition-all cursor-pointer group shadow-sm text-center"
           )
-            i(class="fa-solid fa-images text-2xl text-white/60 group-hover:text-blue-300 group-hover:scale-110 transition-all mb-2")
-            span(class="text-xs font-bold uppercase tracking-wider text-white") Seleccionar fotografías
-            span(class="text-[11px] text-white/50 mt-0.5") Podés elegir una o varias imágenes
+            span(class="text-xs font-bold uppercase tracking-wider text-white") Elegi tus foto.
+            
 
           input#img(type="file" name="img" multiple hidden)
           

@@ -59,6 +59,8 @@ RegYLogin.post("/login", async (req, res) => {
     
     req.session.usuario={
       id: usuario.id,
+      username: usuario.username,
+      rol: usuario.rol,
     };
     res.json({success: true, 
       message: 'Autenticacion existosa', 
@@ -115,5 +117,31 @@ RegYLogin.get("/revisarUsuario", async (req, res) => {
   const respuesta = await Usuario.revisarUsuario(usuario);
   res.json({ respuesta });
 });
+
+RegYLogin.get("/p/:id", async (req, res) => {
+  try {
+    const publicacion = await Publicacion.findByPk(req.params.id, {
+      include: [
+        { model: Imagen, include: [Comentarios] },
+        { model: Usuario, attributes: ["id", "username"] },
+      ],
+    });
+
+    if (!publicacion) return res.status(404).send("Publicación no encontrada");
+
+    const sesion = req.session.usuario;
+    const esDueno = sesion && sesion.id === publicacion.UsuarioId;
+    const esValidador = sesion && sesion.rol === "validador";
+    if (!publicacion.estado && !esDueno && !esValidador) {
+      return res.status(404).send("Publicación no encontrada");
+    }
+
+    res.render("publicacion", { publicacion, usuario: sesion });
+  } catch (error) {
+    console.error("Error en /p/:id:", error.message);
+    res.status(500).send("Error interno del servidor");
+  }
+});
+
 
 export default RegYLogin;
