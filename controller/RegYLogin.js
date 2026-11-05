@@ -33,29 +33,23 @@ RegYLogin.get("/login", (req, res) => {
 });
 
 RegYLogin.post("/login", async (req, res) => {
-  const { email, contrasenia } = req.body;
+  const email = String(req.body.email || "").trim().toLowerCase();
+  const contrasenia = String(req.body.contrasenia || "");
+
+  if(!email || !contrasenia){
+    return res.status(400).json({success: false, error: "Completa el Email y la Contraseña." });
+  }
   try {
 
 
     const usuario = await Usuario.findOne({ where: { email } });
-    if (!usuario) {
-      return res.status(404).json({success: false,  error: "El Email no existe." });
+    const estaOk = usuario && (await bcrypt.compare(contrasenia, String(usuario.contrasenia)));
+    if(!estaOk){
+      return res.status(401).json({success: false, error: "Email o contraseña incorrectos." });
     }
      if(usuario.estado === false){
       return res.status(403).json({success: false,  error: "Usuario bloqueado." });
     }
-
-    const claveDB = String(usuario.password).trim();
-    const claveEscrita = String(contrasenia).trim();
-    const passwordMatch = await bcrypt.compare(claveEscrita, claveDB);
-    if (!passwordMatch) {
-      return res.status(404).json({success: false,  error: "Contraseña  incorrecta." });
-    }
-    console.log("Usuario logeado:", usuario);
-
-    let token = jwt.sign({ id: usuario.id }, clave , { expiresIn: "24h" });
-
-   
     
     req.session.usuario={
       id: usuario.id,
@@ -63,8 +57,7 @@ RegYLogin.post("/login", async (req, res) => {
       rol: usuario.rol,
     };
     res.json({success: true, 
-      message: 'Autenticacion existosa', 
-      token: token });
+      message: 'Autenticacion existosa'});
 
 
   } catch (error) {
