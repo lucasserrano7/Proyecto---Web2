@@ -59,7 +59,7 @@ validadorRT.get(
 
       res.render("validador/validar", {
         titulo: "Panel de control",
-        publicacion: publicacionesRevision,
+        publicaciones: publicacionesRevision,
         usuario: req.session.usuario,
       });
     } catch (err) {
@@ -112,14 +112,14 @@ validadorRT.post(
     try {
       const publicacionId = req.params.id;
 
-      const post = await publicacion.findByPk(publicacionId, {
-        include: [{ model: Usuario }],
-      });
+      const post = await publicacion.findByPk(publicacionId);
 
       if (!post) {
         return res.status(404).json({ message: "Publicacion no encontrada." });
       }
-
+      if(!post.estado){
+        return res.status(409).json({ message: "La publicacion ya fue dada de baja." }); 
+      }
       post.estado = false;
       await post.save();
 

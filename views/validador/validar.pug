@@ -17,7 +17,7 @@ block contenido
                   a(href=`/p/${p.id}` style="color: #2563eb;")= p.title
                 p(style="margin: 4px 0; font-size: 14px;")
                   | Usuario que la subió: 
-                  a(href=`/user/${p.usuario.id}` style="color: #2563eb; font-weight: 600;") @#{p.usuario.username}
+                  a(href=`/user/${p.Usuario.id}` style="color: #2563eb; font-weight: 600;") @#{p.Usuario.username}
 
             div
               a(href=`/validador/validar/${p.id}` style="background: #2563eb; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px;") Validar

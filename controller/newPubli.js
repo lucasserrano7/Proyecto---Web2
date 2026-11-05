@@ -99,17 +99,18 @@ newPubli.post("/p", async (req, res) => {
   }
 });
 newPubli.get("/index", async (req, res) => {
+
   try {
     const idUsuario = req.session.usuario ? req.session.usuario.id : null;
 
-    let condicicionBusquedaPublis = {};
+    let condicionBusquedaPublis = {estado: true, eliminada: false};
 
     if (!idUsuario) {
-      condicicionBusquedaPublis.tieneCopy = false;
+      condicionBusquedaPublis.tieneCopy = false;
     }
 
     const publicaciones = await publicacion.findAll({
-      where: condicicionBusquedaPublis,
+      where: condicionBusquedaPublis,
       include: [
         {
           model: Usuario,
@@ -159,8 +160,8 @@ newPubli.get("/index", async (req, res) => {
           "data:image/jpeg;base64," + bufferCrudo.toString("base64");
 
         let votoUsuario = 0;
-        if (idUsuario && imgInstancia.Valoracion) {
-          const valoracion = imgInstancia.Valoracion.find(
+        if (idUsuario && imgInstancia.Valoracions) {
+          const valoracion = imgInstancia.Valoracions.find(
             (v) => v.UsuarioId === idUsuario,
           );
           if (valoracion) votoUsuario = valoracion.puntaje;
@@ -170,7 +171,7 @@ newPubli.get("/index", async (req, res) => {
           id: imgInstancia.id,
           src: base64,
           promedio: imgInstancia.promedio,
-          cantidadValoraciones: imgInstancia.Valoracion
+          cantidadValoraciones: imgInstancia.Valoracions
             ? imgInstancia.Valoracion.length
             : 0,
           comentarios:
@@ -258,4 +259,82 @@ newPubli.post("/p/:id/cerrar_comentarios", async (req, res) => {
   }
 });
 
+newPubli.post("/p/:id/borrar_publicacion", async (req, res) => {
+  try {
+    if (!req.session?.usuario) {
+      return res.status(401).json({ message: "Tenes que iniciar sesion." });
+    }
+    const publicacionID = req.params.id;
+    const IdUsuario = req.session.usuario.id;
+
+    const post = await publicacion.findByPk(publicacionID);
+
+    if (!post) {
+      return res.status(404).json({ message: "Publicacion no encontrada." });
+    }
+    if (post.UsuarioId !== IdUsuario) {
+      return res.status(403).json({
+        message: "No tenes los permisos para borrar esta publicacion.",
+      });
+    }
+
+    post.eliminada = true;
+    await post.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Publicacion borrada",
+    });
+  } catch (error) {
+    console.error("Error al borrar la publicacion", error);
+    return res.status(500).json({ message: "Error" });
+  }
+});
+newPubli.post("/p/:id/editar_publicacion", async (req, res) => {
+  try {
+    if (!req.session?.usuario) {
+      return res.status(401).json({ message: "Tenes que iniciar sesion." });
+    }
+    const publicacionID = req.params.id;
+    const IdUsuario = req.session.usuario.id;
+
+    const post = await publicacion.findByPk(publicacionID);
+
+    if (!post) {
+      return res.status(404).json({ message: "Publicacion no encontrada." });
+    }
+    if (post.UsuarioId !== IdUsuario) {
+      return res.status(403).json({
+        message: "No tenes los permisos para editar esta publicacion.",
+      });
+    }
+
+    const title = String(req.body.title || "").trim();
+    const description = String(req.body.description || "").trim();
+
+    if (title.length > 100 ) {
+    return res.status(400).json({
+      message: "El título no puede superar los 100 caracteres.",
+    });
+  }if (description.length > 1000 ) {
+    return res.status(400).json({
+      message: "La descripción no puede superar los 1000 caracteres.",
+    });
+  }
+
+   post.title = title;
+    post.description = description; 
+
+
+    await post.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Publicacion borrada",
+    });
+  } catch (error) {
+    console.error("Error al borrar la publicacion", error);
+    return res.status(500).json({ message: "Error" });
+  }
+});
 export default newPubli;

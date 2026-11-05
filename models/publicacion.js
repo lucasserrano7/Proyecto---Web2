@@ -43,6 +43,10 @@ publicacion.init(
     tieneCopy:{
       type: DataTypes.BOOLEAN,
     },
+    eliminada: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    }
 
 
   },
