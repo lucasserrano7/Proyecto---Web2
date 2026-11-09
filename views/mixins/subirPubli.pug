@@ -10,25 +10,28 @@ block contenido
         i(class="fa-solid fa-xmark text-sm")
 
       div(class="mb-6 flex items-center gap-3")
-       div
+        div
           h3(class="text-xl font-black tracking-tight drop-shadow-sm") Nueva Publicacion
 
-      form#form_publi(action="/p" method="POST" autocomplete="off" class="flex flex-col gap-4")
+      form#form_publi(action="/p" method="POST" autocomplete="off" novalidate class="flex flex-col gap-4")
 
         div(class="flex flex-col gap-1.5")
           label(class="text-[11px] font-black uppercase tracking-wider text-white/80") Título
           input(
             type="text" 
             name="title" 
+            maxlength="50"
             placeholder="Dale un título a tu foto..." 
             class="w-full bg-white/10 border border-white/20 rounded-2xl px-4 py-2.5 text-sm text-white placeholder-white/40 outline-none focus:border-blue-400 focus:bg-white/15 transition-all shadow-inner"
           )
+          p#err_title(class="hidden text-xs font-bold text-red-300 pl-1")
 
         div(class="flex flex-col gap-1.5")
           label(class="text-[11px] font-black uppercase tracking-wider text-white/80") Descripción
           textarea(
             name="descripcion" 
             rows="3"
+            maxlength="255"
             placeholder="Contá la historia detrás del disparo, cámara o técnica utilizada..." 
             class="w-full bg-white/10 border border-white/20 rounded-2xl px-4 py-2.5 text-sm text-white placeholder-white/40 outline-none focus:border-blue-400 focus:bg-white/15 transition-all resize-none shadow-inner"
           )
@@ -54,7 +57,6 @@ block contenido
             input(type="checkbox" id="tieneCopy" name="tieneCopy" class="w-4 h-4 rounded-md accent-blue-600 bg-white/20 border-white/30 cursor-pointer")
             div(class="text-xs")
               span(class="font-bold block text-white") Marca de agua
-           
 
         div#divMarcaAgua(class="flex flex-col gap-1.5 transition-all")
           label(class="text-[11px] font-black uppercase tracking-wider text-white/80") Texto de Marca de Agua
@@ -66,6 +68,7 @@ block contenido
             placeholder="Ej: @Usuario" 
             class="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5 text-sm text-white placeholder-white/30 outline-none focus:border-blue-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-inner"
           )
+          p#err_marca(class="hidden text-xs font-bold text-red-300 pl-1")
 
         div(class="flex flex-col gap-2 pt-2")
           label(
@@ -73,30 +76,78 @@ block contenido
             class="w-full flex flex-col items-center justify-center p-5 rounded-2xl border-2 border-dashed border-white/30 bg-white/5 hover:bg-white/10 hover:border-blue-400 transition-all cursor-pointer group shadow-sm text-center"
           )
             span(class="text-xs font-bold uppercase tracking-wider text-white") Elegi tus foto.
-            
 
           input#img(type="file" name="img" multiple hidden)
-          
+          p#err_img(class="hidden text-xs font-bold text-red-300 pl-1")
+
           div#container_preview(class="flex flex-wrap gap-3 mt-1 empty:hidden")
             img#preview(src="" alt="preview" class="hidden")
             textarea#imgBase64(name="imgBase64" hidden)
 
+        div#err_general(class="hidden p-3 rounded-2xl border border-red-400/50 bg-red-500/20 text-xs font-bold text-red-100")
+
         input#subir(
           type="submit" 
           value="Publicar Fotografía" 
-          class="w-full cursor-pointer bg-blue-600 hover:bg-blue-500 border border-white/30 text-white font-black py-3 rounded-2xl transition-all text-sm uppercase tracking-wider shadow-lg active:scale-98 mt-3"
+          class="w-full cursor-pointer bg-blue-600 hover:bg-blue-500 border border-white/30 text-white font-black py-3 rounded-2xl transition-all text-sm uppercase tracking-wider shadow-lg active:scale-98 mt-3 disabled:opacity-50 disabled:cursor-not-allowed"
         )
 
   script.
     const fileInput = document.getElementById('img');
     const previewContainer = document.getElementById('container_preview');
     const formularioPubli = document.getElementById('form_publi');
+    const botonSubir = document.getElementById('subir');
     const arregloImg = [];
+    const tiposOk = ['image/jpeg', 'image/png', 'image/webp'];
+    const clasesRojo = ['border-red-500', 'ring-2', 'ring-red-400'];
+
+    const mostrarError = (id, texto) => {
+      const el = document.getElementById(id);
+      el.textContent = texto;
+      el.classList.remove('hidden');
+    };
+
+    const ocultarError = (id) => {
+      const el = document.getElementById(id);
+      el.textContent = '';
+      el.classList.add('hidden');
+    };
+
+    const limpiarErrores = () => {
+      ['err_title', 'err_marca', 'err_img', 'err_general'].forEach(ocultarError);
+      formularioPubli.querySelector('[name="title"]').classList.remove(...clasesRojo);
+      formularioPubli.querySelector('[name="textoMarcaAgua"]').classList.remove(...clasesRojo);
+      formularioPubli.querySelector('label[for="img"]').classList.remove('border-red-500', 'bg-red-500/20');
+    };
+
+    formularioPubli.querySelector('[name="title"]').addEventListener('input', (e) => {
+      e.target.classList.remove(...clasesRojo);
+      ocultarError('err_title');
+    });
+
+    formularioPubli.querySelector('[name="textoMarcaAgua"]').addEventListener('input', (e) => {
+      e.target.classList.remove(...clasesRojo);
+      ocultarError('err_marca');
+    });
 
     fileInput.addEventListener('change', (e) => {
       const archivos = e.target.files;
+      const errores = [];
+      ocultarError('err_img');
+      formularioPubli.querySelector('label[for="img"]').classList.remove('border-red-500', 'bg-red-500/20');
+
       for (let i = 0; i < archivos.length; i++) {
         const archivo = archivos[i];
+
+        if (!tiposOk.includes(archivo.type)) {
+          errores.push('"' + archivo.name + '": formato no permitido (JPG, PNG o WebP).');
+          continue;
+        }
+        if (archivo.size > 5 * 1024 * 1024) {
+          errores.push('"' + archivo.name + '": pesa más de 5 MB.');
+          continue;
+        }
+
         const reader = new FileReader();
 
         reader.onload = () => {
@@ -126,6 +177,10 @@ block contenido
         };
         reader.readAsDataURL(archivo);
       }
+
+      if (errores.length > 0) {
+        mostrarError('err_img', errores.join(' '));
+      }
       fileInput.value = '';
     });
 
@@ -142,19 +197,20 @@ block contenido
         } else {
           inputMarcaAgua.disabled = true;
           inputMarcaAgua.value = '';
-          inputMarcaAgua.classList.remove('bg-white/10', 'border-white/20');
+          inputMarcaAgua.classList.remove('bg-white/10', 'border-white/20', ...clasesRojo);
           inputMarcaAgua.classList.add('bg-white/5', 'border-white/10');
+          ocultarError('err_marca');
         }
       });
     });
 
     formularioPubli.addEventListener('submit', (e) => {
       e.preventDefault();
-      const inputTitle = formularioPubli.querySelector('[name="title"]');
-      const labelImg = formularioPubli.querySelector('label[for="img"]');
+      limpiarErrores();
 
-      inputTitle.classList.remove('border-red-500', 'ring-2', 'ring-red-400');
-      labelImg.classList.remove('border-red-500', 'bg-red-500/20');
+      const inputTitle = formularioPubli.querySelector('[name="title"]');
+      const inputMarca = formularioPubli.querySelector('[name="textoMarcaAgua"]');
+      const labelImg = formularioPubli.querySelector('label[for="img"]');
 
       const formdata = new FormData(formularioPubli);
       const txtTitle = formdata.get('title') ? formdata.get('title').trim() : '';
@@ -164,12 +220,19 @@ block contenido
       const txtMarcaAgua = formdata.get('textoMarcaAgua') ? formdata.get('textoMarcaAgua').trim() : '';
 
       let tieneError = false;
-      if (!txtTitle) {
-        inputTitle.classList.add('border-red-500', 'ring-2', 'ring-red-400');
+      if (txtTitle.length < 3 || txtTitle.length > 50) {
+        inputTitle.classList.add(...clasesRojo);
+        mostrarError('err_title', 'El título debe tener entre 3 y 50 caracteres.');
+        tieneError = true;
+      }
+      if (tieneCopy && !txtMarcaAgua) {
+        inputMarca.classList.add(...clasesRojo);
+        mostrarError('err_marca', 'Escribí el texto de la marca de agua.');
         tieneError = true;
       }
       if (arregloImg.length === 0) {
         labelImg.classList.add('border-red-500', 'bg-red-500/20');
+        mostrarError('err_img', 'Subí al menos una imagen.');
         tieneError = true;
       }
       if (tieneError) return;
@@ -190,18 +253,25 @@ block contenido
         fech: new Date().toLocaleTimeString(),
       };
 
+      botonSubir.disabled = true;
+
       fetch(formularioPubli.action, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
         body: JSON.stringify(bodtoSend)
       })
-      .then(response => {
+      .then(async (response) => {
         if (response.ok) {
           window.location.href = '/index?subido=true';
-        } else {
-          alert('Ocurrió un error al procesar la publicación.');
+          return;
         }
+        const data = await response.json().catch(() => ({}));
+        mostrarError('err_general', data.message || 'Ocurrió un error al procesar la publicación.');
+        botonSubir.disabled = false;
       })
-      .catch(err => console.error('Error general:', err));
+      .catch(() => {
+        mostrarError('err_general', 'No se pudo conectar con el servidor. Intentá de nuevo.');
+        botonSubir.disabled = false;
+      });
     });

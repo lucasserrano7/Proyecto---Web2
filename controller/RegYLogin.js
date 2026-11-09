@@ -1,5 +1,8 @@
 import express from "express";
 import { Usuario } from "../models/usuario.js";
+import { publicacion } from "../models/publicacion.js";
+import { Imagen } from "../models/Imagen.js";
+import { Comentarios } from "../models/comentarios.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
@@ -43,7 +46,7 @@ RegYLogin.post("/login", async (req, res) => {
 
 
     const usuario = await Usuario.findOne({ where: { email } });
-    const estaOk = usuario && (await bcrypt.compare(contrasenia, String(usuario.contrasenia)));
+    const estaOk = usuario && (await bcrypt.compare(contrasenia, String(usuario.password)));
     if(!estaOk){
       return res.status(401).json({success: false, error: "Email o contraseña incorrectos." });
     }
@@ -109,31 +112,6 @@ RegYLogin.get("/revisarUsuario", async (req, res) => {
   const { usuario } = req.query;
   const respuesta = await Usuario.revisarUsuario(usuario);
   res.json({ respuesta });
-});
-
-RegYLogin.get("/p/:id", async (req, res) => {
-  try {
-    const publicacion = await Publicacion.findByPk(req.params.id, {
-      include: [
-        { model: Imagen, include: [Comentarios] },
-        { model: Usuario, attributes: ["id", "username"] },
-      ],
-    });
-
-    if (!publicacion) return res.status(404).send("Publicación no encontrada");
-
-    const sesion = req.session.usuario;
-    const esDueno = sesion && sesion.id === publicacion.UsuarioId;
-    const esValidador = sesion && sesion.rol === "validador";
-    if (!publicacion.estado && !esDueno && !esValidador) {
-      return res.status(404).send("Publicación no encontrada");
-    }
-
-    res.render("publicacion", { publicacion, usuario: sesion });
-  } catch (error) {
-    console.error("Error en /p/:id:", error.message);
-    res.status(500).send("Error interno del servidor");
-  }
 });
 
 
