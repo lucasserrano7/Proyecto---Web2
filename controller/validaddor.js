@@ -3,12 +3,21 @@ import { authMiddleware } from "../middlewares/auth.js";
 import { verificarRol } from "../middlewares/verificarRol.js";
 import { Usuario } from "../models/usuario.js";
 import { publicacion } from "../models/publicacion.js";
-import { Comentarios} from "../models/comentarios.js"
-import {denunciaComentario} from "../models/denunciaComentario.js"
+import { Comentarios } from "../models/comentarios.js";
+import { denunciaComentario } from "../models/denunciaComentario.js";
 import { Imagen } from "../models/Imagen.js";
 import { denunciaPublicacion } from "../models/denunciaPublicacion.js";
 
 const validadorRT = express.Router();
+
+function pideJson(req) {
+  return req.xhr || req.headers.accept?.includes("json");
+}
+
+function imagenABase64(url) {
+  const buffer = Buffer.isBuffer(url) ? url : Buffer.from(url?.data || url || []);
+  return "data:image/jpeg;base64," + buffer.toString("base64");
+}
 
 validadorRT.get("/", (req, res) => {
   res.redirect("/validador/validar");
@@ -21,6 +30,7 @@ validadorRT.get(
   async (req, res) => {
     try {
       const publicacionesRevision = await publicacion.findAll({
+        where: { estado: true, eliminada: false },
         include: [
           {
             model: Usuario,
@@ -34,9 +44,11 @@ validadorRT.get(
           },
           {
             model: Imagen,
+            attributes: ["id", "url"],
           },
           {
             model: denunciaPublicacion,
+            required: true,
             include: [
               {
                 model: Usuario,
@@ -49,23 +61,33 @@ validadorRT.get(
         order: [["updatedAt", "DESC"]],
       });
 
+      const publicaciones = publicacionesRevision.map((instancia) => {
+        const publi = instancia.toJSON();
+        publi.imagenes = (publi.Imagens || []).map((img) => ({
+          id: img.id,
+          src: imagenABase64(img.url),
+        }));
+        delete publi.Imagens;
+        return publi;
+      });
+
       if (req.xhr || req.headers.accept?.includes("application/json")) {
         return res.status(200).json({
           success: true,
-          total: publicacionesRevision.length,
-          publicaciones: publicacionesRevision,
+          total: publicaciones.length,
+          publicaciones: publicaciones,
         });
       }
 
       res.render("validador/validar", {
         titulo: "Panel de control",
-        publicaciones: publicacionesRevision,
+        publicaciones: publicaciones,
         usuario: req.session.usuario,
       });
     } catch (err) {
       console.error(err);
       res.status(500).json({
-        mensaje: "error ene le servidor",
+        mensaje: "Error en el servidor",
         detalle: err.message,
       });
     }
@@ -81,20 +103,20 @@ validadorRT.post(
       const publicacionId = req.params.id;
 
       const post = await publicacion.findByPk(publicacionId);
-      if (!post) {
+      if (!post || post.eliminada) {
         return res.status(404).json({ message: "Publicacion no encontrada." });
       }
+
       await denunciaPublicacion.destroy({
         where: { publicacion_id: publicacionId },
       });
-      post.estado = true;
       post.cantidad_denuncias = 0;
       await post.save();
 
-      if (req.xhr || req.headers.accept?.includes("json")) {
+      if (pideJson(req)) {
         return res
           .status(200)
-          .json({ success: true, message: "Denuncias rechazada." });
+          .json({ success: true, message: "Denuncias rechazadas." });
       }
       res.redirect("/validador/validar");
     } catch (err) {
@@ -117,9 +139,17 @@ validadorRT.post(
       if (!post) {
         return res.status(404).json({ message: "Publicacion no encontrada." });
       }
-      if(!post.estado){
-        return res.status(409).json({ message: "La publicacion ya fue dada de baja." }); 
+      if (post.eliminada) {
+        return res
+          .status(409)
+          .json({ message: "La publicacion ya fue eliminada por su dueño." });
       }
+      if (!post.estado) {
+        return res
+          .status(409)
+          .json({ message: "La publicacion ya fue dada de baja." });
+      }
+
       post.estado = false;
       await post.save();
 
@@ -137,11 +167,11 @@ validadorRT.post(
         await autor.save();
       }
 
-      if (req.xhr || req.headers.accept?.includes("json")) {
+      if (pideJson(req)) {
         return res.status(200).json({
           success: true,
           message: "Publicacion dada de baja.",
-          strickesAutor: autor ? autor.Nro_publicaciones_bajadas : 0,
+          strikesAutor: autor ? autor.Nro_publicaciones_bajadas : 0,
           cuentaSuspendida: cuentaSuspendida,
         });
       }
@@ -202,6 +232,7 @@ validadorRT.get(
     }
   },
 );
+
 validadorRT.post(
   "/comentarios/rechazar/:id",
   authMiddleware,
@@ -214,7 +245,7 @@ validadorRT.post(
         where: { comentarioId: comentarioId },
       });
 
-      if (req.xhr || req.headers.accept?.includes("json")) {
+      if (pideJson(req)) {
         return res.status(200).json({
           success: true,
           message: "Denuncias de comentario desestimadas.",
@@ -242,12 +273,13 @@ validadorRT.post(
       if (!comentario) {
         return res.status(404).json({ message: "Comentario no encontrado." });
       }
-await comentario.destroy();
-await denunciaComentario.destroy({
+
+      await denunciaComentario.destroy({
         where: { comentarioId: comentarioId },
       });
+      await comentario.destroy();
 
-      if (req.xhr || req.headers.accept?.includes("json")) {
+      if (pideJson(req)) {
         return res.status(200).json({
           success: true,
           message: "Comentario dado de baja correctamente.",

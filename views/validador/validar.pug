@@ -1,25 +1,48 @@
-extends ../layout 
+extends ../layout
+
+append metadata
+  script(src="https://cdn.tailwindcss.com")
 
 block contenido
-  div(style="max-width: 800px; margin: 40px auto; padding: 20px; background: rgba(255,255,255,0.9); border-radius: 12px; color: #333;")
-    h1(style="font-size: 24px; font-weight: bold; margin-bottom: 20px;") Validar Publicaciones
+  div(class="max-w-6xl w-full mx-auto p-6 my-3")
+    div(class="bg-orange-500/15 backdrop-blur-md p-6 rounded-3xl shadow-xl border border-orange-500/40 mb-4 flex flex-col md:flex-row justify-between items-center gap-4")
+
+      h1(class="text-2xl font-black text-white flex items-center gap-2")
+        | Panel de Validador
+
+      div(class="flex gap-2 bg-white/40 p-1.5 rounded-2xl border border-white/50")
+        a(href="/validador/validar" class="px-4 py-2 text-sm font-bold bg-blue-600 text-white rounded-xl shadow-md")
+          | Publicaciones
+
+        a(href="/validador/comentarios" class="px-4 py-2 text-sm font-semibold text-gray-600 hover:text-blue-900 rounded-xl transition-all")
+          | Comentarios
+
+  div(class="max-w-5xl w-full mx-auto my-6")
 
     if publicaciones && publicaciones.length > 0
-      div(style="display: flex; flex-direction: column; gap: 15px;")
+      div(class="flex flex-col gap-4")
         each p in publicaciones
-          div(style="border: 1px solid #ddd; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;")
-            div(style="display: flex; align-items: center; gap: 15px;")
-              if p.miniatura
-                img(src=p.miniatura alt="Foto" style="width: 60px; height: 60px; object-fit: cover; border-radius: 6px;")
-              div
-                p(style="margin: 0; font-weight: bold;")
-                  | Publicación ID: 
-                  a(href=`/p/${p.id}` style="color: #2563eb;")= p.title
-                p(style="margin: 4px 0; font-size: 14px;")
-                  | Usuario que la subió: 
-                  a(href=`/user/${p.Usuario.id}` style="color: #2563eb; font-weight: 600;") @#{p.Usuario.username}
+          - const miniatura = p.imagenes && p.imagenes.length > 0 ? p.imagenes[0].src : null
+          div(class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white/5 hover:bg-white/10 border border-white/15 rounded-2xl transition-all shadow-sm")
+            div(class="flex items-center gap-4 min-w-0")
+              if miniatura
+                img(src=miniatura alt="Foto" class="w-24 h-26 object-cover rounded-xl border border-white/30 shadow-md shrink-0")
+              else
+                div(class="w-24 h-24 rounded-xl border border-white/20 bg-white/5 shrink-0")
+              div(class="min-w-0")
+                a(href=`/p/${p.id}` class="block font-black text-base text-blue-300 hover:text-blue-200 truncate transition-all")= p.title
+                p(class="mt-1 text-xs text-white/70")
+                  | Subida por 
+                  a(href=`/user/${p.Usuario.id}` class="font-bold text-blue-300 hover:text-blue-200") @#{p.Usuario.username}
+                div(class="mt-2 flex flex-wrap gap-2")
+                  span(class="text-[11px] font-black uppercase tracking-wider bg-red-500/20 text-red-200 border border-red-400/40 rounded-full px-2.5 py-0.5") Denuncias: #{p.cantidad_denuncias || 0}
+                  span(class="text-[11px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-200 border border-amber-400/40 rounded-full px-2.5 py-0.5") Strikes: #{p.Usuario.Nro_publicaciones_bajadas || 0}
 
-            div
-              a(href=`/validador/validar/${p.id}` style="background: #2563eb; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px;") Validar
+            div(class="flex gap-2 shrink-0")
+              form(method="POST" action=`/validador/rechazar/${p.id}`)
+                button(type="submit" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl text-sm transition-all flex items-center gap-2 cursor-pointer") Rechazar denuncia
+              form(method="POST" action=`/validador/baja/${p.id}`)
+                button(type="submit" class="px-4 py-2 bg-red-600/50 hover:bg-red-600/70 text-white font-semibold rounded-xl text-sm transition-all shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer") Dar de baja
     else
-      p(style="color: #666; font-style: italic;") No hay publicaciones pendientes de validación.
+      div(class="p-6 text-center border-2 border border-white/20 rounded-2xl bg-white/5")
+        p(class="text-sm font-bold text-white/70") No hay publicaciones denunciadas
