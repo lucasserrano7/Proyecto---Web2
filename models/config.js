@@ -1,32 +1,27 @@
-import { parse } from 'dotenv';
-import'dotenv/config';
+import "dotenv/config";
 import { Sequelize } from "sequelize";
-import * as pg from "pg";
 
+const sequelize = new Sequelize(
+  process.env.DATABASE_URL,
+  process.env.DATABASE_USER,
+  process.env.DATABASE_PASSWORD,
+  {
+    host: process.env.DATABASE_HOST || "localhost",
+    port: process.env.DATABASE_PORT || 3000,
+    dialect: "postgres",
+    logging: false,
+    dialectOptions:
+      proccess.env.DB_SSL === "true"
+        ? { ssl: { require: true, rejectUnauthorized: false } }
+        : {},
+  },
+);
 
-// const sequelize = new Sequelize(process.env.DATABASE_URL,{
-//     dialect: 'postgres',
-//     dialectModule: pg,
-//     dialectOptions:{
-//         ssl: {
-//             require: true,
-//             rejectUnauthorized: false
-//         }
-//     }
-// })
-
-const sequelize = new Sequelize( {
-  host: 'localhost',
-  dialect: 'postgres',
-  username: 'postgres',
-  password: 'admin',
-});
-
- try {
-   await sequelize.authenticate();
-   console.log('Connection has been established successfully.');
- } catch (error) {
-   console.error('Unable to connect to the database:', error);
- }
+try {
+  await sequelize.authenticate();
+  console.log("Connection has been established successfully.");
+} catch (error) {
+  console.error("Unable to connect to the database:", error);
+}
 
 export default sequelize;
