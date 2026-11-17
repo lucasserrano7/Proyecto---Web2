@@ -23,7 +23,7 @@ denunciaPublicacion.init({
     allowNull: false,
   },
   estado: {
-    type: DataTypes.BOOLEAN,
+    type: DataTypes.ENUM("pendiente", "aceptada", "rechazada"),
     allowNull: true,
   },
 }, {
