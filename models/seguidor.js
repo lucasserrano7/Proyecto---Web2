@@ -13,10 +13,18 @@ Seguidores.init(
     seguidor_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: "usuarios",
+        key: "id",
+      },
     },
     seguido_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: "usuarios",
+        key: "id",
+      },
     },
     fecha_inicio: {
       type: DataTypes.DATE,
@@ -27,6 +35,9 @@ Seguidores.init(
       type: DataTypes.DATE,
       allowNull: true,
     },
+    indexes: [
+      { unique: true, fields: ["seguidor_id", "seguido_id"] }
+    ],
   },
   {
     sequelize,
