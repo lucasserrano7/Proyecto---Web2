@@ -14,7 +14,15 @@ Valoracion.init(
     puntaje: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      validate: {
+        min: 1,
+        max: 5,
+      },
     },
+    indexes:[
+      {unique: true, fields: ['UsuarioId', 'ImagenId']},
+      {fields: ['ImagenId'],
+    }]
   },
   {
     sequelize,
