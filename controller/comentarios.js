@@ -19,13 +19,22 @@ newComentarios.post("/new", async (req, res) => {
     const { ImagenId, texto } = req.body;
 
     const imagen = await Imagen.findByPk(ImagenId, {
-      include: [{ model: publicacion, attributes: ["id", "comments_allowed"] }],
+      include: [
+        {
+          model: publicacion,
+          attributes: ["id", "comments_allowed", "UsuarioId"],
+        },
+      ],
     });
     if (!imagen) {
       return res.status(404).json({ message: "La imagen no existe." });
     }
     if (imagen.publicacion && !imagen.publicacion.comments_allowed) {
-      return res.status(403).json({ message: "Los comentarios están cerrados para esta publicación." });
+      return res
+        .status(403)
+        .json({
+          message: "Los comentarios están cerrados para esta publicación.",
+        });
     }
 
     const nuevoComentario = await Comentarios.create({
@@ -35,7 +44,7 @@ newComentarios.post("/new", async (req, res) => {
       UsuarioId: req.session.usuario.id,
     });
     const autorId = imagen.publicacion?.UsuarioId;
-    if(autorId !== req.session.usuario.id) {
+    if (autorId !== req.session.usuario.id) {
       await notificacion.create({
         titulo: "Nuevo Comentario",
         mensaje: `${req.session.usuario.username} comento tu publicación.`,

@@ -12,7 +12,11 @@ export const buscador = async (req, res) => {
     const usuarioSesion = req.session.usuario || null;
     const idUsuario = usuarioSesion ? usuarioSesion.id : null;
 
-    let condicionesPublicacion = {};
+    let condicionesPublicacion = {
+        estado: true,
+        eliminada: false,
+        ...(usuarioSesion ? {} : {tieneCopy: false}),
+    };
     const includeEtiquetas = {
       model: Etiquetas,
       attributes: ["id", "nombre"],

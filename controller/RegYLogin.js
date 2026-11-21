@@ -4,33 +4,10 @@ import { publicacion } from "../models/publicacion.js";
 import { Imagen } from "../models/Imagen.js";
 import { Comentarios } from "../models/comentarios.js";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 
 const RegYLogin = express.Router();
 
 
-const clave = process.env.JWT_SECRET || 'fotazaapp' ;
-
-const verificarToken = (req, res, next) => {
-  let token = req.headers["x-access-token"] || req.headers["authorization"];
-
-  if(token && token.startsWith("Bearer ")){
-    token = token.slice(7, token.length);
-  }
-  if(token){
-    jwt.verify(token, clave, (err, decoded) => {
-      if(err){
-        return res.status(401).json({ success: false, message: "Token no valido" });
-      } else {
-        req.usuarioId = decoded.id;
-        next();
-  }
-});
-  }
-  else {
-    return res.status(403).json({ success: false, message: "No se proporciono token" });
-  }
-};
 RegYLogin.get("/login", (req, res) => {
   res.render("iniciosSesion");
 });
@@ -79,7 +56,8 @@ RegYLogin.get("/registro", (req, res) => {
 // recibir registro
 RegYLogin.post("/registro", async (req, res) => {
   try {
-    const { usuario, contrasenia, email } = req.body;
+    const { usuario, contrasenia } = req.body;
+    const email = String(req.body.email || "").trim().toLowerCase();
     const ofertas = req.body.ofertas === "on";
     const claveEncriptada = await bcrypt.hash(contrasenia, 10);
     const creado = await Usuario.crearUsuario(

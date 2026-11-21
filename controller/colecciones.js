@@ -131,47 +131,49 @@ coleccionRt.get("/:id", async (req, res) => {
     }
 
     const esDuenio = usuarioSesion && usuarioSesion.id === coleccion.UsuarioId;
-    if (!coleccion.publico && !esDuenio) {
+    if (!esDuenio) {
       return res.status(403).render("error", {
         titulo: "Colección privada",
-        mensaje: "Este álbum es privado y solo su creador puede ver el contenido.",
+        mensaje:
+          "Este álbum es privado y solo su creador puede ver el contenido",
       });
     }
 
+    const publicacionesProcesadas = (coleccion.publicacions || [])
+      .filter((pub) => pub.estado && !pub.eliminada)
+      .map((pub) => {
+        const p = pub.toJSON();
 
-    const publicacionesProcesadas = (coleccion.publicacions || []).map((pub) => {
-      const p = pub.toJSON();
+        const imagenesOriginales = p.Imagens || p.imagenes || [];
 
-   
-      const imagenesOriginales = p.Imagens || p.imagenes || [];
+        const imagenesFormateadas = imagenesOriginales.map((img) => {
+          let base64 = "";
 
-     
-      const imagenesFormateadas = imagenesOriginales.map((img) => {
-        let base64 = "";
-
-        if (img.url && Buffer.isBuffer(img.url)) {
-          base64 = img.url.toString("base64");
-        } else if (img.url && typeof img.url === "string") {
-          if (img.url.startsWith("data:")) {
-            return { ...img, src: img.url };
+          if (img.url && Buffer.isBuffer(img.url)) {
+            base64 = img.url.toString("base64");
+          } else if (img.url && typeof img.url === "string") {
+            if (img.url.startsWith("data:")) {
+              return { ...img, src: img.url };
+            }
+            base64 = Buffer.from(img.url).toString("base64");
           }
-          base64 = Buffer.from(img.url).toString("base64");
-        }
 
-        const srcFinal = base64 ? `data:image/webp;base64,${base64}` : (img.url || "");
+          const srcFinal = base64
+            ? `data:image/webp;base64,${base64}`
+            : img.url || "";
 
-        return {
-          ...img,
-          src: srcFinal, 
-          url: srcFinal,
-        };
+          return {
+            ...img,
+            src: srcFinal,
+            url: srcFinal,
+          };
+        });
+
+        p.imagenes = imagenesFormateadas;
+        p.Imagens = imagenesFormateadas;
+
+        return p;
       });
-
-      p.imagenes = imagenesFormateadas;
-      p.Imagens = imagenesFormateadas;
-
-      return p;
-    });
 
     res.render("coleccionDetalle", {
       coleccion,
@@ -220,19 +222,23 @@ coleccionRt.delete("/:id", async (req, res) => {
 coleccionRt.post("/crear", async (req, res) => {
   try {
     if (!req.session || !req.session.usuario) {
-      return res.status(401).json({ success: false, message: "Iniciá sesión primero." });
+      return res
+        .status(401)
+        .json({ success: false, message: "Iniciá sesión primero." });
     }
 
     const { titulo, categoria, publico } = req.body;
 
     if (!titulo || !categoria) {
-      return res.status(400).json({ success: false, message: "Título y categoría requeridos." });
+      return res
+        .status(400)
+        .json({ success: false, message: "Título y categoría requeridos." });
     }
 
     const nuevaColeccion = await Coleccion.create({
       titulo: titulo.trim(),
       categoria: categoria.trim(),
-      publico: publico === "true" || publico === true,
+      publico: false,
       UsuarioId: req.session.usuario.id,
     });
 
@@ -243,13 +249,17 @@ coleccionRt.post("/crear", async (req, res) => {
     });
   } catch (error) {
     console.error("Error al crear colección:", error);
-    return res.status(500).json({ success: false, message: "Error al guardar en base de datos." });
+    return res
+      .status(500)
+      .json({ success: false, message: "Error al guardar en base de datos." });
   }
 });
 coleccionRt.get("/para-guardar/:publicacionId", async (req, res) => {
   try {
     if (!req.session || !req.session.usuario) {
-      return res.status(401).json({ success: false, message: "Iniciá sesión primero." });
+      return res
+        .status(401)
+        .json({ success: false, message: "Iniciá sesión primero." });
     }
 
     const { publicacionId } = req.params;
@@ -264,7 +274,7 @@ coleccionRt.get("/para-guardar/:publicacionId", async (req, res) => {
           where: { id: publicacionId },
           attributes: ["id"],
           required: false,
-          },
+        },
       ],
       order: [["titulo", "ASC"]],
     });
@@ -279,7 +289,9 @@ coleccionRt.get("/para-guardar/:publicacionId", async (req, res) => {
     res.json({ success: true, colecciones: resultado });
   } catch (error) {
     console.error("Error al obtener colecciones para guardar:", error);
-    res.status(500).json({ success: false, message: "Error al cargar colecciones." });
+    res
+      .status(500)
+      .json({ success: false, message: "Error al cargar colecciones." });
   }
 });
 export default coleccionRt;

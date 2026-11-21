@@ -44,7 +44,12 @@ perfil.get("/user/:id", async (req, res) => {
     });
 
     const publicaciones = await publicacion.findAll({
-      where: { UsuarioId: perfilUsuario.id },
+      where: {
+        UsuarioId: perfilUsuario.id,
+        estado: true,
+        eliminada: false,
+        ...(usuarioSesion ? {} : { tieneCopy: false }),
+      },
       include: [
         {
           model: Imagen,
@@ -86,7 +91,9 @@ perfil.get("/user/:id", async (req, res) => {
 
               let votoUsuario = 0;
               if (idUsuario && imgInstancia.Valoracions) {
-                const val = imgInstancia.Valoracions.find(v => v.UsuarioId === idUsuario);
+                const val = imgInstancia.Valoracions.find(
+                  (v) => v.UsuarioId === idUsuario,
+                );
                 if (val) votoUsuario = val.puntaje;
               }
 
@@ -94,7 +101,9 @@ perfil.get("/user/:id", async (req, res) => {
                 id: imgInstancia.id,
                 src: base64,
                 promedio: imgInstancia.promedio,
-                cantidadValoraciones: imgInstancia.Valoracions ? imgInstancia.Valoracions.length : 0,
+                cantidadValoraciones: imgInstancia.Valoracions
+                  ? imgInstancia.Valoracions.length
+                  : 0,
                 comentarios: imgInstancia.comentarios || [],
                 votoUsuario,
               };
