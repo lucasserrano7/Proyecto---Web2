@@ -7,6 +7,7 @@ import { Comentarios } from "../models/comentarios.js";
 import { denunciaComentario } from "../models/denunciaComentario.js";
 import { Imagen } from "../models/Imagen.js";
 import { denunciaPublicacion } from "../models/denunciaPublicacion.js";
+import { DenunciaImagen } from "../models/denunciaImagen.js";
 
 const validadorRT = express.Router();
 

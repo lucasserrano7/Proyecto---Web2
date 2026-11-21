@@ -5,6 +5,7 @@ import { Compra } from "./compra.js";
 import { denunciaComentario } from "./denunciaComentario.js";
 import { denunciaPublicacion } from "./denunciaPublicacion.js";
 import { denunciaUsuario } from "./denunciaUsuario.js";
+import { DenunciaImagen } from "./denunciaImagen.js";
 import { Etiquetas } from "./etiquetas.js";
 import { Favoritos } from "./favoritos.js";
 import { Imagen } from "./Imagen.js";
@@ -15,6 +16,7 @@ import { Usuario } from "./usuario.js";
 import { Valoracion } from "./valoracion.js";
 import { MeInteresa } from "./meInteresa.js";
 import { Mensaje } from "./mensaje.js";
+
 
 // To create a One-To-One relationship, the hasOne and belongsTo associations are used together;
 // To create a One-To-Many relationship, the hasMany and belongsTo associations are used together;
@@ -84,6 +86,17 @@ denunciaPublicacion.belongsTo(publicacion, {
   as: "PubliDenunciada",
 });
 
+Imagen.hasMany(DenunciaImagen, { foreignKey: "ImagenId", onDelete: "CASCADE" });
+DenunciaImagen.belongsTo(Imagen, { foreignKey: "ImagenId" });
+Usuario.hasMany(DenunciaImagen, {
+  foreignKey: "UsuarioId",
+  onDelete: "CASCADE",
+});
+DenunciaImagen.belongsTo(Usuario, {
+  as: "Denunciante",
+  foreignKey: "UsuarioId",
+});
+
 publicacion.hasMany(Imagen);
 Imagen.belongsTo(publicacion);
 
@@ -128,7 +141,7 @@ export async function connectDatabase() {
     await sequelize.authenticate(); // testear la conexión
     console.log(" [+] Conexión a la BdD establecida.");
 
-   // await sequelize.sync({}); // sincronizar los modelos con la BdD
+    // await sequelize.sync({}); // sincronizar los modelos con la BdD
     //console.log(" [+] sincronizado de modelos.");
   } catch (error) {
     console.error(" [x] No se pudo conectar a la BdD:", error);

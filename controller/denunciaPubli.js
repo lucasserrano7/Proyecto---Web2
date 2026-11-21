@@ -1,6 +1,7 @@
 import express from "express";
 import { Imagen } from "../models/Imagen.js";
 import { publicacion } from "../models/publicacion.js";
+import { DenunciaImagen } from "../models/denunciaImagen.js";
 const denunciaPubli = express.Router();
 
 denunciaPubli.post("/denunciar/imagen/:id", async (req, res) => {
