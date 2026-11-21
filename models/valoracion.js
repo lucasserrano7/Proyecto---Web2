@@ -19,15 +19,16 @@ Valoracion.init(
         max: 5,
       },
     },
-    indexes:[
-      {unique: true, fields: ['UsuarioId', 'ImagenId']},
-      {fields: ['ImagenId'],
-    }]
+ 
   },
   {
     sequelize,
     modelName: "Valoracion",
     tableName: "valoraciones",
+       indexes:[
+      {unique: true, fields: ['UsuarioId', 'ImagenId']},
+      {fields: ['ImagenId'],
+    }],
     createdAt: true,
     deletedAt: true,
   },

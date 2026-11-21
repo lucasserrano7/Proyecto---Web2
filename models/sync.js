@@ -15,7 +15,6 @@ import { Usuario } from "./usuario.js";
 import { Valoracion } from "./valoracion.js";
 import { MeInteresa } from "./meInteresa.js";
 import { Mensaje } from "./mensaje.js";
-import { combineTableNames } from "sequelize/lib/utils";
 
 // To create a One-To-One relationship, the hasOne and belongsTo associations are used together;
 // To create a One-To-Many relationship, the hasMany and belongsTo associations are used together;
@@ -27,14 +26,14 @@ publicacion.belongsTo(Usuario);
 Usuario.belongsToMany(Usuario, {
   as: "Seguidos",
   through: Seguidores,
-  foreignKey: "user_id",
+  foreignKey: "seguidor_id",
   otherKey: "seguido_id",
 });
 Usuario.belongsToMany(Usuario, {
   as: "Seguidores",
   through: Seguidores,
   foreignKey: "seguido_id",
-  otherKey: "user_id",
+  otherKey: "seguidor_id",
 });
 
 Usuario.hasMany(Coleccion);

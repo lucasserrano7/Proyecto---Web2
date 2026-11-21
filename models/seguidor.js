@@ -35,14 +35,15 @@ Seguidores.init(
       type: DataTypes.DATE,
       allowNull: true,
     },
-    indexes: [
-      { unique: true, fields: ["seguidor_id", "seguido_id"] }
-    ],
+   
   },
   {
     sequelize,
     modelName: "seguidor",
     tableName: "seguidores",
+     indexes: [
+      { unique: true, fields: ["seguidor_id", "seguido_id"] }
+    ],
     createdAt: true,
     deletedAt: true,
   },
