@@ -385,6 +385,17 @@ newPubli.post("/p/:id/editar_publicacion", async (req, res) => {
         message: "La descripción no puede superar los 255 caracteres.",
       });
     }
+    const denunciada = await DenunciaImagen.count({
+      where: { estado: "pendiente" },
+      include: [
+        { model: Imagen, where: { publicacionId: id }, required: true },
+      ],
+    });
+    if (denunciada > 0) {
+      return res
+        .status(403)
+        .json({ error: "Publicación denunciada: no se puede modificar" });
+    }
 
     post.title = title;
     post.description = description;

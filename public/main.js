@@ -180,7 +180,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const btn = e.target.closest(".btn-denunciar-publi");
     if (!btn) return;
 
-    if (inputPubliId) inputPubliId.value = btn.dataset.publiId;
+    if (inputPubliId) inputPubliId.value = btn.dataset.imagenId;
     if (selectMotivoPubli) selectMotivoPubli.value = "";
     if (textareaDescPubli) textareaDescPubli.value = "";
 
@@ -209,7 +209,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!description) return mostrarAlerta("Escribí una descripción.", "warning");
 
       try {
-        const res = await fetch(`/denunciar/publicacion/${publiId}`, {
+        const res = await fetch(`/denunciar/imagen/${publiId}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

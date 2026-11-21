@@ -23,165 +23,112 @@ validadorRT.get("/", (req, res) => {
   res.redirect("/validador/validar");
 });
 
-validadorRT.get(
-  "/validar",
-  authMiddleware,
-  verificarRol("validador"),
-  async (req, res) => {
-    try {
-      const publicacionesRevision = await publicacion.findAll({
-        where: { estado: true, eliminada: false },
-        include: [
-          {
-            model: Usuario,
-            attributes: [
-              "id",
-              "username",
-              "email",
-              "Nro_publicaciones_bajadas",
-              "estado",
-            ],
-          },
-          {
-            model: Imagen,
-            attributes: ["id", "url"],
-          },
-          {
-            model: denunciaPublicacion,
-            required: true,
-            include: [
-              {
-                model: Usuario,
-                as: "Denunciante",
-                attributes: ["id", "username"],
-              },
-            ],
-          },
-        ],
-        order: [["updatedAt", "DESC"]],
-      });
+validadorRT.get("/validar", authMiddleware, verificarRol("validador"), async (req, res) => {
+  try {
+    const imagenes = await Imagen.findAll({
+      include: [
+        {
+          model: publicacion,
+          required: true,
+          where: { estado: true, eliminada: false },
+          include: [{ model: Usuario, attributes: ["id", "username", "email", "Nro_publicaciones_bajadas", "estado"] }],
+        },
+        {
+          model: DenunciaImagen,
+          required: true,
+          where: { estado: "pendiente" },
+          include: [{ model: Usuario, as: "Denunciante", attributes: ["id", "username"] }],
+        },
+      ],
+    });
 
-      const publicaciones = publicacionesRevision.map((instancia) => {
-        const publi = instancia.toJSON();
-        publi.imagenes = (publi.Imagens || []).map((img) => ({
-          id: img.id,
-          src: imagenABase64(img.url),
-        }));
-        delete publi.Imagens;
-        return publi;
-      });
+    const items = imagenes
+      .map((inst) => inst.toJSON())
+      .filter((img) => img.DenunciaImagens.length > 3)
+      .map((img) => ({
+        imagenId: img.id,
+        src: imagenABase64(img.url),
+        publicacion: {
+          id: img.publicacion.id,
+          titulo: img.publicacion.titulo,
+          descripcion: img.publicacion.descripcion,
+        },
+        autor: img.publicacion.Usuario,
+        denuncias: img.DenunciaImagens,
+      }));
 
-      if (req.xhr || req.headers.accept?.includes("application/json")) {
-        return res.status(200).json({
-          success: true,
-          total: publicaciones.length,
-          publicaciones: publicaciones,
-        });
+    if (req.xhr || req.headers.accept?.includes("application/json")) {
+      return res.status(200).json({ success: true, total: items.length, items });
+    }
+    res.render("validador/validar", {
+      titulo: "Panel de control",
+      items,
+      usuario: req.session.usuario,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ mensaje: "Error en el servidor", detalle: err.message });
+  }
+});
+
+validadorRT.post("/rechazar/:id", authMiddleware, verificarRol("validador"), async (req, res) => {
+  try {
+    const [n] = await DenunciaImagen.update(
+      { estado: "desestimada" },
+      { where: { ImagenId: req.params.id, estado: "pendiente" } }
+    );
+    if (!n) return res.status(404).json({ message: "No hay denuncias pendientes para esa imagen" });
+
+    if (pideJson(req)) return res.status(200).json({ success: true, message: "Denuncias desestimadas" });
+    res.redirect("/validador/validar");
+  } catch (err) {
+    console.error("Error al desestimar denuncias:", err);
+    res.status(500).json({ message: "Error al desestimar la denuncia." });
+  }
+});
+
+validadorRT.post("/baja/:id", authMiddleware, verificarRol("validador"), async (req, res) => {
+  const t = await sequelize.transaction();
+  try {
+    const imagen = await Imagen.findByPk(req.params.id, { include: [{ model: publicacion }], transaction: t });
+    const post = imagen?.publicacion;
+    if (!post) { await t.rollback(); return res.status(404).json({ message: "Imagen no encontrada" }); }
+    if (post.eliminada) { await t.rollback(); return res.status(409).json({ message: "La publicación ya fue eliminada por su dueño" }); }
+    if (!post.estado) { await t.rollback(); return res.status(409).json({ message: "La publicación ya fue dada de baja" }); }
+
+    await post.update({ estado: false }, { transaction: t });
+    await DenunciaImagen.update(
+      { estado: "aceptada" },
+      { where: { ImagenId: imagen.id, estado: "pendiente" }, transaction: t }
+    );
+
+    const autor = await Usuario.findByPk(post.UsuarioId, { transaction: t });
+    let cuentaSuspendida = false;
+    if (autor) {
+      autor.Nro_publicaciones_bajadas = (autor.Nro_publicaciones_bajadas || 0) + 1;
+      if (autor.Nro_publicaciones_bajadas >= 3) {
+        autor.estado = false;
+        cuentaSuspendida = true;
       }
+      await autor.save({ transaction: t });
+    }
 
-      res.render("validador/validar", {
-        titulo: "Panel de control",
-        publicaciones: publicaciones,
-        usuario: req.session.usuario,
-      });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({
-        mensaje: "Error en el servidor",
-        detalle: err.message,
+    await t.commit();
+    if (pideJson(req)) {
+      return res.status(200).json({
+        success: true,
+        message: "Publicación dada de baja.",
+        strikesAutor: autor ? autor.Nro_publicaciones_bajadas : 0,
+        cuentaSuspendida,
       });
     }
-  },
-);
-
-validadorRT.post(
-  "/rechazar/:id",
-  authMiddleware,
-  verificarRol("validador"),
-  async (req, res) => {
-    try {
-      const publicacionId = req.params.id;
-
-      const post = await publicacion.findByPk(publicacionId);
-      if (!post || post.eliminada) {
-        return res.status(404).json({ message: "Publicacion no encontrada." });
-      }
-
-      await denunciaPublicacion.destroy({
-        where: { publicacion_id: publicacionId },
-      });
-      post.cantidad_denuncias = 0;
-      await post.save();
-
-      if (pideJson(req)) {
-        return res
-          .status(200)
-          .json({ success: true, message: "Denuncias rechazadas." });
-      }
-      res.redirect("/validador/validar");
-    } catch (err) {
-      console.error("Error al rechazar denuncias:", err);
-      res.status(500).json({ message: "Error al rechazar la denuncia." });
-    }
-  },
-);
-
-validadorRT.post(
-  "/baja/:id",
-  authMiddleware,
-  verificarRol("validador"),
-  async (req, res) => {
-    try {
-      const publicacionId = req.params.id;
-
-      const post = await publicacion.findByPk(publicacionId);
-
-      if (!post) {
-        return res.status(404).json({ message: "Publicacion no encontrada." });
-      }
-      if (post.eliminada) {
-        return res
-          .status(409)
-          .json({ message: "La publicacion ya fue eliminada por su dueño." });
-      }
-      if (!post.estado) {
-        return res
-          .status(409)
-          .json({ message: "La publicacion ya fue dada de baja." });
-      }
-
-      post.estado = false;
-      await post.save();
-
-      const autor = await Usuario.findByPk(post.UsuarioId);
-      let cuentaSuspendida = false;
-
-      if (autor) {
-        const publisBajadas = (autor.Nro_publicaciones_bajadas || 0) + 1;
-        autor.Nro_publicaciones_bajadas = publisBajadas;
-
-        if (publisBajadas >= 3) {
-          autor.estado = false;
-          cuentaSuspendida = true;
-        }
-        await autor.save();
-      }
-
-      if (pideJson(req)) {
-        return res.status(200).json({
-          success: true,
-          message: "Publicacion dada de baja.",
-          strikesAutor: autor ? autor.Nro_publicaciones_bajadas : 0,
-          cuentaSuspendida: cuentaSuspendida,
-        });
-      }
-      res.redirect("/validador/validar");
-    } catch (err) {
-      console.error("Error al dar de baja:", err);
-      res.status(500).json({ message: "Error al dar de baja." });
-    }
-  },
-);
+    res.redirect("/validador/validar");
+  } catch (err) {
+    await t.rollback();
+    console.error("Error al dar de baja:", err);
+    res.status(500).json({ message: "Error al dar de baja." });
+  }
+});
 
 validadorRT.get(
   "/comentarios",

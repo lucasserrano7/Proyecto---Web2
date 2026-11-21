@@ -37,8 +37,12 @@ import connectSessionSequelize from "connect-session-sequelize";
 const app = express();
 const PORT = process.env.PORT;
 const SequelizeStore = connectSessionSequelize(session.Store);
+
 const sessionStore = new SequelizeStore({
   db: sequelize,
+  tableName: "Sessions",
+  checkExpirationInterval: 15 * 60 * 1000,
+  expiration: 24 * 60 * 60 * 1000,
 });
 app.set("trust proxy", 1);
 app.use(
@@ -125,18 +129,34 @@ app.use(logout);
 app.use(denunciaPubli);
 
 // CONEXION A BASE DE DATOS
-connectDatabase()
-  .then(() => {
+// CONEXIÓN A BASE DE DATOS E INICIO DEL SERVIDOR
+
+async function iniciarServidor() {
+  try {
+    await connectDatabase();
+
+    console.log(" [+] Conexión a la BdD establecida.");
+
+    await sessionStore.sync();
+
+    console.log(" [+] Tabla Sessions sincronizada.");
+
     app.listen(PORT, (err) => {
       if (err) {
-        console.error(" [X] Error al iniciar el servidor: ", err);
+        console.error(" [X] Error al iniciar el servidor:", err);
+        return;
       }
-      console.log(` [✓] Servidor corriendo en el puerto:${PORT}`);
+
+      console.log(` [✓] Servidor corriendo en el puerto: ${PORT}`);
     });
-  })
-  .catch((err) => {
-    console.error(" [X] Error al conectar a la base de datos: ", err);
-  });
+
+  } catch (err) {
+    console.error(" [X] Error al iniciar la aplicación:", err);
+    console.error("Detalle:", err.original || err.parent || err);
+  }
+}
+
+iniciarServidor();
 
 export default app;
 // controladores

@@ -1,85 +1,88 @@
 import express from "express";
-import { denunciaPublicacion } from "../models/denunciaPublicacion.js";
+import { Imagen } from "../models/Imagen.js";
 import { publicacion } from "../models/publicacion.js";
-import { Usuario } from "../models/usuario.js";
-
 const denunciaPubli = express.Router();
 
-denunciaPubli.post("/denunciar/publicacion/:id", async (req, res) => {
+denunciaPubli.post("/denunciar/imagen/:id", async (req, res) => {
   try {
     if (!req.session.usuario) {
-      return res.status(401).json({
-        message: "Tenes que iniciar sesión para poder valorar una imagen",
-      });
+      return res
+        .status(401)
+        .json({
+          message: "Tenés que iniciar sesión para denunciar una imagen",
+        });
     }
-    const publicacionId = req.params.id;
+    const imagenId = Number(req.params.id);
     const usuarioId = req.session.usuario.id;
-    const { motivo, description } = req.body;
+    const motivo = req.body.motivo?.trim();
+    const descripcion = (req.body.descripcion ?? req.body.description)?.trim();
 
-    if (!motivo || !description) {
-      return res.status(400).json({
-        message: "La denuncia tiene que tener motivo y descripcion",
-      });
+    if (!Number.isInteger(imagenId)) {
+      return res.status(400).json({ message: "Imagen inválida" });
+    }
+    if (!motivo || !descripcion) {
+      return res
+        .status(400)
+        .json({ message: "La denuncia tiene que tener motivo y descripción" });
+    }
+    if (descripcion.length > 255) {
+      return res
+        .status(400)
+        .json({
+          message: "La descripción no puede superar los 255 caracteres",
+        });
     }
 
-    const post = await publicacion.findByPk(publicacionId);
-    if (!post) {
-      return res.status(404).json({
-        message: "Publicacion no encontrada",
-      });
-    }
-
-    if (post.UsuarioId === usuarioId) {
-      return res.status(403).json({
-        message: "No podes denunciar tu publicacion",
-      });
-    }
-    const yaDenuncio = await denunciaPublicacion.findOne({
-      where: {
-        publicacion_id: publicacionId,
-        denunciante_id: usuarioId,
-      },
+    const imagen = await Imagen.findByPk(imagenId, {
+      include: [{ model: publicacion }],
     });
+    if (
+      !imagen ||
+      !imagen.publicacion ||
+      imagen.publicacion.eliminada ||
+      !imagen.publicacion.estado
+    ) {
+      return res.status(404).json({ message: "Imagen no encontrada" });
+    }
+    if (imagen.publicacion.UsuarioId === usuarioId) {
+      return res
+        .status(403)
+        .json({ message: "No podés denunciar tu propia imagen" });
+    }
 
+    const yaDenuncio = await DenunciaImagen.findOne({
+      where: { ImagenId: imagenId, UsuarioId: usuarioId },
+    });
     if (yaDenuncio) {
-      return res.status(400).json({
-        message: "Ya denunciaste esta publicacion",
+      return res.status(409).json({ message: "Ya denunciaste esta imagen" });
+    }
+
+    try {
+      await DenunciaImagen.create({
+        motivo,
+        descripcion,
+        ImagenId: imagenId,
+        UsuarioId: usuarioId,
       });
+    } catch (e) {
+      if (e.name === "SequelizeUniqueConstraintError") {
+        return res.status(409).json({ message: "Ya denunciaste esta imagen" });
+      }
+      throw e;
     }
 
-    await denunciaPublicacion.create({
-      motivo: motivo,
-      description: description,
-      contenido: `Denuncia sobre publicación #${publicacionId}`,
-      publicacion_id: publicacionId,
-      denunciante_id: usuarioId,
-    });
-
-    const totalDenuncias = await denunciaPublicacion.count({
-      where: {
-        publicacion_id: publicacionId,
-      },
-    });
-
-    let nuevoEstado = post.estado;
-    if (totalDenuncias >= 3) {
-      nuevoEstado = false;
-    }
-
-    await post.update({
-      cantidad_denuncias: totalDenuncias,
-      estado: nuevoEstado,
+    const totalDenuncias = await DenunciaImagen.count({
+      where: { ImagenId: imagenId, estado: "pendiente" },
     });
 
     return res.status(200).json({
       success: true,
       message: "Denuncia registrada",
-      totalDenuncias: totalDenuncias,
-      estado: nuevoEstado,
+      totalDenuncias,
     });
   } catch (error) {
-    console.error("Error al registrar la denuncia", error);
-    return res.status(500).json({ message: "Error interno al denunciar" });
+    console.error(error);
+    return res.status(500).json({ message: "Error al procesar la denuncia" });
   }
 });
 
