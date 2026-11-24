@@ -2,7 +2,6 @@ extends layout
 
 block metadata 
         title user
-        script(src="https://cdn.tailwindcss.com")
         script(src="/main.js" defer) 
         link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=arrow_circle_up")
 
@@ -12,7 +11,7 @@ block contenido
         +alert(alert)
         body(class="min-h-screen flex flex-col bg-linear-to-br from-[#1e4eb8] via-[#4a90e2] to-[#b3d9ff] bg-fixed")
         block publicaciones      
-                +publicaciones()
+                +publicaciones(usuario)
 
 
         if usuario

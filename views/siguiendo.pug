@@ -1,0 +1,20 @@
+extends index
+
+block metadata
+  title Siguiendo
+  script(src="https://cdn.taildwindcss.com")
+  script(src="/main.js" defer)
+
+include mixins/publicaciones.pug
+
+block publicaciones
+    div(class="max-w-3xl mx-auto px-4 pt-8")
+    if publicaciones.length === 0 
+        div(class="max-w-3xl mx-auto px-4 pb-8")
+            p(class="text-white/90 bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl p-6 text-center")
+                if sigoA === 0
+                    | No seguis a nadie
+                else
+                    | No hay publicaciones de los usuarios que seguis
+    else
+        +publicaciones(usuario)

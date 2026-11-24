@@ -6,6 +6,7 @@ import { notificacion } from "../models/notificacion.js";
 import { Comentarios } from "../models/comentarios.js";
 import { Valoracion } from "../models/valoracion.js";
 import { Etiquetas } from "../models/etiquetas.js";
+import { Seguidores } from "../models/seguidor.js";
 import Jimp from "jimp";
 
 const newPubli = express.Router();
@@ -249,6 +250,50 @@ newPubli.get("/index", async (req, res) => {
   } catch (error) {
     console.error("Error al obtener publicaciones:", error);
     res.status(500).json({ message: "Error al obtener publicaciones" });
+  }
+});
+
+newPubli.get("/siguiendo", async (req, res) => {
+  try {
+    const idUsuario = req.session?.usuario?.id;
+
+    if (!idUsuario) {
+      return res.redirect("/login");
+    }
+
+    const seguidores = await Seguidores.findAll({
+      where: { seguidor_id: idUsuario },
+      attributes: ["seguido_id"],
+    });
+
+    const idsSeguidores = seguidores.map((s) => s.seguidor_id);
+
+    const condicionBusquedaPublis = {
+      estado: true,
+      eliminada: false,
+      UsuarioId: idsSeguidores,
+    };
+
+    const publicaciones = await publicacion.findAll({
+      where: condicionBusquedaPublis,
+      include: incluirPublicacion(),
+      order: [
+        ["createdAt", "DESC"],
+        [Imagen, "id", "ASC"],
+      ],
+    });
+
+    const publis = publicaciones.map((p) => armarPubli(p, idUsuario));
+
+    res.render("siguiendo", {
+      publicaciones: publis,
+      usuario: req.session?.usuario,
+    });
+  } catch (error) {
+    console.error("Error al obtener publicaciones de seguidores:", error);
+    res
+      .status(500)
+      .json({ message: "Error al obtener publicaciones de seguidores" });
   }
 });
 

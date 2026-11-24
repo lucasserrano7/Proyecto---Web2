@@ -8,7 +8,9 @@
     "dev": "nodemon app.js",
     "build": "vite build",
     "db:init": "node init-db.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "css": "npx @tailwindcss/cli -i ./public/css/input.css -o ./public/css/styles.css",
+    "css:watch": "npx @tailwindcss/cli -i ./public/css/input.css -o ./public/css/styles.css --watch"
   },
   "keywords": [],
   "author": "Lucas",
@@ -31,6 +33,7 @@
     "tailwindcss": "^4.3.0"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.3.5",
     "nodemon": "^3.1.14"
   }
 }
