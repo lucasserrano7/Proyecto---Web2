@@ -17,11 +17,32 @@ const MAX_BYTES_IMAGEN = 5 * 1024 * 1024;
 async function ponerMarcaAgua(buffer, textoMarcaAgua) {
   try {
     const imagen = await Jimp.read(buffer);
-    const fuente = await Jimp.loadFont(Jimp.FONT_SANS_32_BLACK);
-    imagen.print(fuente, 0, 0, textoMarcaAgua);
+    const { width, height } = imagen.bitmap;
+
+    const fuente = await Jimp.loadFont(Jimp.FONT_SANS_128_WHITE);
+    const anchoTexto = Jimp.measureText(fuente, textoMarcaAgua);
+    const altoTexto = Jimp.measureTextHeight(
+      fuente,
+      textoMarcaAgua,
+      anchoTexto + 20,
+    );
+    const capa = new Jimp(anchoTexto + 40, altoTexto + 40, 0x00000000);
+    capa.print(fuente, 20, 20, textoMarcaAgua);
+
+    capa.color([{ apply: "darken", params: [12] }]);
+    capa.opacity(0.4);
+    const objetivo = Math.min(width * 0.75, height * 1.3);
+    capa.resize(objetivo, Jimp.AUTO);
+
+    capa.rotate(30);
+
+    const x = Math.round((width - capa.bitmap.width) / 2);
+    const y = Math.round((height - capa.bitmap.height) / 2);
+    imagen.composite(capa, x, y);
+
     return await imagen.getBufferAsync(Jimp.MIME_JPEG);
   } catch (error) {
-    console.error("Error al procesar el buffer");
+    console.error("Error al procesar el buffer", error);
     throw error;
   }
 }
@@ -39,7 +60,7 @@ function incluirPublicacion() {
     },
     {
       model: Imagen,
-      attributes: ["id", "url", "promedio"],
+      attributes: ["id", "promedio","url", "comments_allowed"],
       include: [
         {
           model: Comentarios,
@@ -87,6 +108,8 @@ function armarPubli(instancia, idUsuario) {
         : 0,
       comentarios: imgInstancia.Comentarios || imgInstancia.comentarios || [],
       votoUsuario: votoUsuario,
+      comentariosAbiertos: imgInstancia.comments_allowed,
+      
     };
   });
 
@@ -111,12 +134,9 @@ newPubli.post("/p", async (req, res) => {
         .json({ message: "Tenes que iniciar sesion para poder publicar." });
     }
 
-    const { img, comments_allowed, etiquetas, textoMarcaAgua } = req.body;
+    const { img, comments_allowed, etiquetas } = req.body;
     const title = String(req.body.title || "").trim();
     const descripcion = String(req.body.descripcion || "").trim();
-    const tieneCopy =
-      req.body.tieneCopy === true || req.body.tieneCopy === "true";
-    const marca = String(textoMarcaAgua || "").trim();
 
     if (title.length < 3 || title.length > 50) {
       return res
@@ -131,10 +151,14 @@ newPubli.post("/p", async (req, res) => {
     if (!Array.isArray(img) || img.length === 0) {
       return res.status(400).json({ message: "Subí al menos una imagen." });
     }
-    if (tieneCopy && !marca) {
+
+    const etiquetasLimpias = Array.isArray(etiquetas)
+      ? etiquetas.map((e) => String(e || "").trim()).filter(Boolean)
+      : [];
+    if (etiquetasLimpias.length === 0) {
       return res
         .status(400)
-        .json({ message: "Indicá el texto de la marca de agua." });
+        .json({ message: "Agregá aunque sea una etiqueta" });
     }
 
     const imagenesProcesadas = [];
@@ -151,11 +175,27 @@ newPubli.post("/p", async (req, res) => {
           .status(400)
           .json({ message: "Cada imagen debe pesar menos de 5 MB." });
       }
-      if (tieneCopy) {
+
+      const copyright = item.copyright === true;
+      const marca = String(item.marca || "")
+        .trim()
+        .slice(0, 40);
+      let tipo = match[1];
+
+      if (copyright) {
+        if (!marca) {
+          return res.status(400).json({
+            message: "Escribí la marca de agua en las imágenes con copyright.",
+          });
+        }
         buffer = await ponerMarcaAgua(buffer, marca);
+        tipo = "image/jpeg"; // ponerMarcaAgua devuelve JPEG
       }
-      imagenesProcesadas.push({ buffer, tipo: match[1] });
+      imagenesProcesadas.push({ buffer, tipo, copyright, marca });
     }
+
+    // la publicación "tiene copy" si alguna de sus imágenes lo tiene
+    const tieneCopy = imagenesProcesadas.some((i) => i.copyright);
 
     const idUsuario = req.session.usuario.id;
 
@@ -172,28 +212,18 @@ newPubli.post("/p", async (req, res) => {
         publicacionId: nuevaPubli.id,
         url: item.buffer,
         tipo: item.tipo,
+        copyright: item.copyright,
+        marcaAgua: item.copyright,
+        texto_personalizado: item.copyright ? item.marca : null,
       });
     }
 
-    if (Array.isArray(etiquetas) && etiquetas.length > 0) {
-      for (const nombre of etiquetas) {
-        const nombreLimpio = String(nombre || "").trim();
-        if (!nombreLimpio) continue;
-        const [etiquetaDB] = await Etiquetas.findOrCreate({
-          where: { nombre: nombreLimpio },
-        });
-        await nuevaPubli.addEtiquetas(etiquetaDB);
-      }
+    for (const nombre of etiquetasLimpias) {
+      const [etiquetaDB] = await Etiquetas.findOrCreate({
+        where: { nombre },
+      });
+      await nuevaPubli.addEtiquetas(etiquetaDB);
     }
-
-    await notificacion.create({
-      titulo: "Nueva publicación",
-      mensaje: `Se subio la publicacion "${title}" correctamente`,
-      fecha: new Date(),
-      leida: false,
-      link_: `/p/${nuevaPubli.id}`,
-      UsuarioId: idUsuario,
-    });
 
     return res.status(200).json({ success: true });
   } catch (error) {
@@ -334,30 +364,34 @@ newPubli.get("/p/:id", async (req, res) => {
   }
 });
 
-newPubli.post("/p/:id/cerrar_comentarios", async (req, res) => {
+newPubli.post("/imagen/:id/cerrar_comentarios", async (req, res) => {
   try {
     if (!req.session?.usuario) {
       return res.status(401).json({ message: "Tenes que iniciar sesion." });
     }
 
-    const post = await publicacion.findByPk(req.params.id);
+    const img = await Imagen.findByPk(req.params.id, {
+      include: [
+        { model: publicacion, attributes: ["id", "UsuarioId", "eliminada"] },
+      ],
+    });
 
-    if (!post || post.eliminada) {
-      return res.status(404).json({ message: "Publicacion no encontrada." });
+    if (!img || !img.publicacion || img.publicacion.eliminada) {
+      return res.status(404).json({ message: "Imagen no encontrada." });
     }
-    if (post.UsuarioId !== req.session.usuario.id) {
+    if (img.publicacion.UsuarioId !== req.session.usuario.id) {
       return res.status(403).json({
-        message: "No tenes los permisos para modificar esta publicacion.",
+        message: "No tenes los permisos para modificar esta imagen.",
       });
     }
 
-    post.comments_allowed = false;
-    await post.save();
+    img.comments_allowed = false;
+    await img.save();
 
     return res.status(200).json({
       success: true,
-      message: "Comentarios desactivados",
-      comments_allowed: post.comments_allowed,
+      message: "Comentarios cerrados para esta imagen",
+      comments_allowed: false,
     });
   } catch (error) {
     console.error("Error al cerrar los comentarios", error);

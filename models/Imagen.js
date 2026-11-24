@@ -29,6 +29,11 @@ Imagen.init({
   texto_personalizado: {
     type: DataTypes.STRING,
   },
+      comments_allowed: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: true,
+    },
 }, {
   sequelize,
   modelName: "Imagen",

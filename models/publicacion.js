@@ -26,7 +26,8 @@ publicacion.init(
     },
     comments_allowed: {
       type: DataTypes.BOOLEAN,
-      allowNull: true,
+      allowNull: false,
+      defaultValue: true,
     },
     cantidad_denuncias: {
       type: DataTypes.INTEGER,
@@ -45,7 +46,8 @@ publicacion.init(
     },
     eliminada: {
       type: DataTypes.BOOLEAN,
-      allowNull: true,
+      allowNull: false,
+      defaultValue: false,
     }
 
 

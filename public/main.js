@@ -172,15 +172,22 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalDenunciaPubli = document.getElementById("modal-denuncia-publi");
   const formDenunciaPubli = document.getElementById("form-denunciar-publi");
   const inputPubliId = document.getElementById("input-denuncia-publi-id");
-  const selectMotivoPubli = document.getElementById("select-motivo-denuncia-publi");
-  const textareaDescPubli = document.getElementById("textarea-desc-denuncia-publi");
+  const selectMotivoPubli = document.getElementById(
+    "select-motivo-denuncia-publi",
+  );
+  const textareaDescPubli = document.getElementById(
+    "textarea-desc-denuncia-publi",
+  );
   const btnCancelarPubli = document.getElementById("btn-cancelar-modal-publi");
 
   document.addEventListener("click", (e) => {
     const btn = e.target.closest(".btn-denunciar-publi");
     if (!btn) return;
 
-    if (inputPubliId) inputPubliId.value = btn.dataset.imagenId;
+    const imagenActual = document.getElementById(
+      `input-img-${btn.dataset.publiId}`,
+    )?.value;
+    if (inputPubliId) inputPubliId.value = imagenActual || btn.dataset.imagenId;
     if (selectMotivoPubli) selectMotivoPubli.value = "";
     if (textareaDescPubli) textareaDescPubli.value = "";
 
@@ -206,7 +213,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const description = textareaDescPubli.value.trim();
 
       if (!motivo) return mostrarAlerta("Seleccioná un motivo.", "warning");
-      if (!description) return mostrarAlerta("Escribí una descripción.", "warning");
+      if (!description)
+        return mostrarAlerta("Escribí una descripción.", "warning");
 
       try {
         const res = await fetch(`/denunciar/imagen/${publiId}`, {
@@ -224,9 +232,15 @@ document.addEventListener("DOMContentLoaded", () => {
         if (res.ok) {
           modalDenunciaPubli.classList.add("hidden");
           modalDenunciaPubli.classList.remove("flex");
-          mostrarAlerta("¡Denuncia enviada! Será revisada por moderación.", "success");
+          mostrarAlerta(
+            "¡Denuncia enviada! Será revisada por moderación.",
+            "success",
+          );
         } else {
-          mostrarAlerta(data.message || "No se pudo registrar la denuncia.", "error");
+          mostrarAlerta(
+            data.message || "No se pudo registrar la denuncia.",
+            "error",
+          );
         }
       } catch (err) {
         console.error("Error al enviar denuncia de publicación:", err);
@@ -255,6 +269,15 @@ function cambiarFoto(publiId, dir) {
   const nuevaImagenId = slideActual.getAttribute("data-imgid");
   const nuevoPromedio = slideActual.getAttribute("data-promedio");
   const miVoto = parseInt(slideActual.getAttribute("data-votousuario")) || 0;
+  const abiertos =
+    slideActual.getAttribute("data-comentariosabiertos") !== "false";
+  const formCom = document.getElementById(`form-comentarios-${publiId}`);
+  if (formCom) {
+    formCom.classList.toggle("hidden", !abiertos);
+    formCom.classList.toggle("flex", abiertos);
+  }
+  const btnCerrar = document.getElementById(`btn-cerrar-com-${publiId}`);
+  if (btnCerrar) btnCerrar.classList.toggle("hidden", !abiertos);
 
   const cajaEstrellas = document.getElementById(`caja-estrellas-${publiId}`);
 
@@ -285,7 +308,8 @@ function cambiarFoto(publiId, dir) {
       spanPromedio.textContent = nuevoPromedio;
     }
 
-    const nuevaCantidad = slideActual.getAttribute("data-cantidadvaloraciones") || "0";
+    const nuevaCantidad =
+      slideActual.getAttribute("data-cantidadvaloraciones") || "0";
     const spanCantidad = cajaEstrellas.querySelector(".cantidad-val-span");
     if (spanCantidad) {
       spanCantidad.id = `cantidad-val-${nuevaImagenId}`;
@@ -448,7 +472,7 @@ document.addEventListener("click", async (e) => {
 
   const res = await fetch(`/me-interesa/${btn.dataset.publiId}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" }
+    headers: { "Content-Type": "application/json" },
   });
   const data = await res.json();
 
@@ -456,5 +480,58 @@ document.addEventListener("click", async (e) => {
     window.location.href = `/me-interesa/chat/${data.conversacionId}`;
   } else {
     alert(data.message);
+  }
+});
+
+document.addEventListener("click", async (e) => {
+  const btn = e.target.closest(".btn-cerrar-comentarios");
+  if (!btn) return;
+
+  const publiId = btn.dataset.publiId;
+  const imagenId = document.getElementById(`input-img-${publiId}`)?.value;
+  if (!imagenId) return;
+  if (
+    !confirm(
+      "¿Cerrar los comentarios de esta imagen? Los ya publicados siguen visibles.",
+    )
+  )
+    return;
+
+  try {
+    const res = await fetch(`/imagen/${imagenId}/cerrar_comentarios`, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { Accept: "application/json" },
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      return mostrarAlerta(
+        data.message || "No se pudo cerrar los comentarios.",
+        "error",
+      );
+    }
+
+    document
+      .querySelector(`div[data-imgid="${imagenId}"]`)
+      ?.setAttribute("data-comentariosabiertos", "false");
+    const formCom = document.getElementById(`form-comentarios-${publiId}`);
+    if (formCom) {
+      formCom.classList.add("hidden");
+      formCom.classList.remove("flex");
+    }
+    btn.classList.add("hidden");
+
+    const lista = document.getElementById(`lista-comentarios-${imagenId}`);
+    if (lista) {
+      const aviso = document.createElement("p");
+      aviso.className =
+        "text-xs font-bold text-gray-500 uppercase tracking-wider text-center pt-1";
+      aviso.textContent = "Comentarios cerrados";
+      lista.appendChild(aviso);
+    }
+    mostrarAlerta("Comentarios cerrados para esta imagen.", "success");
+  } catch (err) {
+    console.error(err);
+    mostrarAlerta("Error de conexión.", "error");
   }
 });

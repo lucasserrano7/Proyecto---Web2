@@ -52,32 +52,17 @@ block contenido
             div(class="text-xs")
               span(class="font-bold block text-white") Permitir comentarios
 
-          label(class="flex items-center gap-3 p-3 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/15 cursor-pointer transition-all shadow-sm")
-            input(type="checkbox" id="tieneCopy" name="tieneCopy" class="w-4 h-4 rounded-md accent-blue-600 bg-white/20 border-white/30 cursor-pointer")
-            div(class="text-xs")
-              span(class="font-bold block text-white") Marca de agua
-
-        div#divMarcaAgua(class="flex flex-col gap-1.5 transition-all")
-          label(class="text-[11px] font-black uppercase tracking-wider text-white/80") Texto de Marca de Agua
-          input(
-            type="text" 
-            id="textoMarcaAgua" 
-            name="textoMarcaAgua" 
-            disabled 
-            placeholder="Ej: @Usuario" 
-            class="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5 text-sm text-white placeholder-white/30 outline-none focus:border-blue-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-inner"
-          )
-          p#err_marca(class="hidden text-xs font-bold text-red-300 pl-1")
-
         div(class="flex flex-col gap-2 pt-2")
           label(
             for="img" 
             class="w-full flex flex-col items-center justify-center p-5 rounded-2xl border-2 border-dashed border-white/30 bg-white/5 hover:bg-white/10 hover:border-blue-400 transition-all cursor-pointer group shadow-sm text-center"
           )
-            span(class="text-xs font-bold uppercase tracking-wider text-white") Elegi tus foto.
+            span(class="text-xs font-bold uppercase tracking-wider text-white") Elegi tus fotos
 
           input#img(type="file" name="img" multiple hidden)
           p#err_img(class="hidden text-xs font-bold text-red-300 pl-1")
+
+          p(class="text-[11px] text-white/60 pl-1 text-center") Después de elegir las fotos, marcá "Con copyright" en las que quieras poner una marca de agua.
 
           div#container_preview(class="flex flex-wrap gap-3 mt-1 empty:hidden")
             img#preview(src="" alt="preview" class="hidden")
@@ -91,186 +76,205 @@ block contenido
           class="w-full cursor-pointer bg-blue-600 hover:bg-blue-500 border border-white/30 text-white font-black py-3 rounded-2xl transition-all text-sm uppercase tracking-wider shadow-lg active:scale-98 mt-3 disabled:opacity-50 disabled:cursor-not-allowed"
         )
 
-  script.
-    const fileInput = document.getElementById('img');
-    const previewContainer = document.getElementById('container_preview');
-    const formularioPubli = document.getElementById('form_publi');
-    const botonSubir = document.getElementById('subir');
-    const arregloImg = [];
-    const tiposOk = ['image/jpeg', 'image/png', 'image/webp'];
-    const clasesRojo = ['border-red-500', 'ring-2', 'ring-red-400'];
+script.
+  const fileInput = document.getElementById('img');
+  const previewContainer = document.getElementById('container_preview');
+  const formularioPubli = document.getElementById('form_publi');
+  const botonSubir = document.getElementById('subir');
+  const arregloImg = [];
+  const inputsMarca = new Map();
+  const tiposOk = ['image/jpeg', 'image/png', 'image/webp'];
+  const clasesRojo = ['border-red-500', 'ring-2', 'ring-red-400'];
 
-    const mostrarError = (id, texto) => {
-      const el = document.getElementById(id);
-      el.textContent = texto;
-      el.classList.remove('hidden');
-    };
+  const mostrarError = (id, texto) => {
+    const el = document.getElementById(id);
+    el.textContent = texto;
+    el.classList.remove('hidden');
+  };
 
-    const ocultarError = (id) => {
-      const el = document.getElementById(id);
-      el.textContent = '';
-      el.classList.add('hidden');
-    };
+  const ocultarError = (id) => {
+    const el = document.getElementById(id);
+    el.textContent = '';
+    el.classList.add('hidden');
+  };
 
-    const limpiarErrores = () => {
-      ['err_title', 'err_marca', 'err_img', 'err_general'].forEach(ocultarError);
-      formularioPubli.querySelector('[name="title"]').classList.remove(...clasesRojo);
-      formularioPubli.querySelector('[name="textoMarcaAgua"]').classList.remove(...clasesRojo);
-      formularioPubli.querySelector('label[for="img"]').classList.remove('border-red-500', 'bg-red-500/20');
-    };
+  const limpiarErrores = () => {
+    ['err_title', 'err_img', 'err_general'].forEach(ocultarError);
+    formularioPubli.querySelector('[name="title"]').classList.remove(...clasesRojo);
+    formularioPubli.querySelector('label[for="img"]').classList.remove('border-red-500', 'bg-red-500/20');
+    inputsMarca.forEach((txt) => txt.classList.remove(...clasesRojo));
+  };
 
-    formularioPubli.querySelector('[name="title"]').addEventListener('input', (e) => {
-      e.target.classList.remove(...clasesRojo);
-      ocultarError('err_title');
-    });
+  formularioPubli.querySelector('[name="title"]').addEventListener('input', (e) => {
+    e.target.classList.remove(...clasesRojo);
+    ocultarError('err_title');
+  });
 
-    formularioPubli.querySelector('[name="textoMarcaAgua"]').addEventListener('input', (e) => {
-      e.target.classList.remove(...clasesRojo);
-      ocultarError('err_marca');
-    });
+  fileInput.addEventListener('change', (e) => {
+    const archivos = e.target.files;
+    const errores = [];
+    ocultarError('err_img');
+    formularioPubli.querySelector('label[for="img"]').classList.remove('border-red-500', 'bg-red-500/20');
 
-    fileInput.addEventListener('change', (e) => {
-      const archivos = e.target.files;
-      const errores = [];
-      ocultarError('err_img');
-      formularioPubli.querySelector('label[for="img"]').classList.remove('border-red-500', 'bg-red-500/20');
+    for (let i = 0; i < archivos.length; i++) {
+      const archivo = archivos[i];
 
-      for (let i = 0; i < archivos.length; i++) {
-        const archivo = archivos[i];
+      if (!tiposOk.includes(archivo.type)) {
+        errores.push('"' + archivo.name + '": formato no permitido (JPG, PNG o WebP).');
+        continue;
+      }
+      if (archivo.size > 5 * 1024 * 1024) {
+        errores.push('"' + archivo.name + '": pesa más de 5 MB.');
+        continue;
+      }
 
-        if (!tiposOk.includes(archivo.type)) {
-          errores.push('"' + archivo.name + '": formato no permitido (JPG, PNG o WebP).');
-          continue;
-        }
-        if (archivo.size > 5 * 1024 * 1024) {
-          errores.push('"' + archivo.name + '": pesa más de 5 MB.');
-          continue;
-        }
+      const reader = new FileReader();
 
-        const reader = new FileReader();
+      reader.onload = () => {
+        const item = { src: reader.result, name: archivo.name, copyright: false, marca: '' };
+        arregloImg.push(item);
 
-        reader.onload = () => {
-          arregloImg.push({ src: reader.result, name: archivo.name });
+        const card = document.createElement('div');
+        card.className = 'w-36 flex flex-col gap-1.5';
 
-          const divWrapper = document.createElement('div');
-          divWrapper.className = 'relative inline-block w-24 h-24 rounded-2xl overflow-hidden border border-white/40 shadow-md group';
-          divWrapper.dataset.name = archivo.name;
+        const box = document.createElement('div');
+        box.className = 'relative w-36 h-28 rounded-2xl overflow-hidden border border-white/40 shadow-md';
 
-          const imgNode = document.createElement('img');
-          imgNode.src = reader.result;
-          imgNode.className = 'w-full h-full object-cover';
+        const imgNode = document.createElement('img');
+        imgNode.src = reader.result;
+        imgNode.className = 'w-full h-full object-cover';
 
-          const btnDelete = document.createElement('button');
-          btnDelete.type = 'button';
-          btnDelete.innerHTML = '<i class="fa-solid fa-xmark text-[10px]"></i>';
-          btnDelete.className = 'absolute top-1.5 right-1.5 bg-red-500/80 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center shadow-md cursor-pointer transition-all border border-white/40';
-          btnDelete.onclick = () => {
-            const index = arregloImg.findIndex(img => img.name === archivo.name);
-            if (index !== -1) arregloImg.splice(index, 1);
-            divWrapper.remove();
-          };
-
-          divWrapper.appendChild(imgNode);
-          divWrapper.appendChild(btnDelete);
-          previewContainer.appendChild(divWrapper);
+        const btnDelete = document.createElement('button');
+        btnDelete.type = 'button';
+        btnDelete.innerHTML = '<i class="fa-solid fa-xmark text-[10px]"></i>';
+        btnDelete.className = 'absolute top-1.5 right-1.5 bg-red-500/80 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center shadow-md cursor-pointer transition-all border border-white/40';
+        btnDelete.onclick = () => {
+          const index = arregloImg.indexOf(item);
+          if (index !== -1) arregloImg.splice(index, 1);
+          inputsMarca.delete(item);
+          card.remove();
         };
-        reader.readAsDataURL(archivo);
-      }
 
-      if (errores.length > 0) {
-        mostrarError('err_img', errores.join(' '));
-      }
-      fileInput.value = '';
-    });
+        box.appendChild(imgNode);
+        box.appendChild(btnDelete);
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const checkCpy = document.getElementById('tieneCopy');
-      const inputMarcaAgua = document.getElementById('textoMarcaAgua');
+        const label = document.createElement('label');
+        label.className = 'flex items-center gap-2 text-[11px] font-bold text-white cursor-pointer';
+        const chk = document.createElement('input');
+        chk.type = 'checkbox';
+        chk.className = 'accent-blue-600 cursor-pointer';
+        label.appendChild(chk);
+        label.appendChild(document.createTextNode('Con copyright'));
 
-      checkCpy.addEventListener('change', (e) => {
-        if (e.target.checked) {
-          inputMarcaAgua.disabled = false;
-          inputMarcaAgua.classList.remove('bg-white/5', 'border-white/10');
-          inputMarcaAgua.classList.add('bg-white/10', 'border-white/20');
-          inputMarcaAgua.focus();
-        } else {
-          inputMarcaAgua.disabled = true;
-          inputMarcaAgua.value = '';
-          inputMarcaAgua.classList.remove('bg-white/10', 'border-white/20', ...clasesRojo);
-          inputMarcaAgua.classList.add('bg-white/5', 'border-white/10');
-          ocultarError('err_marca');
-        }
-      });
-    });
+        const txt = document.createElement('input');
+        txt.type = 'text';
+        txt.maxLength = 40;
+        txt.disabled = true;
+        txt.placeholder = 'Marca de agua';
+        txt.className = 'w-full bg-white/5 border border-white/10 rounded-xl px-2 py-1 text-xs text-white placeholder-white/30 outline-none focus:border-blue-400 disabled:opacity-40 disabled:cursor-not-allowed';
+        inputsMarca.set(item, txt);
 
-    formularioPubli.addEventListener('submit', (e) => {
-      e.preventDefault();
-      limpiarErrores();
+        chk.addEventListener('change', () => {
+          item.copyright = chk.checked;
+          txt.disabled = !chk.checked;
+          if (chk.checked) {
+            txt.focus();
+          } else {
+            txt.value = '';
+            item.marca = '';
+            txt.classList.remove(...clasesRojo);
+          }
+        });
 
-      const inputTitle = formularioPubli.querySelector('[name="title"]');
-      const inputMarca = formularioPubli.querySelector('[name="textoMarcaAgua"]');
-      const labelImg = formularioPubli.querySelector('label[for="img"]');
+        txt.addEventListener('input', () => {
+          item.marca = txt.value.trim();
+          txt.classList.remove(...clasesRojo);
+          ocultarError('err_img');
+        });
 
-      const formdata = new FormData(formularioPubli);
-      const txtTitle = formdata.get('title') ? formdata.get('title').trim() : '';
-      const txtDesc = formdata.get('descripcion') ? formdata.get('descripcion').trim() : '';
-      const checked = formdata.get('comentarios') === 'on';
-      const tieneCopy = formdata.get('tieneCopy') === 'on';
-      const txtMarcaAgua = formdata.get('textoMarcaAgua') ? formdata.get('textoMarcaAgua').trim() : '';
-
-      let tieneError = false;
-      if (txtTitle.length < 3 || txtTitle.length > 50) {
-        inputTitle.classList.add(...clasesRojo);
-        mostrarError('err_title', 'El título debe tener entre 3 y 50 caracteres.');
-        tieneError = true;
-      }
-      if (tieneCopy && !txtMarcaAgua) {
-        inputMarca.classList.add(...clasesRojo);
-        mostrarError('err_marca', 'Escribí el texto de la marca de agua.');
-        tieneError = true;
-      }
-      if (arregloImg.length === 0) {
-        labelImg.classList.add('border-red-500', 'bg-red-500/20');
-        mostrarError('err_img', 'Subí al menos una imagen.');
-        tieneError = true;
-      }
-      if (tieneError) return;
-
-      const etiquetasInput = formdata.get('etiquetas');
-      const arrayEtiquetas = etiquetasInput
-        ? etiquetasInput.split(',').map(e => e.trim().toLowerCase()).filter(e => e !== '')
-        : [];
-
-      const bodtoSend = {
-        title: txtTitle,
-        descripcion: txtDesc,
-        comments_allowed: checked,
-        tieneCopy: tieneCopy,
-        textoMarcaAgua: txtMarcaAgua,
-        img: arregloImg,
-        etiquetas: arrayEtiquetas,
-        fech: new Date().toLocaleTimeString(),
+        card.appendChild(box);
+        card.appendChild(label);
+        card.appendChild(txt);
+        previewContainer.appendChild(card);
       };
+      reader.readAsDataURL(archivo);
+    }
 
-      botonSubir.disabled = true;
+    if (errores.length > 0) {
+      mostrarError('err_img', errores.join(' '));
+    }
+    fileInput.value = '';
+  });
 
-      fetch(formularioPubli.action, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'same-origin',
-        body: JSON.stringify(bodtoSend)
-      })
-      .then(async (response) => {
-        if (response.ok) {
-          window.location.href = '/index?subido=true';
-          return;
-        }
-        const data = await response.json().catch(() => ({}));
-        mostrarError('err_general', data.message || 'Ocurrió un error al procesar la publicación.');
-        botonSubir.disabled = false;
-      })
-      .catch(() => {
-        mostrarError('err_general', 'No se pudo conectar con el servidor. Intentá de nuevo.');
-        botonSubir.disabled = false;
-      });
+  formularioPubli.addEventListener('submit', (e) => {
+    e.preventDefault();
+    limpiarErrores();
+
+    const inputTitle = formularioPubli.querySelector('[name="title"]');
+    const labelImg = formularioPubli.querySelector('label[for="img"]');
+
+    const formdata = new FormData(formularioPubli);
+    const txtTitle = formdata.get('title') ? formdata.get('title').trim() : '';
+    const txtDesc = formdata.get('descripcion') ? formdata.get('descripcion').trim() : '';
+    const checked = formdata.get('comentarios') === 'on';
+
+    const etiquetasInput = formdata.get('etiquetas');
+    const arrayEtiquetas = etiquetasInput
+      ? etiquetasInput.split(',').map(e => e.trim().toLowerCase()).filter(e => e !== '')
+      : [];
+
+    let tieneError = false;
+    if (txtTitle.length < 3 || txtTitle.length > 50) {
+      inputTitle.classList.add(...clasesRojo);
+      mostrarError('err_title', 'El título debe tener entre 3 y 50 caracteres.');
+      tieneError = true;
+    }
+    if (arregloImg.length === 0) {
+      labelImg.classList.add('border-red-500', 'bg-red-500/20');
+      mostrarError('err_img', 'Subí al menos una imagen.');
+      tieneError = true;
+    } else {
+      const sinMarca = arregloImg.filter((it) => it.copyright && !it.marca);
+      if (sinMarca.length > 0) {
+        sinMarca.forEach((it) => inputsMarca.get(it).classList.add(...clasesRojo));
+        mostrarError('err_img', 'Escribí la marca de agua en las imágenes con copyright.');
+        tieneError = true;
+      }
+    }
+    if (arrayEtiquetas.length === 0) {
+      mostrarError('err_general', 'Agregá al menos una etiqueta.');
+      tieneError = true;
+    }
+    if (tieneError) return;
+
+    const bodtoSend = {
+      title: txtTitle,
+      descripcion: txtDesc,
+      comments_allowed: checked,
+      img: arregloImg,
+      etiquetas: arrayEtiquetas,
+      fech: new Date().toLocaleTimeString(),
+    };
+
+    botonSubir.disabled = true;
+
+    fetch(formularioPubli.action, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify(bodtoSend)
+    })
+    .then(async (response) => {
+      if (response.ok) {
+        window.location.href = '/index?subido=true';
+        return;
+      }
+      const data = await response.json().catch(() => ({}));
+      mostrarError('err_general', data.message || 'Ocurrió un error al procesar la publicación.');
+      botonSubir.disabled = false;
+    })
+    .catch(() => {
+      mostrarError('err_general', 'No se pudo conectar con el servidor. Intentá de nuevo.');
+      botonSubir.disabled = false;
     });
+  });

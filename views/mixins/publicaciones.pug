@@ -18,7 +18,7 @@ mixin publicaciones(usuario)
                                 if publis.imagenes && publis.imagenes.length > 0
                                     div(class="flex transition-transform duration-500 ease-in-out h-full" id=`slider-${publis.id}`)
                                         each image in publis.imagenes
-                                            div(class=(publis.imagenes.length > 1 ? "min-w-full w-full h-full shrink-0 flex items-center justify-center bg-transparent" : "flex items-center justify-center bg-white") data-imgid=image.id data-promedio=(image.promedio || '0.0') data-votousuario=image.votoUsuario data-cantidadvaloraciones=(image.cantidadValoraciones || 0))
+                                            div(class=(publis.imagenes.length > 1 ? "min-w-full w-full h-full shrink-0 flex items-center justify-center bg-transparent" : "flex items-center justify-center bg-white") data-imgid=image.id data-promedio=(image.promedio || '0.0') data-votousuario=image.votoUsuario data-cantidadvaloraciones=(image.cantidadValoraciones || 0) data-comentariosabiertos=(image.comentariosAbiertos === false ? 'false' : 'true'))
                                                 img(
                                                     src=image.src 
                                                     class=(publis.imagenes.length > 1 ? "max-h-full max-w-full object-contain block select-none" : "max-h-[550px] w-auto max-w-[50vw] block select-none")
@@ -42,7 +42,7 @@ mixin publicaciones(usuario)
                                                 class="mr-1 text-[11px] font-semibold text-black bg-blue-600/30 hover:bg-blue-600/60 px-2.5 py-0.5 rounded-full border border-blue-400/20 backdrop-blur-sm  inline-flex items-center gap-0.5"
                                             )= `#${tag.nombre}`
 
-                                if publis.comments_allowed
+                                if publis.imagenes && publis.imagenes.length > 0
                                     p(class='text-xs font-black text-blue-950 uppercase tracking-wider mt-4 mb-2 flex items-center gap-1.5')
                                         | Comentarios
 
@@ -50,6 +50,8 @@ mixin publicaciones(usuario)
                                         if publis.imagenes && publis.imagenes.length > 0
                                             each image, index in publis.imagenes
                                                 div(id=`lista-comentarios-${image.id}` class=(index === 0 ? 'block space-y-2' : 'hidden space-y-2'))
+                                                    if image.comentariosAbiertos === false
+                                                        p(class='text-xs font-bold text-gray-500 uppercase tracking-wider text-center pt-1') Comentarios cerrados
                                                     if image.comentarios && image.comentarios.length > 0
                                                         each comentario in image.comentarios
                                                             div(class='p-2.5 bg-white/70 backdrop-blur-xs border border-white/80 rounded-xl shadow-xs flex justify-between items-start gap-2 hover:bg-white/90 transition-all' id=`comentario-${comentario.id}`)
@@ -63,12 +65,13 @@ mixin publicaciones(usuario)
                                                                 if usuario && comentario.UsuarioId !== usuario.id
                                                                     button(type="button" class="btn-denunciar-comentario text-gray-400 hover:text-red-500 transition-colors p-1 cursor-pointer" data-id=comentario.id title="Denunciar comentario")
                                                                         i(class="fa-regular fa-flag text-xs")
-                                                    else    
-                                                        div(class="p-4 rounded-xl  text-center")
-                                                            p(class='text-xs font-bold text-gray-600 sin-comentarios uppercase tracking-wider') Sin comentarios
-                                                            p(class='text-xs text-gray-500 mt-0.5') Podes ser el primero...
+                                                    else
+                                                        if image.comentariosAbiertos !== false
+                                                            div(class="p-4 rounded-xl  text-center")
+                                                                p(class='text-xs font-bold text-gray-600 sin-comentarios uppercase tracking-wider') Sin comentarios
+                                                                p(class='text-xs text-gray-500 mt-0.5') Podes ser el primero...
                                     
-                                    form.form_comentario(class='flex items-center gap-2')
+                                    form.form_comentario(id=`form-comentarios-${publis.id}` class=(publis.imagenes[0].comentariosAbiertos === false ? 'hidden' : 'flex items-center gap-2'))
                                         if publis.imagenes && publis.imagenes.length > 0
                                             input(type="hidden", name="ImagenId" value=publis.imagenes[0].id id=`input-img-${publis.id}`)
                                         else
@@ -76,10 +79,8 @@ mixin publicaciones(usuario)
                                         input(type="text" placeholder='Escribí un comentario...' name="texto" required autocomplete="off" class='flex-1 border bg-white/80 rounded-xl px-3 py-2 text-xs font-medium text-gray-800 border-gray-200/80 shadow-inner outline-none focus:border-blue-500 focus:bg-white transition-all')
                                         button(type='submit' class='w-9 h-9 bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-md flex items-center justify-center cursor-pointer transition-all active:scale-95 shrink-0') 
                                             i(class="fa-solid fa-arrow-up text-xs")
-
-                                else 
-                                    div(class="p-4 bg-white/30 rounded-xl border border-white/40 text-center my-4")
-                                        p(class='text-xs font-bold text-gray-500 uppercase tracking-wider') Comentarios desactivados
+                                    if usuario && publis.Usuario && publis.Usuario.id === usuario.id
+                                        button(type="button" id=`btn-cerrar-com-${publis.id}` data-publi-id=publis.id class=('btn-cerrar-comentarios text-[11px] font-bold text-red-600 hover:text-red-700 underline cursor-pointer mb-2 ' + (publis.imagenes[0].comentariosAbiertos === false ? 'hidden' : '')) ) Cerrar comentarios de esta imagen
 
                                 div(class="flex flex-col mt-4 pt-4 border-t border-gray-200/60")
                                     div(class="flex items-center justify-between gap-3")
