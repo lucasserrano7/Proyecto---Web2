@@ -6,6 +6,7 @@ import { notificacion } from "../models/notificacion.js";
 import { Comentarios } from "../models/comentarios.js";
 import { Valoracion } from "../models/valoracion.js";
 import { Etiquetas } from "../models/etiquetas.js";
+import { DenunciaImagen } from "../models/denunciaImagen.js";
 import { Seguidores } from "../models/seguidor.js";
 import Jimp from "jimp";
 
@@ -296,7 +297,7 @@ newPubli.get("/siguiendo", async (req, res) => {
       attributes: ["seguido_id"],
     });
 
-    const idsSeguidores = seguidores.map((s) => s.seguidor_id);
+    const idsSeguidores = seguidores.map((s) => s.seguido_id);
 
     const condicionBusquedaPublis = {
       estado: true,
@@ -467,7 +468,7 @@ newPubli.post("/p/:id/editar_publicacion", async (req, res) => {
     const denunciada = await DenunciaImagen.count({
       where: { estado: "pendiente" },
       include: [
-        { model: Imagen, where: { publicacionId: id }, required: true },
+        { model: Imagen, where: { publicacionId: post.id }, required: true },
       ],
     });
     if (denunciada > 0) {

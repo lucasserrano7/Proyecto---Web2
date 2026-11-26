@@ -35,6 +35,9 @@ meInteresaRt.post("/:publicacionId", authMiddleware, async (req, res) => {
     if (vendedorId === compradorId) {
       return res.status(400).json({ message: "No podés marcar interés en tu propia publicación." });
     }
+    if (!compradorId) {
+      return res.status(400).json({ message: "Inicia sesión para marcar interés en una publicación." });
+    }
 
     const yaExiste = await MeInteresa.findOne({
       where: {

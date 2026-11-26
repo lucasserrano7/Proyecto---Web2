@@ -42,11 +42,11 @@ block contenido
                     span(class="text-gray-500 italic") - "#{rep.description}"
 
             div(class="flex justify-end items-center gap-3 pt-2")
-              form(action=`${rutaDesestimar}` || `/validador/comentarios/rechazar/${c.id}` method="POST" onsubmit="return confirm('¿Desestimar las denuncias de este comentario?')")
+              form(action=(rutaDesestimar || '/validador/comentarios/rechazar') + '/' + c.id method="POST" onsubmit="return confirm('¿Desestimar las denuncias de este comentario?')")
                 button(type="submit" class="px-4 py-2 bg-green-600/50 hover:bg-green-700/70 text-white font-semibold rounded-xl text-sm transition-all flex items-center gap-2 cursor-pointer")
                   | Desestimar
 
-              form(action=`${rutaBaja}` || `/validador/comentarios/baja/${c.id}` method="POST" onsubmit="return confirm('¿Confirmás dar de baja este comentario infractor?')")
+              form(action=(rutaBaja || '/validador/comentarios/baja') + '/' + c.id method="POST" onsubmit="return confirm('¿Confirmás dar de baja este comentario infractor?')")
                 button(type="submit" class="px-4 py-2 bg-red-600/50 hover:bg-red-600/70 text-white font-semibold rounded-xl text-sm transition-all shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer")
                   | Dar de baja
     else

@@ -390,6 +390,8 @@ async function enviarValoracion(imagenId, puntaje, publiId) {
       }
 
       mostrarAlerta("¡Valoración enviada!", "success");
+       } else {
+      mostrarAlerta(data.message || "No se pudo enviar la valoración.", "error");
     }
   } catch (error) {
     console.error("Error al enviar la valoración:", error);

@@ -1,14 +1,43 @@
 extends layout
 
-block contenido
-  h1 Mis Notificaciones
+block metadata
+  title Notificaciones
 
-  each noti in notificaciones
-    div(class= noti.leida ? "leida" : "no-leida")
-      strong= noti.titulo
-      p= noti.mensaje
-      small= noti.fecha
-      if !noti.leida
-        button(data-id=noti.id class="btn-leer") Marcar como leída
-  else
-    p No tenés notificacionesA
+block contenido
+  div(class="max-w-3xl mx-auto px-4 py-8 text-white")
+    h1(class="text-2xl font-bold drop-shadow-md mb-6") Mis notificaciones
+    each noti in notificaciones
+      - const fecha = new Date(noti.fecha || noti.createdAt).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })
+      div(data-card class=(noti.leida ? "opacity-60 " : "") + "bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl p-4 mb-3 flex items-start justify-between gap-4")
+        div(class="flex-1 min-w-0")
+          div(class="flex items-center gap-2 mb-1")
+            span(class="text-[10px] font-black uppercase tracking-wider bg-blue-600/70 px-2 py-0.5 rounded-full")= noti.titulo
+            if !noti.leida
+              span(data-punto class="w-2 h-2 rounded-full bg-amber-400")
+          p(class="text-sm font-medium break-words")= noti.mensaje
+          p(class="text-[11px] text-white/70 mt-1")= fecha
+          if noti.link_
+            a(href=noti.link_ class="text-xs font-bold underline text-white/90 hover:text-white") Ver
+        if !noti.leida
+          button(type="button" data-id=noti.id class="btn-leer shrink-0 bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-2 rounded-xl cursor-pointer transition-all") Marcar como leída
+    else
+      p(class="bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl p-6 text-center") No tenés notificaciones.
+  script.
+    document.querySelectorAll('.btn-leer').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          try {
+            const res = await fetch('/notis/' + btn.dataset.id + '/leer', {
+              method: 'POST',
+              credentials: 'same-origin',
+              headers: { Accept: 'application/json' },
+            });
+            if (!res.ok) return alert('No se pudo marcar como leída.');
+            const card = btn.closest('[data-card]');
+            card.classList.add('opacity-60');
+            card.querySelector('[data-punto]')?.remove();
+            btn.remove();
+          } catch (e) {
+            alert('Error de conexión.');
+          }
+        });
+      });

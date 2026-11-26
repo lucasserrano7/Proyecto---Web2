@@ -1,4 +1,5 @@
 import express from "express";
+import sequelize from "../models/config.js";
 import { authMiddleware } from "../middlewares/auth.js";
 import { verificarRol } from "../middlewares/verificarRol.js";
 import { Usuario } from "../models/usuario.js";
@@ -51,7 +52,7 @@ validadorRT.get("/validar", authMiddleware, verificarRol("validador"), async (re
         src: imagenABase64(img.url),
         publicacion: {
           id: img.publicacion.id,
-          titulo: img.publicacion.titulo,
+          titulo: img.publicacion.title,
           descripcion: img.publicacion.descripcion,
         },
         autor: img.publicacion.Usuario,

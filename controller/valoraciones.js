@@ -10,12 +10,20 @@ const valoraciones = e.Router();
 valoraciones.post("/valoraciones", async (req, res) => {
   try {
     const { puntaje, imagenId } = req.body;
+    const p = Number(puntaje);
+    if (!Number.isInteger(p) || p < 1 || p > 5) {
+      return res.status(400).json({
+        message: "El puntaje debe ser un número entero entre 1 y 5",
+      });
+    }
 
     if (!req.session?.usuario) {
       return res.status(401).json({
         message: "¡Tenés que iniciar sesión para poder valorar una imagen!",
       });
     }
+
+
 
     const idUsuario = req.session.usuario.id;
 
@@ -52,7 +60,7 @@ valoraciones.post("/valoraciones", async (req, res) => {
     }
 
     await Valoracion.create({
-      puntaje,
+      puntaje: p,
       UsuarioId: idUsuario,
       ImagenId: imagenId,
     });
@@ -122,6 +130,10 @@ if (Idautor !== null) {
     });
   } catch (error) {
     console.error("Error al crear la valoración:", error);
+
+    if (error.name === "SequelizeUniqueConstraintError") {
+  return res.status(409).json({ message: "Ya valoraste esta imagen." });
+}
 
     return res.status(500).json({
       message: "Error al crear la valoración",

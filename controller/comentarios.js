@@ -48,7 +48,7 @@ newComentarios.post("/new", async (req, res) => {
         mensaje: `${req.session.usuario.username} comento tu publicación.`,
         fecha: new Date(),
         leida: false,
-        link: `/p/${imagen.publicacion.id}`,
+        link_: `/p/${imagen.publicacion.id}`,
         UsuarioId: autorId,
       });
     }

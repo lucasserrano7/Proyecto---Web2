@@ -8,15 +8,40 @@ import { Etiquetas } from "../models/etiquetas.js";
 
 export const buscador = async (req, res) => {
   try {
-    const { keyword, modo = "todo" } = req.query;
+    const {
+      keyword,
+      modo = "todo",
+      autor = "",
+      desde = "",
+      hasta = "",
+      licencia = "",
+      minPromedio = "",
+      minVotos = "",
+      orden = "",
+    } = req.query;
     const usuarioSesion = req.session.usuario || null;
     const idUsuario = usuarioSesion ? usuarioSesion.id : null;
 
     let condicionesPublicacion = {
-        estado: true,
-        eliminada: false,
-        ...(usuarioSesion ? {} : {tieneCopy: false}),
+      estado: true,
+      eliminada: false,
+      ...(usuarioSesion ? {} : { tieneCopy: false }),
     };
+
+    if (autor.trim()) {
+  condicionesPublicacion["$Usuario.username$"] = {
+    [Op.iLike]: `%${autor.trim()}%`,
+  };
+}
+
+const rangoFechas = {};
+if (desde) rangoFechas[Op.gte] = new Date(`${desde}T00:00:00`);
+if (hasta) rangoFechas[Op.lte] = new Date(`${hasta}T23:59:59.999`);
+if (desde || hasta) condicionesPublicacion.createdAt = rangoFechas;
+
+if (usuarioSesion && licencia === "con") condicionesPublicacion.tieneCopy = true;
+if (usuarioSesion && licencia === "sin") condicionesPublicacion.tieneCopy = false;
+
     const includeEtiquetas = {
       model: Etiquetas,
       attributes: ["id", "nombre"],
@@ -91,7 +116,9 @@ export const buscador = async (req, res) => {
 
               let votoUsuario = 0;
               if (idUsuario && imgDB.Valoracions) {
-                const val = imgDB.Valoracions.find(v => v.UsuarioId === idUsuario);
+                const val = imgDB.Valoracions.find(
+                  (v) => v.UsuarioId === idUsuario,
+                );
                 if (val) votoUsuario = val.puntaje;
               }
 
@@ -99,11 +126,13 @@ export const buscador = async (req, res) => {
                 id: imgDB.id,
                 src: base64,
                 promedio: imgDB.promedio || "0.0",
-                cantidadValoraciones: imgDB.Valoracions ? imgDB.Valoracions.length : 0,
+                cantidadValoraciones: imgDB.Valoracions
+                  ? imgDB.Valoracions.length
+                  : 0,
                 comentarios: imgDB.comentarios || [],
                 votoUsuario,
               };
-            })
+            }),
           );
           publi.comentarios = publi.imagenes[0].comentarios || [];
         } else {
@@ -112,12 +141,39 @@ export const buscador = async (req, res) => {
         }
 
         return publi;
-      })
+      }),
     );
+
+    let resultado = publis;
+
+const promMin = parseFloat(minPromedio);
+if (!Number.isNaN(promMin)) {
+  resultado = resultado.filter((p) =>
+    p.imagenes.some((i) => parseFloat(i.promedio || 0) >= promMin),
+  );
+}
+
+const votosMin = parseInt(minVotos, 10);
+if (!Number.isNaN(votosMin)) {
+  resultado = resultado.filter(
+    (p) => p.imagenes.reduce((a, i) => a + i.cantidadValoraciones, 0) >= votosMin,
+  );
+}
+
+const votosDe = (p) => p.imagenes.reduce((a, i) => a + i.cantidadValoraciones, 0);
+const mejorPromedio = (p) =>
+  Math.max(0, ...p.imagenes.map((i) => parseFloat(i.promedio || 0)));
+
+if (orden === "valoradas") {
+  resultado = [...resultado].sort((a, b) => mejorPromedio(b) - mejorPromedio(a));
+} else if (orden === "votadas") {
+  resultado = [...resultado].sort((a, b) => votosDe(b) - votosDe(a));
+}
+
 
     return res.render("explorar", {
       usuario: usuarioSesion,
-      publicaciones: publis,
+      publicaciones: resultado,
       modoSeleccionado: modo,
       palabraBuscada: keyword ? keyword.trim() : "",
     });

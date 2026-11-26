@@ -1,46 +1,39 @@
 extends ../layout
 
-append metadata
 block contenido
   div(class="max-w-6xl w-full mx-auto p-6 my-3")
     div(class="bg-orange-500/15 backdrop-blur-md p-6 rounded-3xl shadow-xl border border-orange-500/40 mb-4 flex flex-col md:flex-row justify-between items-center gap-4")
-
-      h1(class="text-2xl font-black text-white flex items-center gap-2")
-        | Panel de Validador
-
+      h1(class="text-2xl font-black text-white") Panel de Validador
       div(class="flex gap-2 bg-white/40 p-1.5 rounded-2xl border border-white/50")
-        a(href="/validador/validar" class="px-4 py-2 text-sm font-bold bg-blue-600 text-white rounded-xl shadow-md")
-          | Publicaciones
-
-        a(href="/validador/comentarios" class="px-4 py-2 text-sm font-semibold text-gray-600 hover:text-blue-900 rounded-xl transition-all")
-          | Comentarios
+        a(href="/validador/validar" class="px-4 py-2 text-sm font-bold bg-blue-600 text-white rounded-xl shadow-md") Publicaciones
+        a(href="/validador/comentarios" class="px-4 py-2 text-sm font-semibold text-gray-600 hover:text-blue-900 rounded-xl transition-all") Comentarios
 
   div(class="max-w-5xl w-full mx-auto my-6")
-
-    if publicaciones && publicaciones.length > 0
-      div(class="flex flex-col gap-4")
-        each p in publicaciones
-          - const miniatura = p.imagenes && p.imagenes.length > 0 ? p.imagenes[0].src : null
-          div(class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white/5 hover:bg-white/10 border border-white/15 rounded-2xl transition-all shadow-sm")
-            div(class="flex items-center gap-4 min-w-0")
-              if miniatura
-                img(src=miniatura alt="Foto" class="w-24 h-26 object-cover rounded-xl border border-white/30 shadow-md shrink-0")
-              else
-                div(class="w-24 h-24 rounded-xl border border-white/20 bg-white/5 shrink-0")
-              div(class="min-w-0")
-                a(href=`/p/${p.id}` class="block font-black text-base text-blue-300 hover:text-blue-200 truncate transition-all")= p.title
-                p(class="mt-1 text-xs text-white/70")
-                  | Subida por 
-                  a(href=`/user/${p.Usuario.id}` class="font-bold text-blue-300 hover:text-blue-200") @#{p.Usuario.username}
-                div(class="mt-2 flex flex-wrap gap-2")
-                  span(class="text-[11px] font-black uppercase tracking-wider bg-red-500/20 text-red-200 border border-red-400/40 rounded-full px-2.5 py-0.5") Denuncias: #{p.cantidad_denuncias || 0}
-                  span(class="text-[11px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-200 border border-amber-400/40 rounded-full px-2.5 py-0.5") Strikes: #{p.Usuario.Nro_publicaciones_bajadas || 0}
-
-            div(class="flex gap-2 shrink-0")
-              form(method="POST" action=`/validador/rechazar/${p.id}`)
-                button(type="submit" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl text-sm transition-all flex items-center gap-2 cursor-pointer") Rechazar denuncia
-              form(method="POST" action=`/validador/baja/${p.id}`)
-                button(type="submit" class="px-4 py-2 bg-red-600/50 hover:bg-red-600/70 text-white font-semibold rounded-xl text-sm transition-all shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer") Dar de baja
+    if items && items.length > 0
+      div(class="flex flex-col gap-6")
+        each it in items
+          div(class="bg-white/5 backdrop-blur-md rounded-2xl p-6 shadow-lg border border-white/15 flex flex-col gap-4")
+            div(class="flex flex-col md:flex-row gap-4")
+              img(src=it.src alt="Imagen denunciada" class="w-full md:w-64 h-48 object-cover rounded-xl border border-white/20")
+              div(class="flex-1 text-white")
+                h3(class="text-lg font-black")= it.publicacion.titulo
+                p(class="text-sm text-white/80 mt-1")= it.publicacion.descripcion
+                p(class="text-xs text-white/70 mt-3")
+                  | Autor: @#{it.autor ? it.autor.username : 'desconocido'}
+                  | · Publicaciones dadas de baja: #{it.autor ? it.autor.Nro_publicaciones_bajadas : 0}
+            div(class="bg-white/15 p-4 rounded-xl space-y-2")
+              p(class="text-xs font-bold text-white uppercase tracking-wider") Denuncias (#{(it.denuncias || []).length}):
+              each d in (it.denuncias || [])
+                div(class="text-xs text-white flex flex-wrap items-center gap-2 pb-1.5 border-b border-white/10 last:border-0")
+                  span(class="font-bold") @#{d.Denunciante ? d.Denunciante.username : 'Anónimo'}:
+                  span(class="bg-red-900 text-white px-2 py-0.5 rounded font-semibold")= d.motivo
+                  if d.descripcion
+                    span(class="italic text-white/70") - "#{d.descripcion}"
+            div(class="flex justify-end gap-3")
+              form(action=`/validador/rechazar/${it.imagenId}` method="POST" onsubmit="return confirm('¿Desestimar las denuncias?')")
+                button(type="submit" class="px-4 py-2 bg-green-600/50 hover:bg-green-700/70 text-white font-semibold rounded-xl text-sm cursor-pointer") Desestimar
+              form(action=`/validador/baja/${it.imagenId}` method="POST" onsubmit="return confirm('¿Dar de baja la publicación completa?')")
+                button(type="submit" class="px-4 py-2 bg-red-600/50 hover:bg-red-600/70 text-white font-semibold rounded-xl text-sm cursor-pointer") Dar de baja
     else
-      div(class="p-6 text-center border-2 border border-white/20 rounded-2xl bg-white/5")
+      div(class="p-6 text-center border border-white/20 rounded-2xl bg-white/5")
         p(class="text-sm font-bold text-white/70") No hay publicaciones denunciadas

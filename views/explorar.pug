@@ -1,23 +1,35 @@
-extends layout 
 
-block metadata 
+extends layout
+
+block metadata
   title Explorar | Fotaza
   link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200")
 
 include mixins/publicaciones.pug
 
 block contenido
+  - const f = filtros || {}
+
   div(class="max-w-7xl mx-auto px-4 py-8 flex flex-col items-center")
-    
-    form(action="/explorar" method="GET" class="flex flex-col sm:flex-row items-center gap-2 bg-blue-950/40 backdrop-blur-md p-2 sm:px-4 sm:py-2 rounded-3xl sm:rounded-full border border-white/30 shadow-xl w-full max-w-2xl transition-all focus-within:border-white/70")
-      
+
+    form#form-buscar(
+      action="/explorar"
+      method="GET"
+      class="flex flex-col sm:flex-row items-center gap-2 bg-blue-950/40 backdrop-blur-md p-2 sm:px-4 sm:py-2 rounded-3xl sm:rounded-full border border-white/30 shadow-xl w-full max-w-2xl transition-all focus-within:border-white/70"
+    )
+
       div(class="relative inline-block w-full sm:w-auto")
-        input(type="hidden" name="modo" id="input-modo" value=(modoSeleccionado || 'todo'))
+        input(
+          type="hidden"
+          name="modo"
+          id="input-modo"
+          value=(modoSeleccionado || 'todo')
+        )
 
         button#btn-modo-seleccionado(
-          type="button" 
+          type="button"
           class="flex items-center justify-between gap-2 bg-blue-900/60 text-white text-xs font-bold rounded-full px-3.5 py-2 border border-white/20 outline-none cursor-pointer hover:bg-blue-800/80 transition-colors w-full sm:w-auto shadow-sm"
-      )
+        )
           span#texto-modo
             if modoSeleccionado === 'texto'
               | Texto
@@ -25,39 +37,168 @@ block contenido
               | Etiqueta
             else
               | General
-          i(class="fa-solid fa-chevron-down text-[10px] text-white/70 transition-transform duration-200" id="flecha-modo")
 
-        div#menu-modo(class="hidden absolute left-0 mt-2 bg-blue-950/95 backdrop-blur-md border border-white/20 rounded-2xl shadow-xl z-50 min-w-[170px] p-1.5 space-y-1")
-          button(type="button" class="modo-btn flex items-center w-full px-3 py-2 text-xs font-bold text-white hover:bg-blue-800/80 rounded-xl transition-colors cursor-pointer" data-modo="todo") 
+          i#flecha-modo(
+            class="fa-solid fa-chevron-down text-[10px] text-white/70 transition-transform duration-200"
+          )
+
+        div#menu-modo(
+          class="hidden absolute left-0 mt-2 bg-blue-950/95 backdrop-blur-md border border-white/20 rounded-2xl shadow-xl z-50 min-w-[170px] p-1.5 space-y-1"
+        )
+          button.modo-btn(
+            type="button"
+            data-modo="todo"
+            class="flex items-center w-full px-3 py-2 text-xs font-bold text-white hover:bg-blue-800/80 rounded-xl transition-colors cursor-pointer"
+          )
             i(class="fa-solid fa-compass text-blue-300 text-xs mr-2.5")
             | General
-          button(type="button" class="modo-btn flex items-center w-full px-3 py-2 text-xs font-bold text-white hover:bg-blue-800/80 rounded-xl transition-colors cursor-pointer" data-modo="texto") 
+
+          button.modo-btn(
+            type="button"
+            data-modo="texto"
+            class="flex items-center w-full px-3 py-2 text-xs font-bold text-white hover:bg-blue-800/80 rounded-xl transition-colors cursor-pointer"
+          )
             i(class="fa-solid fa-font text-blue-300 text-xs mr-2.5")
             | Por Texto
-          button(type="button" class="modo-btn flex items-center w-full px-3 py-2 text-xs font-bold text-white hover:bg-blue-800/80 rounded-xl transition-colors cursor-pointer" data-modo="etiqueta") 
+
+          button.modo-btn(
+            type="button"
+            data-modo="etiqueta"
+            class="flex items-center w-full px-3 py-2 text-xs font-bold text-white hover:bg-blue-800/80 rounded-xl transition-colors cursor-pointer"
+          )
             i(class="fa-solid fa-hashtag text-blue-300 text-xs mr-2.5")
             | Por Etiqueta
 
-
       div(class="flex items-center gap-2 w-full px-2")
         input(
-          name="keyword" 
+          name="keyword"
           value=palabraBuscada
-          placeholder="¿Qué estás buscando?..." 
+          placeholder="¿Qué estás buscando?..."
           class="bg-transparent border-none outline-none text-white placeholder-white/60 w-full text-sm font-medium"
         )
+
         if palabraBuscada
-          a(href="/explorar" class="text-white/60 hover:text-white text-xs mr-1" title="Limpiar búsqueda")
+          a(
+            href="/explorar"
+            class="text-white/60 hover:text-white text-xs mr-1"
+            title="Limpiar búsqueda"
+          )
             i(class="fa-solid fa-xmark")
-      button(type="submit" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-5 py-2.5 rounded-full transition-all active:scale-95 cursor-pointer shadow-md shrink-0 w-full sm:w-auto")
+
+      button(
+        type="submit"
+        class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-5 py-2.5 rounded-full transition-all active:scale-95 cursor-pointer shadow-md shrink-0 w-full sm:w-auto"
+      )
         i(class="fa-solid fa-magnifying-glass text-white text-sm shrink-0 p-0.5 mr-2")
         span Buscar
+
+    details(
+      class="w-full max-w-2xl mt-3 mb-3 bg-blue-950/40 backdrop-blur-md border border-white/30 rounded-2xl text-white"
+      open=(f.autor || f.desde || f.hasta || f.licencia || f.minPromedio || f.minVotos || f.orden)
+    )
+      summary(class="cursor-pointer px-4 py-2 text-xs font-bold uppercase tracking-wider")
+        | Filtros avanzados
+
+      div(class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 text-xs")
+
+        label(class="flex flex-col gap-1 font-bold")
+          | Autor
+          input(
+            type="text"
+            name="autor"
+            form="form-buscar"
+            value=f.autor
+            placeholder="Nombre de usuario"
+            class="bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-white placeholder-white/50 outline-none"
+          )
+
+        label(class="flex flex-col gap-1 font-bold")
+          | Ordenar por
+          select(
+            name="orden"
+            form="form-buscar"
+            class="bg-blue-950 border border-white/20 rounded-xl px-3 py-2 text-white outline-none"
+          )
+            option(value="") Más recientes
+            option(value="valoradas" selected=(f.orden === 'valoradas')) Mejor valoradas
+            option(value="votadas" selected=(f.orden === 'votadas')) Más votadas
+
+        label(class="flex flex-col gap-1 font-bold")
+          | Desde
+          input(
+            type="date"
+            name="desde"
+            form="form-buscar"
+            value=f.desde
+            class="bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-white outline-none"
+          )
+
+        label(class="flex flex-col gap-1 font-bold")
+          | Hasta
+          input(
+            type="date"
+            name="hasta"
+            form="form-buscar"
+            value=f.hasta
+            class="bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-white outline-none"
+          )
+
+        label(class="flex flex-col gap-1 font-bold")
+          | Valoración mínima
+          select(
+            name="minPromedio"
+            form="form-buscar"
+            class="bg-blue-950 border border-white/20 rounded-xl px-3 py-2 text-white outline-none"
+          )
+            option(value="") Cualquiera
+            each n in [1, 2, 3, 4, 5]
+              option(value=n selected=(String(f.minPromedio) === String(n)))= n + ' ★ o más'
+
+        label(class="flex flex-col gap-1 font-bold")
+          | Votos mínimos
+          input(
+            type="number"
+            min="0"
+            name="minVotos"
+            form="form-buscar"
+            value=f.minVotos
+            placeholder="0"
+            class="bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-white placeholder-white/50 outline-none"
+          )
+
+        if usuario
+          label(class="flex flex-col gap-1 font-bold")
+            | Licencia
+            select(
+              name="licencia"
+              form="form-buscar"
+              class="bg-blue-950 border border-white/20 rounded-xl px-3 py-2 text-white outline-none"
+            )
+              option(value="") Todas
+              option(value="con" selected=(f.licencia === 'con')) Con copyright
+              option(value="sin" selected=(f.licencia === 'sin')) Sin copyright
+
+        div(class="sm:col-span-2 flex justify-end gap-2 pt-1")
+          a(
+            href="/explorar"
+            class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 font-bold"
+          )
+            | Limpiar
+
+          button(
+            type="submit"
+            form="form-buscar"
+            class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 font-bold cursor-pointer"
+          )
+            | Aplicar filtros
 
     div(class="mb-4 text-center")
       if palabraBuscada
         - const etiquetaModo = modoSeleccionado === 'etiqueta' ? 'en etiquetas' : modoSeleccionado === 'texto' ? 'en texto' : 'en general'
+
         h2(class="text-xs sm:text-sm text-white/90 font-bold bg-white/10 backdrop-blur-md px-5 py-2 rounded-b-lg border-b border-r border-l border-white/20 0 border-t-none shadow-sm inline-flex items-center gap-2")
           span Resultados #{etiquetaModo} para: "#{palabraBuscada}"
+
       else
         h2(class="text-xs sm:text-sm text-white/90 font-bold bg-white/10 backdrop-blur-md px-5 py-2 rounded-b-lg border-b border-r border-l border-white/20 0 border-t-none shadow-sm inline-flex items-center gap-2")
           span Viendo todas las publicaciones
@@ -65,14 +206,18 @@ block contenido
   if publicaciones && publicaciones.length > 0
     div(class="w-full")
       +publicaciones(usuario)
+
   else
     div(class="bg-white/10 backdrop-blur-md border border-white/30 p-10 rounded-3xl text-center max-w-md mx-auto shadow-xl text-white mt-4")
-  
-      if palabraBuscada
-        p(class="text-md text-white/80 font-medium") No se encontraron publicaciones para "#{palabraBuscada}"
-      else
-        p(class="text-md text-white/80 font-medium") Todavía no hay publicaciones registradas.
-      p(class="text-md text-white/60 mt-1") Probá buscando con otro término o cambiando el filtro.
 
-    
+      if palabraBuscada
+        p(class="text-md text-white/80 font-medium")
+          | No se encontraron publicaciones para "#{palabraBuscada}"
+      else
+        p(class="text-md text-white/80 font-medium")
+          | Todavía no hay publicaciones registradas.
+
+      p(class="text-md text-white/60 mt-1")
+        | Probá buscando con otro término o cambiando el filtro.
+
   script(src="/explorar.js")

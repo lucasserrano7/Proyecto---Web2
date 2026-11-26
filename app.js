@@ -121,9 +121,6 @@ app.use(authMiddleware);
 app.use("/seguidores", seguidoresRt);
 app.use("/me-interesa", meInteresaRt);
 app.use("/notis", notisRT);
-app.get("/p", (req, res) => {
-  res.render("nuevaPubli");
-});
 app.use("/comentarios", newComentarios);
 app.use(logout);
 app.use(denunciaPubli);
