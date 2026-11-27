@@ -13,17 +13,24 @@ async function init() {
   console.log(" [+] Iniciando db:init...");
 
   if (!DB_PASSWORD) {
-    console.error(" [-] Falta DB_PASSWORD. Copiá .env.example a .env y completalo.");
+    console.error(
+      " [-] Falta DB_PASSWORD. Copiá .env.example a .env y completalo.",
+    );
     process.exit(1);
   }
 
   try {
     const admin = new pg.Client({
-      host: DB_HOST, port: DB_PORT, user: DB_USER, password: DB_PASSWORD, database: "postgres",
+      host: DB_HOST,
+      port: DB_PORT,
+      user: DB_USER,
+      password: DB_PASSWORD,
+      database: "postgres",
     });
     await admin.connect();
     const { rowCount } = await admin.query(
-      "SELECT 1 FROM pg_database WHERE datname = $1", [DB_NAME]
+      "SELECT 1 FROM pg_database WHERE datname = $1",
+      [DB_NAME],
     );
     if (!rowCount) {
       await admin.query(`CREATE DATABASE "${DB_NAME}"`);
@@ -31,20 +38,18 @@ async function init() {
     }
     await admin.end();
 
-
     const { default: sequelize } = await import("./models/config.js");
-    await import("./models/sync.js"); 
+    await import("./models/sync.js");
 
-    await sequelize.sync({ force: true });  // (force: true BORRA y vuelve a hacer todo, es decir borra datos)
+    await sequelize.sync({ force: true }); // (force: true BORRA y vuelve a hacer todo, es decir borra datos)
     console.log(" [+] Tablas creadas.");
 
     await sequelize.query(
-      `ALTER TABLE valoraciones ADD CONSTRAINT chk_puntaje CHECK (puntaje BETWEEN 1 AND 5)`
+      `ALTER TABLE valoraciones ADD CONSTRAINT chk_puntaje CHECK (puntaje BETWEEN 1 AND 5)`,
     );
     await sequelize.query(
-      `ALTER TABLE seguidores ADD CONSTRAINT chk_no_autoseguir CHECK (seguidor_id <> seguido_id)`
+      `ALTER TABLE seguidores ADD CONSTRAINT chk_no_autoseguir CHECK (seguidor_id <> seguido_id)`,
     );
-
 
     await sequelize.query(`DROP TABLE IF EXISTS "Sessions"`);
     await sequelize.query(`
@@ -56,7 +61,7 @@ async function init() {
         "updatedAt" TIMESTAMPTZ NOT NULL
       )
     `);
-
+    await import("./seed.js"); // Carga datos de prueba
     console.log(" [+] Base de datos lista.");
     await sequelize.close();
     process.exit(0);

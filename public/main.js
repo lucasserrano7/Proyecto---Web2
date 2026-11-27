@@ -69,18 +69,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const username = comentario.Usuario?.username || "Tú";
 
-            nuevoDiv.innerHTML = `
-              <div class="flex-1">
-                <p class="text-blue-500 font-semibold text-xs">@${username}</p>
-                <span class="text-sm text-gray-800 break-words">${comentario.texto}</span>
-              </div>
-            `;
+            const cont = document.createElement("div");
+cont.className = "flex-1";
+const quien = document.createElement("p");
+quien.className = "text-blue-500 font-semibold text-xs";
+quien.textContent = "@" + username;
+const texto = document.createElement("span");
+texto.className = "text-sm text-gray-800 break-words";
+texto.textContent = comentario.texto;
+cont.append(quien, texto);
+nuevoDiv.appendChild(cont);
             lista.appendChild(nuevoDiv);
-            lista.scrollTop = lista.scrollHeight;
           }
 
           inputTexto.value = "";
-          mostrarAlerta("Comentario publicado.", "success");
+          mostrarAlerta("Comentario publicado", "success");
         } else {
           const errData = await response.json();
           mostrarAlerta(
@@ -92,7 +95,6 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("Error al enviar comentario:", error);
         mostrarAlerta("Error de conexión al enviar el comentario.", "error");
       }
-    });
   });
 
   const modalDenuncia = document.getElementById("modal-denuncia-comentario");
@@ -537,3 +539,5 @@ document.addEventListener("click", async (e) => {
     mostrarAlerta("Error de conexión.", "error");
   }
 });
+});
+
