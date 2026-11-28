@@ -61,7 +61,7 @@ function incluirPublicacion() {
     },
     {
       model: Imagen,
-      attributes: ["id", "promedio","url", "comments_allowed"],
+      attributes: ["id", "promedio", "comments_allowed"],
       include: [
         {
           model: Comentarios,
@@ -85,13 +85,6 @@ function armarPubli(instancia, idUsuario) {
   const publi = instancia.toJSON();
 
   publi.imagenes = (publi.Imagens || []).map((imgInstancia) => {
-    const image = imgInstancia.url;
-    const bufferCrudo = Buffer.isBuffer(image)
-      ? image
-      : Buffer.from(image?.data || image || []);
-
-    const base64 = "data:image/jpeg;base64," + bufferCrudo.toString("base64");
-
     let votoUsuario = 0;
     if (idUsuario && imgInstancia.Valoracions) {
       const valoracion = imgInstancia.Valoracions.find(
@@ -102,7 +95,7 @@ function armarPubli(instancia, idUsuario) {
 
     return {
       id: imgInstancia.id,
-      src: base64,
+      src: `/imagen/${imgInstancia.id}`,
       promedio: imgInstancia.promedio,
       cantidadValoraciones: imgInstancia.Valoracions
         ? imgInstancia.Valoracions.length
@@ -466,7 +459,6 @@ newPubli.post("/p/:id/editar_publicacion", async (req, res) => {
       });
     }
     const denunciada = await DenunciaImagen.count({
-      where: { estado: "pendiente" },
       include: [
         { model: Imagen, where: { publicacionId: post.id }, required: true },
       ],
@@ -488,6 +480,33 @@ newPubli.post("/p/:id/editar_publicacion", async (req, res) => {
   } catch (error) {
     console.error("Error al editar la publicacion", error);
     return res.status(500).json({ message: "Error" });
+  }
+});
+newPubli.get("/imagen/:id", async (req, res) => {
+  try {
+    const img = await Imagen.findByPk(req.params.id, {
+      attributes: ["id", "url", "tipo", "publicacionId"],
+    });
+    if (!img) return res.status(404).end();
+
+    const publi = await publicacion.findByPk(img.publicacionId, {
+      attributes: ["id", "estado", "eliminada", "tieneCopy", "UsuarioId"],
+    });
+    const sesion = req.session?.usuario;
+    const esDueno = sesion && sesion.id === publi?.UsuarioId;
+    const esValidador = sesion?.rol === "validador";
+
+    if (!publi || publi.eliminada) return res.status(404).end();
+    if (!publi.estado && !esDueno && !esValidador) return res.status(404).end();
+    if (publi.tieneCopy && !sesion) return res.status(404).end();
+
+    const buffer = Buffer.isBuffer(img.url) ? img.url : Buffer.from(img.url);
+    res.set("Cache-Control", "private, max-age=86400");
+    res.type(img.tipo || "image/jpeg");
+    return res.send(buffer);
+  } catch (error) {
+    console.error("Error al servir la imagen:", error);
+    return res.status(500).end();
   }
 });
 

@@ -17,7 +17,7 @@ coleccionRt.get("/", async (req, res) => {
       include: [
         {
           model: publicacion,
-          include: [{ model: Imagen }],
+          include: [{ model: Imagen , attributes: ["id", "url"] }],
           through: { attributes: [] },
         },
       ],

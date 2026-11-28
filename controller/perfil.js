@@ -53,7 +53,7 @@ perfil.get("/user/:id", async (req, res) => {
       include: [
         {
           model: Imagen,
-          attributes: ["id", "url", "promedio"],
+          attributes: ["id", "promedio", "comments_allowed"],
           include: [
             {
               model: Comentarios,
@@ -81,14 +81,6 @@ perfil.get("/user/:id", async (req, res) => {
         if (listaImagenes.length > 0) {
           publi.imagenes = await Promise.all(
             listaImagenes.map(async (imgInstancia) => {
-              const image = imgInstancia.url;
-              const bufferCrudo = Buffer.isBuffer(image)
-                ? image
-                : Buffer.from(image.data || image);
-
-              const base64 =
-                "data:image/webp;base64," + bufferCrudo.toString("base64");
-
               let votoUsuario = 0;
               if (idUsuario && imgInstancia.Valoracions) {
                 const val = imgInstancia.Valoracions.find(
@@ -99,7 +91,7 @@ perfil.get("/user/:id", async (req, res) => {
 
               return {
                 id: imgInstancia.id,
-                src: base64,
+                src: `/imagen/${imgInstancia.id}`,
                 promedio: imgInstancia.promedio,
                 cantidadValoraciones: imgInstancia.Valoracions
                   ? imgInstancia.Valoracions.length

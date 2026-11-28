@@ -49,7 +49,7 @@ validadorRT.get("/validar", authMiddleware, verificarRol("validador"), async (re
       .filter((img) => img.DenunciaImagens.length > 3)
       .map((img) => ({
         imagenId: img.id,
-        src: imagenABase64(img.url),
+        src: `/imagen/${img.id}`,
         publicacion: {
           id: img.publicacion.id,
           titulo: img.publicacion.title,

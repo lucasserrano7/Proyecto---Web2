@@ -79,7 +79,7 @@ if (usuarioSesion && licencia === "sin") condicionesPublicacion.tieneCopy = fals
         includeEtiquetas,
         {
           model: Imagen,
-          attributes: ["id", "url", "promedio"],
+          attributes: ["id", "promedio", "comments_allowed"],
           include: [
             {
               model: Comentarios,
@@ -106,14 +106,6 @@ if (usuarioSesion && licencia === "sin") condicionesPublicacion.tieneCopy = fals
         if (listaImagenes.length > 0) {
           publi.imagenes = await Promise.all(
             listaImagenes.map(async (imgDB) => {
-              const image = imgDB.url;
-              const bufferCrudo = Buffer.isBuffer(image)
-                ? image
-                : Buffer.from(image.data || image);
-
-              const base64 =
-                "data:image/webp;base64," + bufferCrudo.toString("base64");
-
               let votoUsuario = 0;
               if (idUsuario && imgDB.Valoracions) {
                 const val = imgDB.Valoracions.find(
@@ -124,7 +116,7 @@ if (usuarioSesion && licencia === "sin") condicionesPublicacion.tieneCopy = fals
 
               return {
                 id: imgDB.id,
-                src: base64,
+                src: `/imagen/${imgDB.id}`,
                 promedio: imgDB.promedio || "0.0",
                 cantidadValoraciones: imgDB.Valoracions
                   ? imgDB.Valoracions.length

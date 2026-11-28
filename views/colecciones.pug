@@ -23,7 +23,10 @@ block contenido
           a(href=`/colecciones/${col.id}` class="group relative rounded-3xl bg-white/15 backdrop-blur-md border border-white/30 shadow-xl overflow-hidden flex flex-col transition-all duration-300 hover:scale-[1.02] hover:bg-white/25")
             div(class="h-44 w-full bg-slate-900/30 overflow-hidden relative flex items-center justify-center")
               if col.publicacions && col.publicacions.length > 0 && col.publicacions[0].Imagens && col.publicacions[0].Imagens.length > 0
-                img(src=col.publicacions[0].Imagens[0].url alt=col.titulo class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105")
+              - const primeraPubli = col.publicacions && col.publicacions[0]
+              - const primeraImg = primeraPubli && primeraPubli.Imagens && primeraPubli.Imagens[0]
+              if primeraImg
+                img(src=`/imagen/${primeraImg.id}` alt=col.titulo class="w-full h-full object-cover")
               else
                 div(class="text-white/40 flex flex-col items-center gap-2")
                   i(class="fa-regular fa-image text-3xl")
